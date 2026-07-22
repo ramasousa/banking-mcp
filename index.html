@@ -1,6 +1,77 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
+<head><script>
+(function(){
+  if(sessionStorage.getItem('bmcp')==='1'){return;}
+  document.documentElement.style.visibility='hidden';
+  document.addEventListener('DOMContentLoaded',function(){
+    document.documentElement.style.visibility='';
+    var d=document;
+    var ov=d.createElement('div');
+    ov.setAttribute('id','bmcp-ov');
+    ov.setAttribute('style',
+      'position:fixed;inset:0;z-index:999999;background:#06080d;'+
+      'display:flex;align-items:center;justify-content:center;'+
+      'font-family:DM Sans,sans-serif;');
+    var box=d.createElement('div');
+    box.setAttribute('style','width:320px;text-align:center;');
+    var mark=d.createElement('div');
+    mark.setAttribute('style',
+      'width:44px;height:44px;background:#CC092F;border-radius:10px;'+
+      'display:flex;align-items:center;justify-content:center;'+
+      'font-size:18px;font-weight:800;color:#fff;margin:0 auto 16px;'+
+      'font-family:Syne,sans-serif;');
+    mark.textContent='B';
+    var title=d.createElement('div');
+    title.setAttribute('style',
+      'font-size:22px;font-weight:800;color:#e4e9f4;margin-bottom:6px;'+
+      'font-family:Syne,sans-serif;');
+    title.innerHTML='Bradesco <span style="color:#CC092F">MCP</span>';
+    var sub=d.createElement('div');
+    sub.setAttribute('style','font-size:11px;color:#6b7994;margin-bottom:28px;'+
+      'font-family:DM Mono,monospace;letter-spacing:1px;');
+    sub.textContent='ACESSO RESTRITO · USO INTERNO';
+    var pw=d.createElement('input');
+    pw.setAttribute('id','bmcp-pw');
+    pw.setAttribute('type','password');
+    pw.setAttribute('placeholder','Senha de acesso');
+    pw.setAttribute('style',
+      'background:#0d1017;border:1.5px solid rgba(255,255,255,.12);'+
+      'color:#e4e9f4;border-radius:10px;padding:13px 18px;font-size:14px;'+
+      'width:100%;outline:none;box-sizing:border-box;display:block;margin-bottom:10px;');
+    var err=d.createElement('div');
+    err.setAttribute('id','bmcp-err');
+    err.setAttribute('style','color:#ef4444;font-size:12px;min-height:18px;margin-bottom:10px;');
+    var btn=d.createElement('button');
+    btn.setAttribute('id','bmcp-btn');
+    btn.setAttribute('style',
+      'background:#CC092F;color:#fff;border:none;border-radius:10px;'+
+      'padding:13px;font-size:14px;font-weight:700;cursor:pointer;width:100%;');
+    btn.textContent='Entrar →';
+    box.appendChild(mark);box.appendChild(title);box.appendChild(sub);
+    box.appendChild(pw);box.appendChild(err);box.appendChild(btn);
+    ov.appendChild(box);
+    d.body.appendChild(ov);
+    d.body.style.overflow='hidden';
+    pw.focus();
+    function attempt(){
+      if(pw.value==='bradesco@mcp'){
+        sessionStorage.setItem('bmcp','1');
+        d.body.style.overflow='';
+        ov.style.opacity='0';ov.style.transition='opacity .2s';
+        setTimeout(function(){ov.remove();},220);
+      } else {
+        err.textContent='Senha incorreta — tente novamente';
+        pw.value='';pw.style.borderColor='#ef4444';
+        setTimeout(function(){pw.style.borderColor='rgba(255,255,255,.12)';},1200);
+        pw.focus();
+      }
+    }
+    btn.addEventListener('click',attempt);
+    pw.addEventListener('keydown',function(e){if(e.key==='Enter'){attempt();}});
+  });
+})();
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Bradesco MCP · Banco como Plataforma de IA</title>
@@ -130,82 +201,7 @@
   .footer-note{font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace;}
 </style>
 </head>
-<body><script>
-(function(){
-  var KEY  = 'bmcp_ok';
-  var PASS = 'bradesco@mcp';
-  if (sessionStorage.getItem(KEY) === '1') return;
-
-  var ov = document.createElement('div');
-  ov.id  = 'bmcp-gate';
-  ov.style.cssText = [
-    'position:fixed','inset:0','z-index:999999',
-    'background:#06080d',
-    'display:flex','align-items:center','justify-content:center',
-    "font-family:'DM Sans',sans-serif"
-  ].join(';');
-
-  ov.innerHTML = [
-    '<div style="width:320px;text-align:center;">',
-      '<div style="width:44px;height:44px;background:#CC092F;border-radius:10px;',
-           'display:flex;align-items:center;justify-content:center;',
-           'font-size:18px;font-weight:800;color:#fff;margin:0 auto 16px;',
-           "font-family:'Syne',sans-serif;">B</div>",
-      '<div style="font-size:22px;font-weight:800;color:#e4e9f4;margin-bottom:6px;',
-           "font-family:'Syne',sans-serif;">Bradesco <span style=\"color:#CC092F\">MCP</span></div>",
-      '<div style="font-size:12px;color:#6b7994;margin-bottom:32px;',
-           "font-family:'DM Mono',monospace;letter-spacing:1px;">",
-           'ACESSO RESTRITO · USO INTERNO</div>',
-      '<input id="bmcp-pw" type="password" placeholder="Senha de acesso"',
-        'style="background:#0d1017;border:1.5px solid rgba(255,255,255,.12);',
-        'color:#e4e9f4;border-radius:10px;padding:13px 18px;font-size:14px;',
-        'width:100%;outline:none;box-sizing:border-box;display:block;',
-        'margin-bottom:10px;"/>',
-      '<div id="bmcp-err" style="color:#ef4444;font-size:12px;',
-           'margin-bottom:12px;min-height:18px;"></div>',
-      '<button id="bmcp-btn"',
-        'style="background:#CC092F;color:#fff;border:none;border-radius:10px;',
-        'padding:13px;font-size:14px;font-weight:700;cursor:pointer;',
-        'width:100%;transition:background .15s;">Entrar →</button>',
-    '</div>'
-  ].join('');
-
-  document.body.style.overflow = 'hidden';
-  document.body.appendChild(ov);
-
-  function attempt() {
-    var pw  = document.getElementById('bmcp-pw');
-    var err = document.getElementById('bmcp-err');
-    if (pw.value === PASS) {
-      sessionStorage.setItem(KEY, '1');
-      document.body.style.overflow = '';
-      ov.style.opacity = '0';
-      ov.style.transition = 'opacity .25s';
-      setTimeout(function(){ ov.remove(); }, 260);
-    } else {
-      err.textContent = 'Senha incorreta — tente novamente';
-      pw.value = '';
-      pw.style.borderColor = '#ef4444';
-      setTimeout(function(){ pw.style.borderColor = 'rgba(255,255,255,.12)'; }, 1200);
-      pw.focus();
-    }
-  }
-
-  document.getElementById('bmcp-btn').addEventListener('click', attempt);
-  document.getElementById('bmcp-pw').addEventListener('keydown', function(e){
-    if (e.key === 'Enter') attempt();
-  });
-  document.getElementById('bmcp-btn').addEventListener('mouseover', function(){
-    this.style.background = '#a80724';
-  });
-  document.getElementById('bmcp-btn').addEventListener('mouseout', function(){
-    this.style.background = '#CC092F';
-  });
-
-  setTimeout(function(){ document.getElementById('bmcp-pw').focus(); }, 80);
-})();
-</script>
-
+<body>
 
 <!-- HEADER -->
 <div class="header">
