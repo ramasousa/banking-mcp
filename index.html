@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bradesco MCP · Banco como Plataforma de IA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+  :root{
+    --bg:#06080d; --s1:#0d1017; --s2:#131922; --s3:#1a2230;
+    --b1:rgba(255,255,255,.07); --b2:rgba(255,255,255,.04);
+    --brad:#CC092F; --brad-g:rgba(204,9,47,.1);
+    --ok:#2dd4a8; --ok-g:rgba(45,212,168,.1);
+    --blue:#4ea8de; --blue-g:rgba(78,168,222,.1);
+    --violet:#9b87f5; --violet-g:rgba(155,135,245,.1);
+    --orange:#ff7a45; --orange-g:rgba(255,122,69,.1);
+    --gpt:#10a37f; --gpt-g:rgba(16,163,127,.1);
+    --gem:#4285f4; --gem-g:rgba(66,133,244,.1);
+    --claude:#cc785c; --claude-g:rgba(204,120,92,.1);
+    --text:#e4e9f4; --muted:#6b7994; --muted2:#2e3a4a;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
+  a{text-decoration:none;color:inherit;}
+
+  /* ── HEADER ── */
+  .header{padding:0 44px;height:58px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--b1);position:sticky;top:0;background:rgba(6,8,13,.9);backdrop-filter:blur(12px);z-index:50;}
+  .logo{display:flex;align-items:center;gap:10px;}
+  .logo-mark{width:32px;height:32px;background:var(--brad);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;font-family:'Syne',sans-serif;}
+  .logo-text{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+  .logo-text span{color:var(--brad);}
+  .header-nav{display:flex;gap:22px;font-size:12.5px;color:var(--muted);}
+  .header-nav a:hover{color:var(--text);}
+  .header-cta{background:var(--brad);color:#fff;font-size:12px;font-weight:700;padding:7px 16px;border-radius:8px;}
+
+  /* ── HERO ── */
+  .hero{min-height:92vh;display:flex;flex-direction:column;justify-content:center;padding:80px 44px 60px;position:relative;overflow:hidden;}
+  .hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;}
+  .hero-glow{position:absolute;top:-200px;left:-100px;width:700px;height:700px;background:radial-gradient(circle,rgba(204,9,47,.12) 0%,transparent 60%);pointer-events:none;}
+  .hero-glow2{position:absolute;bottom:-200px;right:-100px;width:600px;height:600px;background:radial-gradient(circle,rgba(78,168,222,.08) 0%,transparent 60%);pointer-events:none;}
+  .hero-tag{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--brad);margin-bottom:20px;position:relative;}
+  .hero h1{font-family:'Syne',sans-serif;font-size:clamp(32px,5.5vw,68px);font-weight:800;line-height:1.05;max-width:900px;margin-bottom:22px;position:relative;}
+  .hero h1 .accent{color:var(--brad);}
+  .hero-sub{font-size:16px;color:var(--muted);max-width:640px;line-height:1.75;font-weight:300;position:relative;margin-bottom:36px;}
+  .hero-sub strong{color:var(--text);}
+  .hero-actions{display:flex;gap:12px;flex-wrap:wrap;position:relative;}
+  .btn-primary{background:var(--brad);color:#fff;padding:13px 24px;border-radius:10px;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;transition:all .2s;}
+  .btn-primary:hover{background:#a80724;transform:translateY(-1px);}
+  .btn-ghost{background:transparent;color:var(--text);padding:13px 24px;border-radius:10px;font-size:14px;font-weight:700;border:1.5px solid var(--b1);display:inline-flex;align-items:center;gap:8px;transition:all .2s;}
+  .btn-ghost:hover{border-color:var(--brad);color:var(--brad);}
+
+  /* ── STATS ── */
+  .stats{display:flex;gap:0;border-top:1px solid var(--b1);border-bottom:1px solid var(--b1);position:relative;}
+  .stat{flex:1;padding:24px 28px;border-right:1px solid var(--b1);}
+  .stat:last-child{border-right:none;}
+  .stat-n{font-family:'Syne',sans-serif;font-size:30px;font-weight:800;margin-bottom:4px;}
+  .stat-l{font-size:11.5px;color:var(--muted);}
+
+  /* ── THESIS ── */
+  .thesis{padding:80px 44px;max-width:1100px;margin:0 auto;}
+  .section-tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;}
+  .section-title{font-family:'Syne',sans-serif;font-size:clamp(24px,3vw,38px);font-weight:800;margin-bottom:16px;line-height:1.2;}
+  .section-sub{font-size:14.5px;color:var(--muted);max-width:680px;line-height:1.7;font-weight:300;}
+
+  .thesis-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:40px;}
+  @media(max-width:800px){.thesis-cols{grid-template-columns:1fr;}}
+  .thesis-card{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:24px;transition:border-color .2s;}
+  .thesis-card:hover{border-color:rgba(204,9,47,.3);}
+  .tc-n{font-family:'DM Mono',monospace;font-size:11px;color:var(--brad);margin-bottom:10px;}
+  .tc-t{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px;}
+  .tc-b{font-size:13px;color:var(--muted);line-height:1.65;}
+  .tc-b b{color:#c5ccd8;}
+
+  /* ── MODEL STRIP ── */
+  .model-strip{background:var(--s1);border-top:1px solid var(--b1);border-bottom:1px solid var(--b1);padding:28px 44px;display:flex;align-items:center;gap:32px;flex-wrap:wrap;}
+  .ms-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);flex-shrink:0;}
+  .ms-models{display:flex;gap:12px;flex-wrap:wrap;}
+  .ms-model{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:8px 14px;font-size:12.5px;font-weight:600;}
+  .ms-dot{width:8px;height:8px;border-radius:50%;}
+  .ms-divider{flex:1;}
+  .ms-tagline{font-size:12px;color:var(--muted);font-style:italic;max-width:280px;line-height:1.5;}
+
+  /* ── CASES GRID ── */
+  .cases{padding:80px 44px;max-width:1100px;margin:0 auto;}
+
+  .case-group{margin-bottom:56px;}
+  .case-group-head{display:flex;align-items:center;gap:14px;margin-bottom:20px;}
+  .cg-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+  .cg-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;}
+  .cg-line{flex:1;height:1px;background:var(--b1);}
+
+  .cards-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:950px){.cards-row{grid-template-columns:1fr 1fr;}}
+  @media(max-width:600px){.cards-row{grid-template-columns:1fr;}}
+
+  .doc-card{background:var(--s1);border:1px solid var(--b1);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:10px;transition:all .2s;cursor:pointer;}
+  .doc-card:hover{border-color:rgba(204,9,47,.4);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,.3);}
+  .doc-card.featured{border-color:rgba(204,9,47,.3);background:linear-gradient(135deg,rgba(204,9,47,.06) 0%,var(--s1) 50%);}
+  .dc-tag{display:inline-flex;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 10px;border-radius:12px;width:fit-content;}
+  .dc-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;line-height:1.3;}
+  .dc-desc{font-size:12.5px;color:var(--muted);line-height:1.6;flex:1;}
+  .dc-link{font-family:'DM Mono',monospace;font-size:10.5px;color:var(--muted2);display:flex;align-items:center;gap:5px;margin-top:auto;}
+  .dc-link span{color:var(--brad);}
+
+  /* ── PLEITO CALLOUT ── */
+  .pleito-section{padding:0 44px 80px;max-width:1100px;margin:0 auto;}
+  .pleito-box{background:var(--s1);border:1.5px solid rgba(204,9,47,.3);border-radius:16px;padding:32px 36px;display:flex;gap:32px;align-items:flex-start;}
+  @media(max-width:700px){.pleito-box{flex-direction:column;}}
+  .pb-icon{font-size:40px;flex-shrink:0;}
+  .pb-content{}
+  .pb-tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--brad);margin-bottom:8px;}
+  .pb-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;margin-bottom:10px;}
+  .pb-desc{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:18px;}
+  .pb-desc strong{color:var(--text);}
+  .pb-actions{display:flex;gap:10px;flex-wrap:wrap;}
+
+  /* ── QUOTE ── */
+  .quote-section{padding:60px 44px;text-align:center;border-top:1px solid var(--b1);}
+  .quote-text{font-family:'Syne',sans-serif;font-size:clamp(20px,3vw,32px);font-weight:700;max-width:720px;margin:0 auto 16px;line-height:1.3;}
+  .quote-text .hl{color:var(--brad);}
+  .quote-attr{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;}
+
+  /* ── FOOTER ── */
+  .footer{background:var(--s1);border-top:1px solid var(--b1);padding:28px 44px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  .footer-brand{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+  .footer-brand span{color:var(--brad);}
+  .footer-links{display:flex;gap:16px;font-size:12px;color:var(--muted);}
+  .footer-links a:hover{color:var(--text);}
+  .footer-note{font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">
+    <div class="logo-mark">B</div>
+    <div class="logo-text">Bradesco <span>MCP</span></div>
+  </div>
+  <div class="header-nav">
+    <a href="#thesis">Tese</a>
+    <a href="#cases">Especificações</a>
+    <a href="#pleito">Bridge</a>
+  </div>
+  <a class="header-cta" href="#pleito">Pleito Bridge →</a>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-tag">Open Platform · APIs, BaaS & Embedded Finance · Bradesco</div>
+  <h1>O banco que<br>qualquer IA<br>pode <span class="accent">consumir</span></h1>
+  <p class="hero-sub">
+    O Bradesco tem <strong>4.400+ APIs no Axway</strong>. O MCP Server transforma essas APIs em ferramentas inteligentes — consumíveis por Claude, GPT, Gemini ou qualquer modelo via protocolo padrão. <strong>Bradesco como plataforma de IA.</strong>
+  </p>
+  <div class="hero-actions">
+    <a class="btn-primary" href="specs/vaas-mcp-server-spec.html">Ver especificação técnica →</a>
+    <a class="btn-ghost" href="specs/banking-mcp-auth-flow.html">▶ Ver fluxo interativo</a>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat"><div class="stat-n" style="color:var(--brad)">4.400+</div><div class="stat-l">APIs publicadas no Axway</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--blue)">3</div><div class="stat-l">Modelos de IA suportados<br>(Claude · GPT · Gemini)</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--ok)">1</div><div class="stat-l">Executor central compartilhado<br>por todos os modelos</div></div>
+  <div class="stat"><div class="stat-n" style="color:var(--violet)">0</div><div class="stat-l">Regras de negócio duplicadas<br>O MCP Server é um proxy inteligente</div></div>
+</div>
+
+<!-- THESIS -->
+<div class="thesis" id="thesis">
+  <div class="section-tag">A tese</div>
+  <h2 class="section-title">Não é sobre chatbot.<br>É sobre distribuição.</h2>
+  <p class="section-sub">APIs bancárias já existem. Agentes de IA já existem. O MCP Server é o elo que falta — o protocolo padrão que permite qualquer modelo acessar qualquer produto Bradesco de forma governada, auditada e regulatoriamente correta.</p>
+
+  <div class="thesis-cols">
+    <div class="thesis-card">
+      <div class="tc-n">01</div>
+      <div class="tc-t">O Axway já tem tudo</div>
+      <div class="tc-b">4.400+ APIs, 24 gateways, 23 políticas de segurança, 30 bilhões de requisições por mês. O Bradesco não precisa construir nada novo no backend — precisa <b>expor o que já existe para um novo canal: os agentes de IA</b>.</div>
+    </div>
+    <div class="thesis-card">
+      <div class="tc-n">02</div>
+      <div class="tc-t">MCP é o protocolo que faltava</div>
+      <div class="tc-b">Model Context Protocol (MCP) é o padrão aberto que define como um agente de IA chama uma ferramenta externa. Claude, GPT e Gemini todos entendem MCP — ou têm adaptadores equivalentes. <b>Uma especificação de tool, todos os modelos.</b></div>
+    </div>
+    <div class="thesis-card">
+      <div class="tc-n">03</div>
+      <div class="tc-t">Governança na camada certa</div>
+      <div class="tc-b">O Gate de Política, a validação de token do usuário, o LgpdSanitizer, o audit log — tudo fica no MCP Server. <b>O modelo de IA nunca toca dados bancários diretamente.</b> Governança determinística, não delegada ao modelo.</div>
+    </div>
+    <div class="thesis-card">
+      <div class="tc-n">04</div>
+      <div class="tc-t">Dois cases, um padrão</div>
+      <div class="tc-b">VaaS MCP Server: operações (comprar veículo, pagar tributos, contratar seguro). Banking MCP Server: dados pessoais (saldo, extrato, fatura, apólice). <b>O mesmo padrão arquitetural cobre ambos</b> — só muda o tipo de autenticação e o escopo dos dados.</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODEL STRIP -->
+<div class="model-strip">
+  <div class="ms-label">Modelos suportados</div>
+  <div class="ms-models">
+    <div class="ms-model"><div class="ms-dot" style="background:var(--claude);"></div>Claude (MCP nativo)</div>
+    <div class="ms-model"><div class="ms-dot" style="background:var(--gpt);"></div>GPT-4o (Function Calling)</div>
+    <div class="ms-model"><div class="ms-dot" style="background:var(--gem);"></div>Gemini (Function Declarations)</div>
+    <div class="ms-model"><div class="ms-dot" style="background:var(--orange);"></div>Axway (gateway existente)</div>
+  </div>
+  <div class="ms-divider"></div>
+  <div class="ms-tagline">Um executor central. Três adaptadores de protocolo. Nenhuma lógica de negócio duplicada.</div>
+</div>
+
+<!-- CASES -->
+<div class="cases" id="cases">
+
+  <div class="case-group">
+    <div class="case-group-head">
+      <div class="cg-label">Case 1</div>
+      <div class="cg-title">VaaS MCP Server · Full Commerce Veicular</div>
+      <div class="cg-line"></div>
+    </div>
+    <div class="cards-row">
+      <a class="doc-card featured" href="specs/vaas-mcp-server-spec.html">
+        <div class="dc-tag" style="background:var(--orange-g);color:var(--orange);">Especificação Completa</div>
+        <div class="dc-title">VaaS MCP Server · Axway Integration</div>
+        <div class="dc-desc">10 seções: design do servidor (TypeScript + MCP SDK), autenticação OAuth2 client_credentials, catálogo de 8 tools com schemas completos, middleware chain (gate, idempotência, auditoria, circuit breaker), segurança, resiliência, observabilidade, deployment ECS Fargate e 4 ADRs.</div>
+        <div class="dc-link"><span>→</span> specs/vaas-mcp-server-spec.html</div>
+      </a>
+      <div class="doc-card">
+        <div class="dc-tag" style="background:var(--brad-g);color:var(--brad);">8 Tools</div>
+        <div class="dc-title">Catálogo de Tools VaaS</div>
+        <div class="dc-desc">
+          <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ok);">consultar_veiculo</code><br>
+          <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ok);">calcular_tributos</code><br>
+          <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ok);">simular_credito</code><br>
+          <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ok);">proposta_seguro</code><br>
+          <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ok);">verificar_gate_politica</code><br>
+          <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ok);">executar_split_pix</code><br>
+          <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ok);">executar_arrecadacao</code><br>
+          <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ok);">verificar_correntista</code>
+        </div>
+        <div class="dc-link" style="font-size:11px;color:var(--muted2);">Detalhes na especificação completa</div>
+      </div>
+      <div class="doc-card">
+        <div class="dc-tag" style="background:var(--blue-g);color:var(--blue);">Middleware</div>
+        <div class="dc-title">Pipeline de Governança</div>
+        <div class="dc-desc" style="font-size:12px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:20px;height:20px;border-radius:50%;background:var(--muted2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;">1</span>X-Ray Trace</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:20px;height:20px;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#fff;">2</span>Schema Validator</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:20px;height:20px;border-radius:50%;background:#ef4444;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#fff;">3</span>Circuit Breaker</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:20px;height:20px;border-radius:50%;background:var(--warn);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#fff;">4</span>Gate de Política</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:20px;height:20px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#fff;">5</span>Idempotência DynamoDB</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:20px;height:20px;border-radius:50%;background:var(--ok);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#000;">6</span>Axway Client</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><span style="width:20px;height:20px;border-radius:50%;background:var(--violet);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#fff;">7</span>Response Enricher</div>
+          <div style="display:flex;align-items:center;gap:8px;"><span style="width:20px;height:20px;border-radius:50%;background:var(--muted2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;color:#fff;">8</span>Audit Logger</div>
+        </div>
+        <div class="dc-link" style="font-size:11px;color:var(--muted2);">Pipeline completo na especificação</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="case-group">
+    <div class="case-group-head">
+      <div class="cg-label">Case 2</div>
+      <div class="cg-title">Banking MCP Server · Dados Pessoais · Multi-Modelo</div>
+      <div class="cg-line"></div>
+    </div>
+    <div class="cards-row">
+      <a class="doc-card featured" href="specs/banking-mcp-server-spec.html">
+        <div class="dc-tag" style="background:var(--gpt-g);color:var(--gpt);">Multi-Modelo</div>
+        <div class="dc-title">Banking MCP Server · Claude · GPT · Gemini</div>
+        <div class="dc-desc">Como disponibilizar saldo, extrato, fatura e apólice para qualquer modelo de IA. Authorization Code + PKCE (não client_credentials), LgpdSanitizer, cache por userId no Redis, um executor central com três adaptadores de protocolo.</div>
+        <div class="dc-link"><span>→</span> specs/banking-mcp-server-spec.html</div>
+      </a>
+      <a class="doc-card featured" href="specs/banking-mcp-auth-flow.html">
+        <div class="dc-tag" style="background:var(--violet-g);color:var(--violet);">Fluxo Interativo</div>
+        <div class="dc-title">Do "qual meu saldo?" ao dado bancário</div>
+        <div class="dc-desc">9 passos animados mostrando o que acontece na prática: primeira autenticação via PKCE, token armazenado no Redis, consultas subsequentes sem novo login, sanitização LGPD antes de chegar ao modelo.</div>
+        <div class="dc-link"><span>→</span> specs/banking-mcp-auth-flow.html</div>
+      </a>
+      <div class="doc-card">
+        <div class="dc-tag" style="background:var(--brad-g);color:var(--brad);">4 Tools</div>
+        <div class="dc-title">Catálogo Banking</div>
+        <div class="dc-desc">
+          <div style="margin-bottom:10px;">
+            <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ok);">consultar_saldo</code>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Scope: conta:saldo:read · Cache 30s</div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ok);">consultar_extrato</code>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Scope: conta:extrato:read · Cache 5min</div>
+          </div>
+          <div style="margin-bottom:10px;">
+            <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ok);">consultar_fatura_cartao</code>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Scope: cartao:fatura:read · Cache 5min</div>
+          </div>
+          <div>
+            <code style="font-family:'DM Mono',monospace;font-size:11px;color:var(--ok);">consultar_apolice_seguro</code>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Scope: seguro:apolice:read · Cache 30min</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- PLEITO BRIDGE -->
+<div class="pleito-section" id="pleito">
+  <div class="pleito-box">
+    <div class="pb-icon">🌉</div>
+    <div class="pb-content">
+      <div class="pb-tag">Integração · Bridge · Plataforma de IA do Bradesco</div>
+      <div class="pb-title">Pleito formal de integração com a Bridge</div>
+      <div class="pb-desc">
+        O VaaS foi desenvolvido usando Amazon Bedrock AgentCore como prova de conceito. A proposta é migrar a camada de orquestração para a <strong>Bridge — plataforma de IA do Bradesco</strong> — e usar o MCP Server como a interface de tools. Isso transforma o VaaS no <strong>primeiro produto nativo Bridge da Tribe Open Platform</strong>.
+        <br><br>
+        O que estamos pedindo: acesso às APIs de Bradesco Seguros, CaaS, LaaS, PIX, Arrecadação e BaaS Core em ambiente de homologação — para execução da POC em 8 semanas.
+      </div>
+      <div class="pb-actions">
+        <a class="btn-primary" href="../vaas-showcase/estrategia/vaas-pleito-bridge.html">Ler o pleito completo →</a>
+        <a class="btn-ghost" href="../vaas-showcase/">Ver VaaS Showcase</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUOTE -->
+<div class="quote-section">
+  <div class="quote-text">
+    "O Axway já tem <span class="hl">4.400+ APIs</span>. O MCP Server não cria nada novo — ele <span class="hl">abre o que já existe</span> para o canal que está crescendo mais rápido no mundo."
+  </div>
+  <div class="quote-attr">Open Platform · APIs, BaaS & Embedded Finance · Bradesco · 2026</div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <div class="footer-brand">Bradesco <span>MCP</span> · Open Platform</div>
+  <div class="footer-links">
+    <a href="specs/vaas-mcp-server-spec.html">VaaS MCP Spec</a>
+    <a href="specs/banking-mcp-server-spec.html">Banking MCP Spec</a>
+    <a href="specs/banking-mcp-auth-flow.html">Auth Flow</a>
+    <a href="../vaas-showcase/">VaaS Showcase</a>
+  </div>
+  <div class="footer-note">ramasousa.github.io/bradesco-mcp · Julho/2026</div>
+</div>
+
+</body>
+</html>
