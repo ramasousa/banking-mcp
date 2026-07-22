@@ -1,1 +1,971 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VaaS MCP Server · Especificação Técnica · Axway Integration</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+  :root{
+    --bg:#080b10; --s1:#0f1318; --s2:#151c26; --s3:#1c2535;
+    --b1:rgba(255,255,255,.07); --b2:rgba(255,255,255,.04);
+    --brad:#CC092F; --brad-g:rgba(204,9,47,.1);
+    --ok:#2dd4a8; --ok-g:rgba(45,212,168,.1);
+    --warn:#f59e0b; --warn-g:rgba(245,158,11,.1);
+    --risk:#ef4444; --risk-g:rgba(239,68,68,.1);
+    --blue:#4ea8de; --blue-g:rgba(78,168,222,.1);
+    --violet:#9b87f5; --violet-g:rgba(155,135,245,.1);
+    --pix:#32d583; --pix-g:rgba(50,213,131,.1);
+    --orange:#ff7a45; --orange-g:rgba(255,122,69,.1);
+    --text:#e4e9f4; --muted:#6b7994; --muted2:#3a4557;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
 
+  /* ── HERO ── */
+  .hero{padding:56px 48px 44px;border-bottom:1px solid var(--b1);position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-200px;right:-100px;width:600px;height:600px;background:radial-gradient(circle,rgba(78,168,222,.08) 0%,transparent 60%);pointer-events:none;}
+  .hero-tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--orange);margin-bottom:16px;}
+  .hero h1{font-family:'Syne',sans-serif;font-size:clamp(24px,3.5vw,44px);font-weight:800;line-height:1.1;max-width:800px;margin-bottom:14px;}
+  .hero h1 em{color:var(--orange);font-style:normal;}
+  .hero-sub{font-size:14px;color:var(--muted);max-width:720px;line-height:1.7;font-weight:300;}
+  .hero-chips{display:flex;gap:8px;margin-top:22px;flex-wrap:wrap;}
+  .chip{font-size:10.5px;font-weight:700;padding:4px 11px;border-radius:20px;font-family:'DM Mono',monospace;}
+
+  /* ── NAV ── */
+  .nav{display:flex;gap:2px;padding:0 48px;border-bottom:1px solid var(--b1);background:var(--bg);position:sticky;top:0;z-index:20;overflow-x:auto;}
+  .nt{background:none;border:none;color:var(--muted);font-family:'DM Sans';font-size:12px;font-weight:500;padding:13px 13px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:color .15s;}
+  .nt:hover{color:var(--text);}
+  .nt.a{color:var(--text);border-bottom-color:var(--orange);}
+
+  /* ── MAIN ── */
+  .main{max-width:1160px;margin:0 auto;padding:40px 48px 120px;}
+  .sec{display:none;animation:fi .2s ease;}
+  .sec.a{display:block;}
+  @keyframes fi{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .sh{display:flex;align-items:baseline;gap:12px;margin-bottom:5px;}
+  .sn{font-family:'DM Mono',monospace;font-size:11px;color:var(--orange);}
+  .st{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+  .ss{color:var(--muted);font-size:13.5px;line-height:1.65;max-width:760px;margin-bottom:30px;}
+  h3.sub{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin:36px 0 12px;color:var(--text);}
+  p.ld{font-size:13.5px;line-height:1.75;color:#c5ccd8;margin-bottom:12px;max-width:780px;}
+  p.ld strong{color:var(--text);}
+
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:14px;}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;margin-bottom:14px;}
+  @media(max-width:900px){.g2,.g3{grid-template-columns:1fr;}}
+
+  .card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:18px;}
+  .card.hl{border-color:rgba(78,168,222,.25);background:rgba(78,168,222,.04);}
+  .card-t{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:7px;}
+  .card-b{font-size:12.5px;color:var(--muted);line-height:1.6;}
+  .card-b b,.card-b strong{color:#c5ccd8;}
+
+  .tag{display:inline-flex;align-items:center;font-size:9.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:2px 9px;border-radius:12px;margin-bottom:8px;}
+  .tok{background:var(--ok-g);color:var(--ok);}
+  .tbl{background:var(--blue-g);color:var(--blue);}
+  .tv{background:var(--violet-g);color:var(--violet);}
+  .tw{background:var(--warn-g);color:var(--warn);}
+  .tr{background:var(--risk-g);color:var(--risk);}
+  .tp{background:var(--pix-g);color:var(--pix);}
+  .tb{background:var(--brad-g);color:var(--brad);}
+  .to{background:var(--orange-g);color:var(--orange);}
+
+  .callout{border-left:3px solid var(--orange);background:var(--s1);border-radius:0 10px 10px 0;padding:14px 18px;font-size:13px;color:#c5ccd8;line-height:1.65;margin:16px 0;}
+  .callout b{color:var(--text);}
+  .callout.ok{border-left-color:var(--ok);}
+  .callout.risk{border-left-color:var(--risk);}
+  .callout.blue{border-left-color:var(--blue);}
+  .callout.violet{border-left-color:var(--violet);}
+
+  /* ── CODE ── */
+  pre.code{font-family:'DM Mono',monospace;font-size:11.5px;background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:20px;line-height:1.8;overflow-x:auto;white-space:pre;margin:14px 0;}
+  pre.code .kw{color:var(--blue);}
+  pre.code .str{color:var(--ok);}
+  pre.code .cm{color:var(--muted2);}
+  pre.code .cl{color:var(--orange);}
+  pre.code .dc{color:var(--violet);}
+  pre.code .ok{color:var(--ok);}
+  pre.code .an{color:var(--warn);}
+  pre.code .num{color:var(--pix);}
+  code{font-family:'DM Mono',monospace;font-size:11.5px;background:var(--s2);padding:2px 6px;border-radius:4px;color:var(--ok);}
+
+  /* ── TABLES ── */
+  table.t{width:100%;border-collapse:collapse;margin:12px 0 24px;font-size:12.5px;}
+  table.t th{text-align:left;font-family:'DM Mono';font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);padding:9px 12px;border-bottom:1px solid var(--b1);}
+  table.t td{padding:10px 12px;border-bottom:1px solid var(--b2);color:#c5ccd8;vertical-align:top;}
+  table.t tr:last-child td{border-bottom:none;}
+
+  /* ── LAYER DIAGRAM ── */
+  .layers{display:flex;flex-direction:column;gap:3px;margin:20px 0 28px;}
+  .layer{border-radius:10px;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;border:1px solid var(--b1);}
+  .layer-n{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;}
+  .layer-n small{display:block;font-family:'DM Mono';font-weight:400;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;}
+  .layer-pills{display:flex;gap:7px;flex-wrap:wrap;}
+  .pill{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:3px 10px;font-size:11px;color:#c5ccd8;}
+  .layer-arr{color:var(--muted2);text-align:center;padding:2px 0;font-size:11px;}
+
+  /* ── TOOL CARDS ── */
+  .tool-card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:18px;margin-bottom:12px;}
+  .tool-card:hover{border-color:rgba(255,122,69,.3);}
+  .tool-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+  .tool-name{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--orange);}
+  .tool-desc{font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.6;}
+  .tool-schema{background:var(--s2);border-radius:8px;padding:13px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;}
+  .tool-axway{margin-top:10px;background:rgba(78,168,222,.06);border:1px solid rgba(78,168,222,.2);border-radius:8px;padding:10px 13px;font-size:11.5px;}
+  .tool-axway-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--blue);margin-bottom:4px;}
+
+  /* ── MIDDLEWARE CHAIN ── */
+  .mw-chain{display:flex;flex-direction:column;gap:8px;margin:16px 0;}
+  .mw-step{background:var(--s1);border:1px solid var(--b1);border-left:3px solid;border-radius:0 9px 9px 0;padding:12px 16px;display:flex;gap:12px;align-items:flex-start;}
+  .mw-num{font-family:'DM Mono',monospace;font-size:12px;font-weight:700;min-width:24px;margin-top:1px;}
+  .mw-body b{display:block;font-size:13px;font-family:'Syne',sans-serif;margin-bottom:3px;}
+  .mw-body span{font-size:12px;color:var(--muted);}
+
+  /* ── DECISION TABLE ── */
+  .adr{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:18px;margin-bottom:14px;}
+  .adr-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+  .adr-id{font-family:'DM Mono',monospace;font-size:11px;color:var(--orange);}
+  .adr-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;}
+  .adr-status{font-size:10px;font-weight:700;padding:2px 9px;border-radius:12px;}
+  .adr-row{display:flex;gap:10px;font-size:12.5px;margin-bottom:6px;}
+  .adr-label{color:var(--muted);min-width:80px;flex-shrink:0;}
+  .adr-val{color:#c5ccd8;line-height:1.55;flex:1;}
+
+  .footer{text-align:center;padding:30px 0 14px;font-size:11px;color:var(--muted2);border-top:1px solid var(--b1);margin-top:48px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-tag">Especificação Técnica · Arquitetura · VaaS Open Platform</div>
+  <h1>MCP Server <em>VaaS</em><br>Integração com Axway API Gateway</h1>
+  <p class="hero-sub">Definição arquitetural completa do MCP Server que expõe as APIs publicadas no Axway como ferramentas consumíveis pela Bridge — plataforma de IA do Bradesco. Cobertura: design do servidor, autenticação, catálogo de tools, middleware chain, resiliência, observabilidade e deployment.</p>
+  <div class="hero-chips">
+    <span class="chip" style="background:var(--orange-g);color:var(--orange)">TypeScript · MCP SDK</span>
+    <span class="chip" style="background:var(--blue-g);color:var(--blue)">Axway API Gateway</span>
+    <span class="chip" style="background:var(--violet-g);color:var(--violet)">Bridge · Bedrock AgentCore</span>
+    <span class="chip" style="background:var(--ok-g);color:var(--ok)">OAuth2 Client Credentials</span>
+    <span class="chip" style="background:var(--brad-g);color:var(--brad)">ECS Fargate · sa-east-1</span>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nt a" onclick="show('visao',this)">Visão Geral</button>
+  <button class="nt" onclick="show('design',this)">Design do Servidor</button>
+  <button class="nt" onclick="show('axway',this)">Axway Integration</button>
+  <button class="nt" onclick="show('tools',this)">Catálogo de Tools</button>
+  <button class="nt" onclick="show('middleware',this)">Middleware Chain</button>
+  <button class="nt" onclick="show('seguranca',this)">Segurança</button>
+  <button class="nt" onclick="show('resiliencia',this)">Resiliência</button>
+  <button class="nt" onclick="show('obs',this)">Observabilidade</button>
+  <button class="nt" onclick="show('deploy',this)">Deployment</button>
+  <button class="nt" onclick="show('adrs',this)">ADRs</button>
+</nav>
+
+<div class="main">
+
+<!-- ════════════════════════════════════════════
+     01 · VISÃO GERAL
+════════════════════════════════════════════ -->
+<div class="sec a" id="sec-visao">
+  <div class="sh"><span class="sn">01</span><h2 class="st">Visão Geral — O que é e o que faz</h2></div>
+  <p class="ss">O MCP Server VaaS é a camada que transforma APIs existentes publicadas no Axway em ferramentas inteligentes consumíveis pela Bridge. Ele não reimplementa nenhuma lógica de negócio — ele expõe, governa e enriquece semanticamente chamadas que já existem.</p>
+
+  <div class="layers">
+    <div class="layer" style="background:rgba(155,135,245,.06);border-color:rgba(155,135,245,.3);">
+      <div class="layer-n"><small>Camada 1 · IA</small>Bridge · Bedrock AgentCore</div>
+      <div class="layer-pills"><span class="pill">Agente decide chamar uma tool</span><span class="pill">tools/list · tools/call</span><span class="pill">MCP Protocol over HTTPS/SSE</span></div>
+    </div>
+    <div class="layer-arr">↓ MCP Protocol (HTTPS + SSE) — o agente não sabe que existe Axway</div>
+    <div class="layer" style="background:rgba(255,122,69,.06);border-color:rgba(255,122,69,.35);">
+      <div class="layer-n"><small>Camada 2 · Este componente</small>vaas-mcp-server</div>
+      <div class="layer-pills"><span class="pill" style="border-color:var(--orange);color:var(--orange)">Tool Registry</span><span class="pill">Middleware Chain</span><span class="pill">Gate de Política</span><span class="pill">Audit Logger</span><span class="pill">Axway Client</span><span class="pill">Response Enricher</span></div>
+    </div>
+    <div class="layer-arr">↓ HTTPS + OAuth2 Bearer Token — autenticado com client_credentials do serviço</div>
+    <div class="layer" style="background:rgba(78,168,222,.06);border-color:rgba(78,168,222,.3);">
+      <div class="layer-n"><small>Camada 3 · Gateway existente</small>Axway API Gateway</div>
+      <div class="layer-pills"><span class="pill">4.400+ APIs publicadas</span><span class="pill">24 gateways</span><span class="pill">23 security policies</span><span class="pill">~30B requests/mês</span><span class="pill">500 TPS/verbo</span></div>
+    </div>
+    <div class="layer-arr">↓ Roteamento interno Axway para os backends</div>
+    <div class="layer" style="background:rgba(204,9,47,.05);border-color:rgba(204,9,47,.25);">
+      <div class="layer-n"><small>Camada 4 · Backends do conglomerado</small>APIs de Domínio Bradesco</div>
+      <div class="layer-pills"><span class="pill">Bradesco Seguros</span><span class="pill">CaaS · LaaS</span><span class="pill">PIX · Arrecadação</span><span class="pill">RENAVAM / FIPE</span><span class="pill">Core Bancário</span></div>
+    </div>
+  </div>
+
+  <h3 class="sub">Responsabilidades do MCP Server — e o que ele explicitamente não faz</h3>
+  <div class="g2">
+    <div class="card">
+      <span class="tag tok">Faz</span>
+      <div class="card-b">
+        <b>Expõe tools via protocolo MCP</b> — responde a <code>tools/list</code> e <code>tools/call</code> seguindo o padrão MCP oficial<br><br>
+        <b>Autentica no Axway</b> — gerencia tokens OAuth2 com refresh automático<br><br>
+        <b>Mapeia tool → API Axway</b> — cada tool tem um mapeamento explícito para método, path e API ID no Axway<br><br>
+        <b>Enriquece respostas semanticamente</b> — adiciona contexto útil para o agente (ex: calculado automaticamente, incentivo aplicado, prazo estimado)<br><br>
+        <b>Aplica middleware</b> — gate de política, idempotência, auditoria, circuit breaker — antes e depois de cada tool call
+      </div>
+    </div>
+    <div class="card">
+      <span class="tag tr">Não faz</span>
+      <div class="card-b">
+        <b>Não reimplementa regras de negócio</b> — a lógica de crédito está no CaaS, a atuarial está no Seguros. O MCP Server é um proxy inteligente, não um novo domínio<br><br>
+        <b>Não decide o que executar</b> — isso é responsabilidade do agente na Bridge. O MCP Server executa o que foi solicitado (após o middleware aprovar)<br><br>
+        <b>Não acessa backends diretamente</b> — toda chamada passa pelo Axway. Nunca contorna o gateway<br><br>
+        <b>Não armazena dados de negócio</b> — persiste apenas chaves de idempotência (DynamoDB) e logs de auditoria (CloudTrail/S3)
+      </div>
+    </div>
+  </div>
+
+  <div class="callout ok"><b>Princípio fundamental:</b> o MCP Server é um tradutor de intenção para chamada de API — com governança. A Bridge diz "quero calcular tributos para MG", o MCP Server transforma isso em <code>GET /veiculos/tributos/v1?uf=MG&fipe=139900</code> autenticado no Axway, e devolve uma resposta enriquecida que o agente consegue raciocinar.</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     02 · DESIGN DO SERVIDOR
+════════════════════════════════════════════ -->
+<div class="sec" id="sec-design">
+  <div class="sh"><span class="sn">02</span><h2 class="st">Design Interno do MCP Server</h2></div>
+  <p class="ss">Runtime TypeScript com o SDK oficial MCP, estrutura em camadas, e separação clara entre o protocolo MCP, a lógica de middleware e o cliente Axway.</p>
+
+  <h3 class="sub">Estrutura de diretórios</h3>
+  <pre class="code"><span class="cm">vaas-mcp-server/</span>
+├── <span class="kw">src/</span>
+│   ├── <span class="cl">server.ts</span>                   <span class="cm">// Entry point — inicializa MCP Server com transport HTTP/SSE</span>
+│   │
+│   ├── <span class="kw">tools/</span>
+│   │   ├── <span class="cl">registry.ts</span>             <span class="cm">// Carrega e registra todas as tools no servidor MCP</span>
+│   │   ├── <span class="cl">types.ts</span>                <span class="cm">// ToolDefinition, AxwayMapping, ToolContext</span>
+│   │   └── <span class="kw">vaas/</span>
+│   │       ├── <span class="cl">veiculo.tool.ts</span>     <span class="cm">// consultar_veiculo, calcular_tributos</span>
+│   │       ├── <span class="cl">credito.tool.ts</span>     <span class="cm">// simular_credito, contratar_financiamento</span>
+│   │       ├── <span class="cl">seguro.tool.ts</span>      <span class="cm">// proposta_seguro, contratar_seguro</span>
+│   │       ├── <span class="cl">pagamento.tool.ts</span>   <span class="cm">// verificar_gate, executar_pix, executar_arrecadacao</span>
+│   │       └── <span class="cl">banking.tool.ts</span>     <span class="cm">// verificar_correntista, abrir_conta</span>
+│   │
+│   ├── <span class="kw">axway/</span>
+│   │   ├── <span class="cl">client.ts</span>               <span class="cm">// HTTP client com retry, timeout e correlationId</span>
+│   │   ├── <span class="cl">auth.ts</span>                 <span class="cm">// OAuth2 client_credentials flow + token cache</span>
+│   │   └── <span class="cl">enricher.ts</span>             <span class="cm">// Transforma respostas Axway em contexto útil para o agente</span>
+│   │
+│   ├── <span class="kw">middleware/</span>
+│   │   ├── <span class="cl">pipeline.ts</span>             <span class="cm">// Executa a chain de middleware em ordem</span>
+│   │   ├── <span class="cl">gate-policy.ts</span>          <span class="cm">// Bloqueia writes sem aprovação determinística</span>
+│   │   ├── <span class="cl">idempotency.ts</span>          <span class="cm">// DynamoDB attribute_not_exists para tools de mutação</span>
+│   │   ├── <span class="cl">audit.ts</span>                <span class="cm">// Grava cada tool call no CloudTrail</span>
+│   │   └── <span class="cl">circuit-breaker.ts</span>      <span class="cm">// Per-API circuit breaker com half-open state</span>
+│   │
+│   ├── <span class="kw">config/</span>
+│   │   ├── <span class="cl">axway.config.ts</span>         <span class="cm">// Base URL, timeout, retry config por ambiente</span>
+│   │   └── <span class="cl">tools.config.ts</span>         <span class="cm">// Quais tools estão habilitadas por ambiente</span>
+│   │
+│   └── <span class="kw">observability/</span>
+│       ├── <span class="cl">metrics.ts</span>              <span class="cm">// CloudWatch PutMetricData (latência, erros, calls)</span>
+│       └── <span class="cl">tracer.ts</span>               <span class="cm">// AWS X-Ray segment por tool call</span>
+│
+├── <span class="kw">tests/</span>
+│   ├── <span class="kw">unit/</span>
+│   └── <span class="kw">integration/</span>              <span class="cm">// Testes contra Axway HML (ambiente de homologação)</span>
+│
+├── <span class="cl">Dockerfile</span>
+├── <span class="cl">package.json</span>
+└── <span class="cl">tsconfig.json</span></pre>
+
+  <h3 class="sub">Entry point — como o servidor inicia</h3>
+  <pre class="code"><span class="cm">// src/server.ts</span>
+<span class="kw">import</span> { <span class="cl">McpServer</span>, <span class="cl">StreamableHTTPServerTransport</span> } <span class="kw">from</span> <span class="str">'@modelcontextprotocol/sdk/server'</span>;
+<span class="kw">import</span> { <span class="cl">ToolRegistry</span> } <span class="kw">from</span> <span class="str">'./tools/registry'</span>;
+<span class="kw">import</span> { <span class="cl">AxwayClient</span> } <span class="kw">from</span> <span class="str">'./axway/client'</span>;
+<span class="kw">import</span> { <span class="cl">MiddlewarePipeline</span> } <span class="kw">from</span> <span class="str">'./middleware/pipeline'</span>;
+
+<span class="kw">async function</span> <span class="cl">main</span>() {
+  <span class="cm">// 1. Inicializa o cliente Axway (faz o primeiro token fetch)</span>
+  <span class="kw">const</span> axway = <span class="kw">await</span> <span class="cl">AxwayClient</span>.init({
+    baseUrl:      process.env.<span class="dc">AXWAY_BASE_URL</span>,
+    clientId:     process.env.<span class="dc">AXWAY_CLIENT_ID</span>,     <span class="cm">// Secrets Manager</span>
+    clientSecret: process.env.<span class="dc">AXWAY_CLIENT_SECRET</span>,  <span class="cm">// Secrets Manager</span>
+    scopes:       [<span class="str">'veiculo:read'</span>, <span class="str">'credito:simulate'</span>, <span class="str">'seguro:quote'</span>,
+                   <span class="str">'pagamento:write'</span>, <span class="str">'arrecadacao:write'</span>]
+  });
+
+  <span class="cm">// 2. Cria o servidor MCP</span>
+  <span class="kw">const</span> server = <span class="kw">new</span> <span class="cl">McpServer</span>({
+    name:    <span class="str">'vaas-mcp-server'</span>,
+    version: <span class="str">'1.0.0'</span>
+  });
+
+  <span class="cm">// 3. Registra todas as tools</span>
+  <span class="kw">const</span> pipeline = <span class="kw">new</span> <span class="cl">MiddlewarePipeline</span>();
+  <span class="kw">await</span> <span class="cl">ToolRegistry</span>.registerAll(server, axway, pipeline);
+
+  <span class="cm">// 4. Expõe via HTTP/SSE — compatível com Bridge e Bedrock AgentCore</span>
+  <span class="kw">const</span> transport = <span class="kw">new</span> <span class="cl">StreamableHTTPServerTransport</span>({ port: <span class="num">3000</span> });
+  <span class="kw">await</span> server.connect(transport);
+
+  console.log(<span class="str">'vaas-mcp-server pronto na porta 3000'</span>);
+}
+
+main().<span class="kw">catch</span>(console.error);</pre>
+
+  <h3 class="sub">Como uma tool é definida — tipo base</h3>
+  <pre class="code"><span class="cm">// src/tools/types.ts</span>
+<span class="kw">export interface</span> <span class="cl">ToolDefinition</span>&lt;TInput = <span class="kw">unknown</span>, TOutput = <span class="kw">unknown</span>&gt; {
+  name:        <span class="kw">string</span>;           <span class="cm">// identificador único — snake_case</span>
+  description: <span class="kw">string</span>;           <span class="cm">// para o agente entender QUANDO chamar esta tool</span>
+  inputSchema: <span class="kw">object</span>;           <span class="cm">// JSON Schema — validado antes de chamar o Axway</span>
+  allowsWrite: <span class="kw">boolean</span>;          <span class="cm">// true = passa pelo Gate de Política</span>
+  idempotent:  <span class="kw">boolean</span>;          <span class="cm">// true = verifica DynamoDB antes de executar</span>
+  axwayMap:    <span class="cl">AxwayMapping</span>;      <span class="cm">// mapeamento para o Axway</span>
+  enrich?:     (raw: TOutput, input: TInput) =&gt; TOutput; <span class="cm">// enriquecimento semântico opcional</span>
+}
+
+<span class="kw">export interface</span> <span class="cl">AxwayMapping</span> {
+  apiId:   <span class="kw">string</span>;    <span class="cm">// ID da API no Axway API Manager</span>
+  method:  <span class="kw">string</span>;    <span class="cm">// HTTP method</span>
+  path:    <span class="kw">string</span>;    <span class="cm">// path com parâmetros em {chave}</span>
+  scopes:  <span class="kw">string</span>[];  <span class="cm">// OAuth2 scopes necessários</span>
+  timeout: <span class="kw">number</span>;    <span class="cm">// ms — cada API tem seu SLA</span>
+}</pre>
+</div>
+
+<!-- ════════════════════════════════════════════
+     03 · AXWAY INTEGRATION
+════════════════════════════════════════════ -->
+<div class="sec" id="sec-axway">
+  <div class="sh"><span class="sn">03</span><h2 class="st">Integração com o Axway</h2></div>
+  <p class="ss">O MCP Server é um consumer OAuth2 das APIs do Axway. Toda chamada passa pelo gateway — nunca diretamente ao backend. Aqui estão todos os detalhes do fluxo de autenticação e do cliente HTTP.</p>
+
+  <h3 class="sub">Fluxo de autenticação — OAuth2 Client Credentials</h3>
+  <pre class="code"><span class="cm">// src/axway/auth.ts</span>
+<span class="kw">export class</span> <span class="cl">AxwayTokenManager</span> {
+  <span class="kw">private</span> cache: { token: <span class="kw">string</span>; expiresAt: <span class="kw">number</span> } | <span class="kw">null</span> = <span class="kw">null</span>;
+
+  <span class="kw">async</span> getToken(): <span class="kw">Promise</span>&lt;<span class="kw">string</span>&gt; {
+    <span class="cm">// Renova 60s antes de expirar — nunca serve token vencido</span>
+    <span class="kw">if</span> (<span class="kw">this</span>.cache && Date.now() &lt; <span class="kw">this</span>.cache.expiresAt - <span class="num">60_000</span>) {
+      <span class="kw">return this</span>.cache.token;
+    }
+
+    <span class="kw">const</span> response = <span class="kw">await</span> fetch(<span class="str">`${this.config.baseUrl}/oauth/token`</span>, {
+      method: <span class="str">'POST'</span>,
+      headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/x-www-form-urlencoded'</span> },
+      body: <span class="kw">new</span> <span class="cl">URLSearchParams</span>({
+        grant_type:    <span class="str">'client_credentials'</span>,
+        client_id:     <span class="kw">this</span>.config.clientId,
+        client_secret: <span class="kw">this</span>.config.clientSecret,
+        scope:         <span class="kw">this</span>.config.scopes.join(<span class="str">' '</span>)
+      })
+    });
+
+    <span class="kw">if</span> (!response.ok) <span class="kw">throw new</span> <span class="cl">Error</span>(<span class="str">`Axway auth falhou: ${response.status}`</span>);
+
+    <span class="kw">const</span> data = <span class="kw">await</span> response.json();
+    <span class="kw">this</span>.cache = {
+      token:     data.access_token,
+      expiresAt: Date.now() + (data.expires_in * <span class="num">1000</span>)
+    };
+    <span class="kw">return this</span>.cache.token;
+  }
+}</pre>
+
+  <h3 class="sub">Cliente HTTP — correlação, retry e timeout</h3>
+  <pre class="code"><span class="cm">// src/axway/client.ts</span>
+<span class="kw">export class</span> <span class="cl">AxwayClient</span> {
+  <span class="kw">async</span> call&lt;T&gt;(
+    mapping: <span class="cl">AxwayMapping</span>,
+    params:  <span class="kw">Record</span>&lt;<span class="kw">string</span>, <span class="kw">unknown</span>&gt;,
+    context: <span class="cl">ToolContext</span>
+  ): <span class="kw">Promise</span>&lt;T&gt; {
+    <span class="kw">const</span> token = <span class="kw">await this</span>.tokenManager.getToken();
+    <span class="kw">const</span> url   = <span class="kw">this</span>.buildUrl(mapping.path, params);
+
+    <span class="cm">// Cabeçalhos obrigatórios em TODA chamada ao Axway</span>
+    <span class="kw">const</span> headers = {
+      <span class="str">'Authorization'</span>:     <span class="str">`Bearer ${token}`</span>,
+      <span class="str">'X-Correlation-ID'</span>:  context.correlationId,  <span class="cm">// sagaId para rastreabilidade</span>
+      <span class="str">'X-MCP-Tool-Name'</span>:   context.toolName,        <span class="cm">// qual tool chamou</span>
+      <span class="str">'X-Agent-Session-ID'</span>: context.agentSessionId, <span class="cm">// sessão do agente na Bridge</span>
+      <span class="str">'Content-Type'</span>:      <span class="str">'application/json'</span>
+    };
+
+    <span class="cm">// Retry com backoff exponencial — apenas para 5xx e timeout</span>
+    <span class="kw">return</span> <span class="kw">await this</span>.withRetry(async () =&gt; {
+      <span class="kw">const</span> res = <span class="kw">await</span> fetch(url, {
+        method:  mapping.method,
+        headers,
+        body:    mapping.method !== <span class="str">'GET'</span> ? JSON.stringify(params) : <span class="kw">undefined</span>,
+        signal:  <span class="cl">AbortSignal</span>.timeout(mapping.timeout)
+      });
+
+      <span class="kw">if</span> (res.status === <span class="num">401</span>) { <span class="cm">// token expirou de forma inesperada</span>
+        <span class="kw">this</span>.tokenManager.invalidate();
+        <span class="kw">throw new</span> <span class="cl">RetryableError</span>(<span class="str">'Token expirado — renovando'</span>);
+      }
+      <span class="kw">if</span> (res.status === <span class="num">429</span>) { <span class="cm">// rate limit do Axway</span>
+        <span class="kw">const</span> retryAfter = res.headers.get(<span class="str">'Retry-After'</span>) ?? <span class="str">'5'</span>;
+        <span class="kw">throw new</span> <span class="cl">RateLimitError</span>(<span class="kw">parseInt</span>(retryAfter) * <span class="num">1000</span>);
+      }
+      <span class="kw">if</span> (!res.ok) <span class="kw">throw new</span> <span class="cl">AxwayApiError</span>(res.status, <span class="kw">await</span> res.json());
+
+      <span class="kw">return</span> res.json() <span class="kw">as</span> <span class="cl">Promise</span>&lt;T&gt;;
+    }, { maxAttempts: <span class="num">3</span>, baseDelayMs: <span class="num">500</span> });
+  }
+}</pre>
+
+  <h3 class="sub">Considerações críticas sobre o Axway</h3>
+  <div class="g2">
+    <div class="card">
+      <span class="tag tbl">Autenticação no Axway</span>
+      <div class="card-b">O MCP Server precisa de <b>um client OAuth2 registrado no Axway API Manager</b> — identidade de serviço (não humana). A senha do client deve estar no AWS Secrets Manager, nunca em variável de ambiente direta.<br><br>O client precisa ter <b>subscriptions ativas</b> nas APIs que quer chamar. Sem subscription, o Axway retorna 403 mesmo com token válido.</div>
+    </div>
+    <div class="card">
+      <span class="tag tw">Rate limits herdados</span>
+      <div class="card-b">O Axway já tem <b>500 TPS por verbo HTTP</b> nas políticas existentes. O MCP Server não contorna isso — o circuit breaker interno age <b>antes</b> de atingir o limite do Axway, protegendo os backends.<br><br>Para a POC VaaS, o volume de calls de ferramenta do agente é muito abaixo desse limite — mas é importante medir e expor a métrica <code>vaas.axway.ratelimit.hits</code>.</div>
+    </div>
+    <div class="card">
+      <span class="tag tok">Correlation ID</span>
+      <div class="card-b">O cabeçalho <code>X-Correlation-ID</code> deve carregar o <b>sagaId da transação VaaS</b> em toda chamada ao Axway. Isso permite cruzar logs do Axway com logs do MCP Server e do agente — rastreabilidade end-to-end sem instrumentação adicional.</div>
+    </div>
+    <div class="card">
+      <span class="tag tv">API ID vs. Path</span>
+      <div class="card-b">O Axway pode ter múltiplas versões da mesma API (<code>/v1</code>, <code>/v2</code>). O mapeamento de tool deve referenciar o <b>API ID do Axway</b>, não só o path — isso garante que uma atualização de versão no gateway seja capturada sem mudar o código da tool.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     04 · CATÁLOGO DE TOOLS
+════════════════════════════════════════════ -->
+<div class="sec" id="sec-tools">
+  <div class="sh"><span class="sn">04</span><h2 class="st">Catálogo de Tools VaaS</h2></div>
+  <p class="ss">8 tools definidas manualmente para a POC. Cada uma com schema de input completo, mapeamento Axway e nota de enriquecimento semântico.</p>
+
+  <div class="callout blue"><b>Princípio de nomenclatura:</b> nomes em <code>snake_case</code>, verbo + substantivo, semântica de negócio — nunca nomes técnicos como <code>get_api_seguros_proposta</code>. O agente usa o <code>description</code> para decidir quando chamar, e o nome precisa ser auto-explicativo no reasoning.</div>
+
+  <!-- TOOL 1 -->
+  <div class="tool-card">
+    <div class="tool-head">
+      <div>
+        <div class="tool-name">consultar_veiculo</div>
+        <div class="tool-desc">Consulta dados cadastrais do veículo via RENAVAM e o valor de mercado via tabela FIPE. Chamar sempre que o cliente informar placa ou modelo — dados desta tool alimentam calcular_tributos e proposta_seguro.</div>
+      </div>
+      <span class="tag tok">Leitura · Sem gate</span>
+    </div>
+    <div class="tool-schema"><span style="color:var(--muted)">input:</span>
+  placa: <span style="color:var(--ok)">string</span>  <span style="color:var(--muted2)">// padrão Mercosul ou antigo — regex no schema</span>
+  uf:    <span style="color:var(--ok)">string</span>  <span style="color:var(--muted2)">// UF de registro — afeta IPVA</span>
+
+<span style="color:var(--muted)">output enriquecido:</span>
+  fipe_value:          <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// em centavos — sempre inteiro</span>
+  modelo:              <span style="color:var(--ok)">string</span>
+  combustivel:         <span style="color:var(--ok)">"eletrico" | "flex" | "gasolina" | "diesel"</span>
+  incentivo_ev_ativo:  <span style="color:var(--warn)">boolean</span>  <span style="color:var(--muted2)">// true se UF tem IPVA reduzido para elétrico</span>
+  economia_ev_estimada:<span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// em centavos — adicionado pelo enricher</span></div>
+    <div class="tool-axway">
+      <div class="tool-axway-label">Mapeamento Axway</div>
+      <code>GET /veiculos/v1/{placa}?uf={uf}</code> · API ID: <code>renavam-fipe-api</code> · Scope: <code>veiculo:read</code> · Timeout: 3s
+    </div>
+  </div>
+
+  <!-- TOOL 2 -->
+  <div class="tool-card">
+    <div class="tool-head">
+      <div>
+        <div class="tool-name">calcular_tributos</div>
+        <div class="tool-desc">Calcula IPVA, licenciamento e emplacamento para o veículo na UF informada. Usa o valor FIPE como base. O resultado complementa o RAG de normas tributárias — o agente chama esta tool, não recalcula por conta própria.</div>
+      </div>
+      <span class="tag tok">Leitura · Sem gate</span>
+    </div>
+    <div class="tool-schema"><span style="color:var(--muted)">input:</span>
+  fipe_value:   <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// em centavos</span>
+  uf:           <span style="color:var(--ok)">string</span>
+  combustivel:  <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// de consultar_veiculo</span>
+  ano_modelo:   <span style="color:var(--pix)">number</span>
+
+<span style="color:var(--muted)">output enriquecido:</span>
+  ipva:             <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// centavos</span>
+  licenciamento:    <span style="color:var(--pix)">number</span>
+  emplacamento:     <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// 0 se não é 0KM</span>
+  total_tributos:   <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// soma — adicionado pelo enricher</span>
+  aliquota_ipva_pct:<span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// ex: 1.0 para EV em MG</span>
+  observacao:       <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// ex: "Alíquota reduzida para VE em MG — Lei 7657/2024"</span></div>
+    <div class="tool-axway">
+      <div class="tool-axway-label">Mapeamento Axway</div>
+      <code>GET /tributos/v2/calculo?fipe={fipe}&uf={uf}&tipo={combustivel}</code> · API ID: <code>tributos-api</code> · Scope: <code>veiculo:read</code> · Timeout: 2s
+    </div>
+  </div>
+
+  <!-- TOOL 3 -->
+  <div class="tool-card">
+    <div class="tool-head">
+      <div>
+        <div class="tool-name">simular_credito</div>
+        <div class="tool-desc">Simula parcelas de financiamento via CaaS (crédito embedded). Retorna as opções disponíveis para o cliente. Não consome score de crédito diretamente — o CaaS já retorna as opções aprovadas para o perfil do cliente autenticado.</div>
+      </div>
+      <span class="tag tok">Leitura · Sem gate</span>
+    </div>
+    <div class="tool-schema"><span style="color:var(--muted)">input:</span>
+  valor_financiado: <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// fipe_value + tributos + acessórios</span>
+  cliente_id:       <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// token de sessão — CaaS resolve o perfil</span>
+  prazo_meses?:     <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// opcional — sem isso retorna todas as opções</span>
+
+<span style="color:var(--muted)">output:</span>
+  opcoes: Array&lt;{
+    prazo_meses:    <span style="color:var(--pix)">number</span>
+    parcela_valor:  <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// centavos</span>
+    taxa_mensal_pct:<span style="color:var(--pix)">number</span>
+    cet_anual_pct:  <span style="color:var(--pix)">number</span>
+    recomendado:    <span style="color:var(--warn)">boolean</span>  <span style="color:var(--muted2)">// marcado pelo enricher com base em menor CET</span>
+  }&gt;</div>
+    <div class="tool-axway">
+      <div class="tool-axway-label">Mapeamento Axway</div>
+      <code>POST /caas/v1/simulacao</code> · API ID: <code>caas-credito-api</code> · Scope: <code>credito:simulate</code> · Timeout: 4s
+    </div>
+  </div>
+
+  <!-- TOOL 4 -->
+  <div class="tool-card">
+    <div class="tool-head">
+      <div>
+        <div class="tool-name">proposta_seguro</div>
+        <div class="tool-desc">Gera proposta de seguro auto via Bradesco Seguros (canal intragrupo). Recebe dados do veículo e retorna proposta com prêmio, coberturas e desconto aplicado. Chamar após consultar_veiculo — precisa do modelo e do combustivel.</div>
+      </div>
+      <span class="tag tok">Leitura · Sem gate</span>
+    </div>
+    <div class="tool-schema"><span style="color:var(--muted)">input:</span>
+  fipe_value:   <span style="color:var(--pix)">number</span>
+  modelo:       <span style="color:var(--ok)">string</span>
+  combustivel:  <span style="color:var(--ok)">string</span>
+  uf_pernoite:  <span style="color:var(--ok)">string</span>
+  cliente_id:   <span style="color:var(--ok)">string</span>
+
+<span style="color:var(--muted)">output enriquecido:</span>
+  premio_mensal:    <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// centavos</span>
+  coberturas:       <span style="color:var(--ok)">string[]</span>
+  desconto_ev_pct:  <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// 0 se não for elétrico</span>
+  proposta_id:      <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// necessário para contratar_seguro</span>
+  validade_horas:   <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// proposta expira em N horas</span></div>
+    <div class="tool-axway">
+      <div class="tool-axway-label">Mapeamento Axway</div>
+      <code>POST /seguros/auto/v1/proposta</code> · API ID: <code>bradesco-seguros-auto-api</code> · Scope: <code>seguro:quote</code> · Timeout: 5s
+    </div>
+  </div>
+
+  <!-- TOOL 5 - GATE -->
+  <div class="tool-card" style="border-color:rgba(245,158,11,.25);">
+    <div class="tool-head">
+      <div>
+        <div class="tool-name">verificar_gate_politica</div>
+        <div class="tool-desc">Verifica deterministicamente se um pagamento pode ser executado automaticamente. SEMPRE chamar antes de qualquer tool de pagamento. Esta verificação é uma regra de código — não decisão do modelo. O agente não deve tentar contornar ou inferir o resultado.</div>
+      </div>
+      <span class="tag tw">Gate obrigatório · Pré-requisito de todos os writes</span>
+    </div>
+    <div class="tool-schema"><span style="color:var(--muted)">input:</span>
+  valor_total:    <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// soma de todos os splits</span>
+  tipo_operacao:  <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// "COMPRA_VEICULO" | "PAGAMENTO_TRIBUTO" | "CONTRATACAO_SEGURO"</span>
+  cliente_id:     <span style="color:var(--ok)">string</span>
+
+<span style="color:var(--muted)">output:</span>
+  aprovado:       <span style="color:var(--warn)">boolean</span>
+  motivo_bloqueio:<span style="color:var(--ok)">string | null</span>  <span style="color:var(--muted2)">// null se aprovado</span>
+  limite_atual:   <span style="color:var(--pix)">number</span>          <span style="color:var(--muted2)">// limite vigente neste momento</span></div>
+    <div class="tool-axway">
+      <div class="tool-axway-label">Mapeamento Axway</div>
+      <code>POST /pagamentos/v1/gate/verificar</code> · API ID: <code>vaas-gate-api</code> · Scope: <code>pagamento:write</code> · Timeout: 1s
+    </div>
+  </div>
+
+  <!-- TOOL 6 -->
+  <div class="tool-card" style="border-color:rgba(239,68,68,.2);">
+    <div class="tool-head">
+      <div>
+        <div class="tool-name">executar_split_pix</div>
+        <div class="tool-desc">Executa um split de pagamento via PIX. Chamar APENAS após verificar_gate_politica retornar aprovado=true E tributos confirmados. Cada chamada tem uma idempotency_key única gerada a partir do sagaId + beneficiário — nunca reutilizar chaves.</div>
+      </div>
+      <span class="tag tr">Escrita · Gate obrigatório · Idempotente</span>
+    </div>
+    <div class="tool-schema"><span style="color:var(--muted)">input:</span>
+  saga_id:          <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// ID da saga — base da idempotency key</span>
+  beneficiario_token:<span style="color:var(--ok)">string</span>  <span style="color:var(--muted2)">// token opaco — MCP Server resolve para dados bancários reais</span>
+  valor:            <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// centavos</span>
+  descricao:        <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// max 140 chars — aparece no extrato</span>
+
+<span style="color:var(--muted)">output:</span>
+  end_to_end_id:    <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// E2EID do Bacen</span>
+  status:           <span style="color:var(--ok)">"ACSC" | "RJCT" | "PDNG"</span>
+  protocolo:        <span style="color:var(--ok)">string</span></div>
+    <div class="tool-axway">
+      <div class="tool-axway-label">Mapeamento Axway</div>
+      <code>POST /pix/v2/pagamento</code> · API ID: <code>pix-pagamento-api</code> · Scope: <code>pagamento:write</code> · Timeout: 8s
+    </div>
+  </div>
+
+  <!-- TOOL 7 -->
+  <div class="tool-card" style="border-color:rgba(239,68,68,.2);">
+    <div class="tool-head">
+      <div>
+        <div class="tool-name">executar_arrecadacao</div>
+        <div class="tool-desc">Executa pagamento de tributo via convênio de arrecadação Bradesco (SEFAZ ou DETRAN). Deve ser a PRIMEIRA tool de pagamento executada na saga — CMN 4.282 exige tributo antes de repasse ao vendedor.</div>
+      </div>
+      <span class="tag tr">Escrita · Gate obrigatório · Idempotente · Executar primeiro</span>
+    </div>
+    <div class="tool-schema"><span style="color:var(--muted)">input:</span>
+  saga_id:      <span style="color:var(--ok)">string</span>
+  tipo:         <span style="color:var(--ok)">"IPVA" | "LICENCIAMENTO" | "EMPLACAMENTO" | "DPVAT"</span>
+  uf:           <span style="color:var(--ok)">string</span>
+  valor:        <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// centavos — de calcular_tributos</span>
+  renavam:      <span style="color:var(--ok)">string</span>
+  exercicio?:   <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// ano fiscal — default: ano corrente</span>
+
+<span style="color:var(--muted)">output:</span>
+  protocolo:    <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// protocolo SEFAZ/DETRAN</span>
+  status:       <span style="color:var(--ok)">"CONFIRMADO" | "PENDENTE" | "REJEITADO"</span>
+  data_efetiva: <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// ISO 8601 — D+0 ou D+1</span></div>
+    <div class="tool-axway">
+      <div class="tool-axway-label">Mapeamento Axway</div>
+      <code>POST /arrecadacao/v1/tributo</code> · API ID: <code>arrecadacao-convenio-api</code> · Scope: <code>arrecadacao:write</code> · Timeout: 10s
+    </div>
+  </div>
+
+  <!-- TOOL 8 -->
+  <div class="tool-card">
+    <div class="tool-head">
+      <div>
+        <div class="tool-name">verificar_correntista</div>
+        <div class="tool-desc">Verifica se o cliente já possui conta corrente Bradesco. Usar para decidir se deve ofertar abrir_conta. Não expõe saldo ou movimentação — apenas status de correntista.</div>
+      </div>
+      <span class="tag tok">Leitura · Sem gate</span>
+    </div>
+    <div class="tool-schema"><span style="color:var(--muted)">input:</span>  cliente_id: <span style="color:var(--ok)">string</span>
+<span style="color:var(--muted)">output:</span> { correntista: <span style="color:var(--warn)">boolean</span>, agencia?: <span style="color:var(--ok)">string</span>, conta?: <span style="color:var(--ok)">string (masked)</span> }</div>
+    <div class="tool-axway">
+      <div class="tool-axway-label">Mapeamento Axway</div>
+      <code>GET /clientes/v1/{cliente_id}/conta</code> · API ID: <code>baas-core-api</code> · Scope: <code>cliente:read</code> · Timeout: 2s
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     05 · MIDDLEWARE CHAIN
+════════════════════════════════════════════ -->
+<div class="sec" id="sec-middleware">
+  <div class="sh"><span class="sn">05</span><h2 class="st">Middleware Chain</h2></div>
+  <p class="ss">Toda tool call passa pela mesma pipeline de middleware, na ordem definida. O middleware não conhece a tool específica — só o contexto e os metadados (allowsWrite, idempotent).</p>
+
+  <pre class="code"><span class="cm">// src/middleware/pipeline.ts — executa em ordem para toda tool call</span>
+<span class="kw">async function</span> <span class="cl">executePipeline</span>(
+  toolDef: <span class="cl">ToolDefinition</span>,
+  input:   <span class="kw">unknown</span>,
+  ctx:     <span class="cl">ToolContext</span>,
+  handler: () =&gt; <span class="cl">Promise</span>&lt;<span class="kw">unknown</span>&gt;
+): <span class="cl">Promise</span>&lt;<span class="kw">unknown</span>&gt; {
+
+  <span class="cm">// ① Trace — abre X-Ray segment</span>
+  <span class="kw">return await</span> tracer.trace(ctx.correlationId, async () =&gt; {
+
+    <span class="cm">// ② Validação de schema — antes de qualquer lógica</span>
+    <span class="cl">SchemaValidator</span>.validate(input, toolDef.inputSchema);
+
+    <span class="cm">// ③ Circuit breaker — verifica se a API destino está saudável</span>
+    <span class="cl">CircuitBreaker</span>.checkOrThrow(toolDef.axwayMap.apiId);
+
+    <span class="cm">// ④ Gate de Política — apenas para tools de escrita</span>
+    <span class="kw">if</span> (toolDef.allowsWrite) {
+      <span class="kw">await</span> <span class="cl">GatePolicyMiddleware</span>.enforce(input, ctx);
+    }
+
+    <span class="cm">// ⑤ Idempotência — apenas para tools de mutação idempotentes</span>
+    <span class="kw">if</span> (toolDef.idempotent) {
+      <span class="kw">const</span> key = <span class="cl">IdempotencyMiddleware</span>.buildKey(toolDef.name, input, ctx);
+      <span class="kw">if</span> (!<span class="kw">await</span> <span class="cl">IdempotencyMiddleware</span>.tryAcquire(key)) {
+        <span class="kw">return await</span> <span class="cl">IdempotencyMiddleware</span>.getCached(key); <span class="cm">// retorna resultado anterior</span>
+      }
+    }
+
+    <span class="cm">// ⑥ Executa a chamada real ao Axway</span>
+    <span class="kw">const</span> result = <span class="kw">await</span> handler();
+
+    <span class="cm">// ⑦ Enriquecimento semântico — adiciona contexto para o agente</span>
+    <span class="kw">const</span> enriched = toolDef.enrich ? toolDef.enrich(result, input) : result;
+
+    <span class="cm">// ⑧ Auditoria — grava no CloudTrail (nunca bloqueia a resposta)</span>
+    <span class="cl">AuditMiddleware</span>.record(toolDef.name, input, enriched, ctx).<span class="kw">catch</span>(console.error);
+
+    <span class="kw">return</span> enriched;
+  });
+}</span></pre>
+
+  <div class="mw-chain">
+    <div class="mw-step" style="border-left-color:var(--muted);">
+      <span class="mw-num" style="color:var(--muted)">①</span>
+      <div class="mw-body"><b>X-Ray Trace</b><span>Abre um subsegment do X-Ray com o nome da tool e o correlationId. Toda a chain aparece como um único trace rastreável no console AWS.</span></div>
+    </div>
+    <div class="mw-step" style="border-left-color:var(--blue);">
+      <span class="mw-num" style="color:var(--blue)">②</span>
+      <div class="mw-body"><b>Schema Validator</b><span>Valida o input contra o JSON Schema da tool antes de qualquer chamada de rede. Erros de validação retornam imediatamente ao agente sem consumir quota do Axway.</span></div>
+    </div>
+    <div class="mw-step" style="border-left-color:var(--risk);">
+      <span class="mw-num" style="color:var(--risk)">③</span>
+      <div class="mw-body"><b>Circuit Breaker</b><span>Verifica o estado do circuit breaker por API ID do Axway. Se o breaker estiver OPEN, retorna erro imediatamente com mensagem legível para o agente — não tenta a chamada.</span></div>
+    </div>
+    <div class="mw-step" style="border-left-color:var(--warn);">
+      <span class="mw-num" style="color:var(--warn)">④</span>
+      <div class="mw-body"><b>Gate de Política</b><span>Para tools com <code>allowsWrite: true</code>: chama <code>verificar_gate_politica</code> deterministicamente. Se não aprovado, lança <code>GatePolicyError</code> — o agente recebe a mensagem de bloqueio e decide como proceder.</span></div>
+    </div>
+    <div class="mw-step" style="border-left-color:var(--orange);">
+      <span class="mw-num" style="color:var(--orange)">⑤</span>
+      <div class="mw-body"><b>Idempotência DynamoDB</b><span>Para tools com <code>idempotent: true</code>: tenta gravar a chave com <code>attribute_not_exists(pk)</code>. Se a chave já existe, retorna o resultado da execução anterior — o agente recebe a mesma resposta de uma execução bem-sucedida.</span></div>
+    </div>
+    <div class="mw-step" style="border-left-color:var(--ok);">
+      <span class="mw-num" style="color:var(--ok)">⑥</span>
+      <div class="mw-body"><b>Axway Client</b><span>Executa a chamada HTTP real com o token OAuth2, cabeçalhos de correlação e retry automático para erros 5xx e timeouts.</span></div>
+    </div>
+    <div class="mw-step" style="border-left-color:var(--violet);">
+      <span class="mw-num" style="color:var(--violet)">⑦</span>
+      <div class="mw-body"><b>Response Enricher</b><span>Transforma a resposta raw do Axway adicionando campos calculados, contexto de negócio e linguagem natural que ajuda o agente a raciocinar sobre o resultado.</span></div>
+    </div>
+    <div class="mw-step" style="border-left-color:var(--muted2);">
+      <span class="mw-num" style="color:var(--muted2)">⑧</span>
+      <div class="mw-body"><b>Audit Logger</b><span>Grava de forma assíncrona (non-blocking) no CloudTrail: nome da tool, input sanitizado (PII removido), output hash, correlationId, timestamp. Nunca atrasa a resposta ao agente.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     06 · SEGURANÇA
+════════════════════════════════════════════ -->
+<div class="sec" id="sec-seguranca">
+  <div class="sh"><span class="sn">06</span><h2 class="st">Segurança</h2></div>
+  <p class="ss">Quatro camadas de segurança independentes — cada uma falha de forma segura mesmo que a anterior falhe.</p>
+
+  <div class="g2">
+    <div class="card">
+      <span class="tag tbl">Autenticação de entrada</span>
+      <div class="card-t">A Bridge autentica no MCP Server</div>
+      <div class="card-b">O MCP Server exige um <b>Bearer token da Bridge</b> em toda requisição de entrada — não aceita chamadas anônimas. Token validado via JWKS do IAM da Bridge (ou mTLS se disponível). Sem token válido: HTTP 401 antes de qualquer tool ser processada.</div>
+    </div>
+    <div class="card">
+      <span class="tag tw">Scoping de tools</span>
+      <div class="card-t">O agente só vê o que pode usar</div>
+      <div class="card-b">O <code>tools/list</code> retorna apenas as tools habilitadas para o contexto da chamada. O ambiente HML não expõe tools de produção. Uma tool de pagamento em HML aponta para o simulador Axway — sem risco de acionar pagamento real.</div>
+    </div>
+    <div class="card">
+      <span class="tag tr">PII fora do agente</span>
+      <div class="card-t">Dados sensíveis ficam no MCP Server</div>
+      <div class="card-b">O agente nunca recebe dados bancários reais. O campo <code>beneficiario_token</code> é um token opaco — o MCP Server resolve para os dados reais na hora da chamada ao Axway. CPF, conta bancária e chave PIX nunca aparecem no reasoning do agente.</div>
+    </div>
+    <div class="card">
+      <span class="tag tv">Vault de credenciais</span>
+      <div class="card-t">Zero credenciais em código ou env</div>
+      <div class="card-b"><code>AXWAY_CLIENT_ID</code> e <code>AXWAY_CLIENT_SECRET</code> são lidos do AWS Secrets Manager no startup. Rotação automática a cada 30 dias. A IAM Task Role do ECS tem acesso apenas ao secret específico do vaas-mcp-server.</div>
+    </div>
+  </div>
+
+  <h3 class="sub">Sanitização de PII no Audit Log</h3>
+  <pre class="code"><span class="cm">// src/middleware/audit.ts — remove PII antes de logar</span>
+<span class="kw">const</span> PII_FIELDS = [<span class="str">'cpf'</span>, <span class="str">'email'</span>, <span class="str">'telefone'</span>, <span class="str">'conta'</span>, <span class="str">'agencia'</span>, <span class="str">'chave_pix'</span>];
+
+<span class="kw">function</span> <span class="cl">sanitize</span>(obj: <span class="kw">unknown</span>): <span class="kw">unknown</span> {
+  <span class="kw">if</span> (<span class="kw">typeof</span> obj !== <span class="str">'object'</span> || obj === <span class="kw">null</span>) <span class="kw">return</span> obj;
+  <span class="kw">return</span> <span class="cl">Object</span>.fromEntries(
+    <span class="cl">Object</span>.entries(obj <span class="kw">as</span> <span class="kw">object</span>).map(([k, v]) => [
+      k,
+      PII_FIELDS.includes(k) ? <span class="str">'[REDACTED]'</span> : <span class="cl">sanitize</span>(v)
+    ])
+  );
+}</pre>
+</div>
+
+<!-- ════════════════════════════════════════════
+     07 · RESILIÊNCIA
+════════════════════════════════════════════ -->
+<div class="sec" id="sec-resiliencia">
+  <div class="sh"><span class="sn">07</span><h2 class="st">Resiliência</h2></div>
+  <p class="ss">APIs de conglomerado têm SLAs distintos e falham de forma independente. O MCP Server isola essas falhas para que uma API fora do ar não derrube toda a jornada.</p>
+
+  <h3 class="sub">Circuit Breaker — por API ID Axway</h3>
+  <pre class="code"><span class="cm">// Estado do circuit breaker por apiId — independente por API</span>
+<span class="kw">type</span> <span class="cl">BreakerState</span> = <span class="str">'CLOSED'</span> | <span class="str">'OPEN'</span> | <span class="str">'HALF_OPEN'</span>;
+
+<span class="cm">// Parâmetros recomendados para a POC VaaS:</span>
+{
+  <span class="str">'renavam-fipe-api'</span>:         { failureThreshold: <span class="num">5</span>, timeout: <span class="num">30_000</span>, halfOpenCalls: <span class="num">1</span> },
+  <span class="str">'tributos-api'</span>:             { failureThreshold: <span class="num">5</span>, timeout: <span class="num">30_000</span>, halfOpenCalls: <span class="num">1</span> },
+  <span class="str">'caas-credito-api'</span>:         { failureThreshold: <span class="num">3</span>, timeout: <span class="num">60_000</span>, halfOpenCalls: <span class="num">1</span> },
+  <span class="str">'bradesco-seguros-auto-api'</span>: { failureThreshold: <span class="num">3</span>, timeout: <span class="num">60_000</span>, halfOpenCalls: <span class="num">1</span> },
+  <span class="str">'pix-pagamento-api'</span>:        { failureThreshold: <span class="num">2</span>, timeout: <span class="num">120_000</span>, halfOpenCalls: <span class="num">1</span> }, <span class="cm">// mais conservador</span>
+  <span class="str">'arrecadacao-convenio-api'</span>:  { failureThreshold: <span class="num">2</span>, timeout: <span class="num">120_000</span>, halfOpenCalls: <span class="num">1</span> },
+  <span class="str">'vaas-gate-api'</span>:            { failureThreshold: <span class="num">3</span>, timeout: <span class="num">15_000</span>,  halfOpenCalls: <span class="num">1</span> },
+}</pre>
+
+  <h3 class="sub">O que o agente recebe quando uma API falha</h3>
+  <table class="t">
+    <tr><th>Cenário</th><th>O que o agente recebe</th><th>O que o agente pode fazer</th></tr>
+    <tr><td>Timeout no Axway</td><td><code>error: "API_TIMEOUT"</code> + API ID + tempo esperado</td><td>Tentar novamente após wait, ou informar o cliente</td></tr>
+    <tr><td>Circuit OPEN</td><td><code>error: "CIRCUIT_OPEN"</code> + API ID + quando reabre</td><td>Pular a etapa opcional ou usar alternativa</td></tr>
+    <tr><td>Gate bloqueou</td><td><code>error: "GATE_BLOCKED"</code> + motivo + limite</td><td>Parar a saga, informar o cliente, não tentar contornar</td></tr>
+    <tr><td>Duplicata (idempotência)</td><td>Resultado da execução anterior (sucesso)</td><td>Continuar normalmente — o resultado é o mesmo</td></tr>
+    <tr><td>PIX RJCT</td><td><code>status: "RJCT"</code> + motivo do Bacen</td><td>Chamar <code>executar_fallback_ted</code> se disponível</td></tr>
+  </table>
+</div>
+
+<!-- ════════════════════════════════════════════
+     08 · OBSERVABILIDADE
+════════════════════════════════════════════ -->
+<div class="sec" id="sec-obs">
+  <div class="sh"><span class="sn">08</span><h2 class="st">Observabilidade</h2></div>
+  <p class="ss">Três pilares — métricas, logs e traces — com o correlationId como fio condutor entre o agente, o MCP Server, o Axway e os backends.</p>
+
+  <h3 class="sub">Métricas CloudWatch — namespace VaaS/MCP</h3>
+  <table class="t">
+    <tr><th>Métrica</th><th>Dimensões</th><th>Alarm quando</th></tr>
+    <tr><td><code>vaas.mcp.tool.latency.p99</code></td><td>ToolName, ApiId</td><td>&gt; 8000ms (tolerância de UX do app)</td></tr>
+    <tr><td><code>vaas.mcp.tool.error.rate</code></td><td>ToolName, ErrorType</td><td>&gt; 5% em janela de 5 min</td></tr>
+    <tr><td><code>vaas.axway.token.refresh.count</code></td><td>—</td><td>&gt; 10/min (indica token expirando rápido demais)</td></tr>
+    <tr><td><code>vaas.circuit.state</code></td><td>ApiId</td><td>Qualquer ApiId em state OPEN</td></tr>
+    <tr><td><code>vaas.gate.blocked.count</code></td><td>TipoOperacao</td><td>Monitoramento — não é alarme, é indicador de negócio</td></tr>
+    <tr><td><code>vaas.idempotency.duplicate.count</code></td><td>ToolName</td><td>Pico acima do baseline (pode indicar retry em loop do agente)</td></tr>
+  </table>
+
+  <h3 class="sub">Logs estruturados — campos obrigatórios</h3>
+  <pre class="code"><span class="cm">// Todo log do MCP Server em JSON com estes campos obrigatórios:</span>
+{
+  <span class="str">"timestamp"</span>:      <span class="str">"ISO-8601"</span>,
+  <span class="str">"level"</span>:          <span class="str">"INFO | WARN | ERROR"</span>,
+  <span class="str">"service"</span>:        <span class="str">"vaas-mcp-server"</span>,
+  <span class="str">"version"</span>:        <span class="str">"1.0.0"</span>,
+  <span class="str">"traceId"</span>:        <span class="str">"X-Ray trace ID"</span>,
+  <span class="str">"correlationId"</span>:  <span class="str">"sagaId da transação VaaS"</span>,
+  <span class="str">"agentSessionId"</span>: <span class="str">"ID da sessão Bridge"</span>,
+  <span class="str">"toolName"</span>:       <span class="str">"nome da tool chamada"</span>,
+  <span class="str">"axwayApiId"</span>:     <span class="str">"ID da API no Axway"</span>,
+  <span class="str">"latencyMs"</span>:      <span class="num">142</span>,
+  <span class="str">"statusCode"</span>:     <span class="num">200</span>,
+  <span class="str">"middlewarePath"</span>: [<span class="str">"trace"</span>, <span class="str">"schema"</span>, <span class="str">"circuit"</span>, <span class="str">"gate"</span>, <span class="str">"axway"</span>, <span class="str">"enrich"</span>, <span class="str">"audit"</span>],
+  <span class="str">"msg"</span>:            <span class="str">"mensagem descritiva"</span>
+}</pre>
+</div>
+
+<!-- ════════════════════════════════════════════
+     09 · DEPLOYMENT
+════════════════════════════════════════════ -->
+<div class="sec" id="sec-deploy">
+  <div class="sh"><span class="sn">09</span><h2 class="st">Deployment</h2></div>
+  <p class="ss">ECS Fargate — consistente com o restante da stack VaaS. Container leve (Node.js Alpine), health check rígido e configuração de escalonamento conservadora para a POC.</p>
+
+  <pre class="code"><span class="cm"># Dockerfile — imagem mínima para Node.js MCP Server</span>
+<span class="kw">FROM</span> node:22-alpine <span class="kw">AS</span> build
+WORKDIR /app
+COPY package*.json ./
+<span class="kw">RUN</span> npm ci --only=production
+COPY . .
+<span class="kw">RUN</span> npm run build   <span class="cm"># tsc → dist/</span>
+
+<span class="kw">FROM</span> node:22-alpine
+WORKDIR /app
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
+<span class="kw">EXPOSE</span> 3000
+
+<span class="cm"># Health check via /health endpoint</span>
+<span class="kw">HEALTHCHECK</span> --interval=15s --timeout=3s --retries=3 \
+  CMD wget -qO- http://localhost:3000/health || exit 1
+
+<span class="kw">CMD</span> ["node", "dist/server.js"]</pre>
+
+  <pre class="code"><span class="cm"># ECS Task Definition — configuração mínima para POC</span>
+{
+  <span class="str">"family"</span>:      <span class="str">"vaas-mcp-server"</span>,
+  <span class="str">"cpu"</span>:         <span class="str">"512"</span>,    <span class="cm">// 0.5 vCPU — aumentar se latência for issue</span>
+  <span class="str">"memory"</span>:      <span class="str">"1024"</span>,   <span class="cm">// 1GB — Node.js não precisa de mais para a POC</span>
+  <span class="str">"networkMode"</span>: <span class="str">"awsvpc"</span>,
+  <span class="str">"requiresCompatibilities"</span>: [<span class="str">"FARGATE"</span>],
+
+  <span class="str">"taskRoleArn"</span>: <span class="str">"arn:aws:iam::...:role/vaas-mcp-server-task-role"</span>,
+  <span class="cm">// Permissões: dynamodb:PutItem + GetItem (idempotência)</span>
+  <span class="cm">//             secretsmanager:GetSecretValue (credenciais Axway)</span>
+  <span class="cm">//             cloudwatch:PutMetricData + xray:PutTraceSegments</span>
+
+  <span class="str">"containerDefinitions"</span>: [{
+    <span class="str">"name"</span>:  <span class="str">"vaas-mcp-server"</span>,
+    <span class="str">"image"</span>: <span class="str">"${ECR_URI}/vaas-mcp-server:${VERSION}"</span>,
+    <span class="str">"portMappings"</span>: [{ <span class="str">"containerPort"</span>: <span class="num">3000</span> }],
+    <span class="str">"environment"</span>: [
+      { <span class="str">"name"</span>: <span class="str">"AXWAY_BASE_URL"</span>,   <span class="str">"value"</span>: <span class="str">"https://api-hml.bradesco.com.br"</span> },
+      { <span class="str">"name"</span>: <span class="str">"AWS_REGION"</span>,       <span class="str">"value"</span>: <span class="str">"sa-east-1"</span> },
+      { <span class="str">"name"</span>: <span class="str">"ENVIRONMENT"</span>,      <span class="str">"value"</span>: <span class="str">"hml"</span> }
+    ],
+    <span class="str">"secrets"</span>: [  <span class="cm">// vem do Secrets Manager — não aparece em env</span>
+      { <span class="str">"name"</span>: <span class="str">"AXWAY_CLIENT_ID"</span>,     <span class="str">"valueFrom"</span>: <span class="str">"arn:aws:secretsmanager:...:vaas/mcp/axway-client-id"</span> },
+      { <span class="str">"name"</span>: <span class="str">"AXWAY_CLIENT_SECRET"</span>, <span class="str">"valueFrom"</span>: <span class="str">"arn:aws:secretsmanager:...:vaas/mcp/axway-client-secret"</span> }
+    ]
+  }]
+}</pre>
+
+  <div class="callout ok"><b>Para a POC:</b> uma única task ECS é suficiente. O MCP Server é stateless — o circuit breaker e o token cache ficam em memória por task. Se duas tasks rodarem em paralelo, cada uma tem seu próprio estado de circuit breaker. Para escala futura, mover o estado do circuit breaker para ElastiCache Redis.</div>
+</div>
+
+<!-- ════════════════════════════════════════════
+     10 · ADRs
+════════════════════════════════════════════ -->
+<div class="sec" id="sec-adrs">
+  <div class="sh"><span class="sn">10</span><h2 class="st">Architecture Decision Records</h2></div>
+  <p class="ss">Decisões tomadas com alternativas consideradas e raciocínio explícito.</p>
+
+  <div class="adr">
+    <div class="adr-head">
+      <div><div class="adr-id">MCP-ADR-001</div><div class="adr-title">Runtime: TypeScript/Node.js em vez de Java Spring Boot</div></div>
+      <span class="adr-status" style="background:var(--ok-g);color:var(--ok);">Aprovado</span>
+    </div>
+    <div class="adr-row"><span class="adr-label">Contexto:</span><span class="adr-val">O stack Java Spring Boot já existe para os domain services. O MCP Server é um componente novo — thin proxy, sem lógica de domínio.</span></div>
+    <div class="adr-row"><span class="adr-label">Decisão:</span><span class="adr-val">TypeScript com o SDK oficial <code>@modelcontextprotocol/sdk</code>. O SDK MCP é TypeScript-first — a implementação Java é community-maintained e menos madura.</span></div>
+    <div class="adr-row"><span class="adr-label">Alternativas:</span><span class="adr-val">Java Spring Boot (SDK menos maduro, cold start mais lento para um proxy thin) · Python (também tem SDK oficial mas menos familiaridade no time)</span></div>
+    <div class="adr-row"><span class="adr-label">Consequência:</span><span class="adr-val">O time precisa ter desenvolvedores confortáveis com TypeScript para manutenção. A Stack Java continua nos domain services — o MCP Server é um componente complementar.</span></div>
+  </div>
+
+  <div class="adr">
+    <div class="adr-head">
+      <div><div class="adr-id">MCP-ADR-002</div><div class="adr-title">Tools manuais para a POC, não auto-descoberta do Axway Catalog</div></div>
+      <span class="adr-status" style="background:var(--ok-g);color:var(--ok);">Aprovado</span>
+    </div>
+    <div class="adr-row"><span class="adr-label">Contexto:</span><span class="adr-val">O Axway tem 4.400+ APIs. Poderia se auto-descobrir tools do catálogo via API do Axway Manager.</span></div>
+    <div class="adr-row"><span class="adr-label">Decisão:</span><span class="adr-val">8 tools definidas manualmente para a POC. Auto-descoberta é a visão de longo prazo — implementar na Fase 2.</span></div>
+    <div class="adr-row"><span class="adr-label">Alternativas:</span><span class="adr-val">Auto-descoberta agora: risco de expor APIs não adequadas ao agente, schema de input não otimizado para o agente, enricher genérico demais.</span></div>
+    <div class="adr-row"><span class="adr-label">Consequência:</span><span class="adr-val">Cada nova tool requer um PR. Para a escala futura (centenas de tools), a auto-descoberta precisa ser implementada com scoping rigoroso.</span></div>
+  </div>
+
+  <div class="adr">
+    <div class="adr-head">
+      <div><div class="adr-id">MCP-ADR-003</div><div class="adr-title">Gate de Política no MCP Server, não só no Domain Service</div></div>
+      <span class="adr-status" style="background:var(--ok-g);color:var(--ok);">Aprovado</span>
+    </div>
+    <div class="adr-row"><span class="adr-label">Contexto:</span><span class="adr-val">O Gate de Política já existe no vaas-pagamento-service (Spring Boot). Deveria ser reutilizado ou reimplementado?</span></div>
+    <div class="adr-row"><span class="adr-label">Decisão:</span><span class="adr-val">O MCP Server chama o Gate via tool <code>verificar_gate_politica</code> (que é também ela mesma uma tool exposta ao agente). A fonte da verdade é única — o domain service Java. O MCP Server não reimplementa.</span></div>
+    <div class="adr-row"><span class="adr-label">Consequência:</span><span class="adr-val">Adiciona uma chamada de rede extra antes de cada write. Aceitável dado que o Gate retorna em &lt;1s e o benefício de ter uma única fonte de verdade para a política compensa.</span></div>
+  </div>
+
+  <div class="adr">
+    <div class="adr-head">
+      <div><div class="adr-id">MCP-ADR-004</div><div class="adr-title">Transport HTTP/SSE — não stdio, não WebSocket</div></div>
+      <span class="adr-status" style="background:var(--ok-g);color:var(--ok);">Aprovado</span>
+    </div>
+    <div class="adr-row"><span class="adr-label">Contexto:</span><span class="adr-val">MCP suporta três transports: stdio (processo local), HTTP/SSE, WebSocket.</span></div>
+    <div class="adr-row"><span class="adr-label">Decisão:</span><span class="adr-val">HTTP com Server-Sent Events (SSE) via <code>StreamableHTTPServerTransport</code>. Padrão recomendado para servidores remotos — compatível com Bedrock AgentCore e Bridge.</span></div>
+    <div class="adr-row"><span class="adr-label">Consequência:</span><span class="adr-val">O servidor expõe porta 3000. O ALB termina TLS e faz proxy para a task ECS. A Bridge/AgentCore conecta via HTTPS — o SSE fica sobre o mesmo canal.</span></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<div class="footer">Bradesco · Open Platform — APIs, BaaS & Embedded Finance · VaaS MCP Server · Especificação Técnica · Julho/2026</div>
+
+<script>
+function show(id, btn){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('a'));
+  document.querySelectorAll('.nt').forEach(b=>b.classList.remove('a'));
+  document.getElementById('sec-'+id).classList.add('a');
+  btn.classList.add('a');
+}
+</script>
+</body>
+</html>

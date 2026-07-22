@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Banking MCP Server · Multi-Modelo · Claude · GPT · Gemini · Bradesco</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+  :root{
+    --bg:#080b10;--s1:#0f1318;--s2:#151c26;--s3:#1c2535;
+    --b1:rgba(255,255,255,.07);--b2:rgba(255,255,255,.04);
+    --brad:#CC092F;--brad-g:rgba(204,9,47,.1);
+    --ok:#2dd4a8;--ok-g:rgba(45,212,168,.1);
+    --warn:#f59e0b;--warn-g:rgba(245,158,11,.1);
+    --risk:#ef4444;--risk-g:rgba(239,68,68,.1);
+    --blue:#4ea8de;--blue-g:rgba(78,168,222,.1);
+    --violet:#9b87f5;--violet-g:rgba(155,135,245,.1);
+    --pix:#32d583;--pix-g:rgba(50,213,131,.1);
+    --orange:#ff7a45;--orange-g:rgba(255,122,69,.1);
+    --gpt:#10a37f;--gpt-g:rgba(16,163,127,.1);
+    --gem:#4285f4;--gem-g:rgba(66,133,244,.1);
+    --claude:#cc785c;--claude-g:rgba(204,120,92,.1);
+    --text:#e4e9f4;--muted:#6b7994;--muted2:#3a4557;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;}
+
+  .hero{padding:52px 48px 40px;border-bottom:1px solid var(--b1);position:relative;overflow:hidden;}
+  .hero::before{content:'';position:absolute;top:-180px;right:-60px;width:540px;height:540px;background:radial-gradient(circle,rgba(16,163,127,.07) 0%,transparent 60%);pointer-events:none;}
+  .hero-tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gpt);margin-bottom:14px;}
+  .hero h1{font-family:'Syne',sans-serif;font-size:clamp(22px,3.2vw,42px);font-weight:800;line-height:1.1;max-width:820px;margin-bottom:12px;}
+  .hero h1 em{font-style:normal;}
+  .hero-sub{font-size:14px;color:var(--muted);max-width:740px;line-height:1.7;font-weight:300;}
+  .model-pills{display:flex;gap:10px;margin-top:22px;flex-wrap:wrap;}
+  .mpill{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;padding:7px 14px;border-radius:22px;border:1.5px solid;}
+  .mpill-claude{border-color:var(--claude);color:var(--claude);background:var(--claude-g);}
+  .mpill-gpt{border-color:var(--gpt);color:var(--gpt);background:var(--gpt-g);}
+  .mpill-gem{border-color:var(--gem);color:var(--gem);background:var(--gem-g);}
+  .mpill-axway{border-color:var(--orange);color:var(--orange);background:var(--orange-g);}
+
+  .nav{display:flex;gap:2px;padding:0 48px;border-bottom:1px solid var(--b1);background:var(--bg);position:sticky;top:0;z-index:20;overflow-x:auto;}
+  .nt{background:none;border:none;color:var(--muted);font-family:'DM Sans';font-size:12px;font-weight:500;padding:13px 12px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;}
+  .nt:hover{color:var(--text);}
+  .nt.a{color:var(--text);border-bottom-color:var(--gpt);}
+
+  .main{max-width:1160px;margin:0 auto;padding:38px 48px 120px;}
+  .sec{display:none;animation:fi .2s ease;}
+  .sec.a{display:block;}
+  @keyframes fi{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .sh{display:flex;align-items:baseline;gap:12px;margin-bottom:5px;}
+  .sn{font-family:'DM Mono',monospace;font-size:11px;color:var(--gpt);}
+  .st{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;}
+  .ss{color:var(--muted);font-size:13.5px;line-height:1.65;max-width:760px;margin-bottom:28px;}
+  h3.sub{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin:34px 0 12px;}
+  p.ld{font-size:13.5px;line-height:1.75;color:#c5ccd8;margin-bottom:12px;max-width:780px;}
+  p.ld strong{color:var(--text);}
+
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:14px;}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;margin-bottom:14px;}
+  @media(max-width:900px){.g2,.g3{grid-template-columns:1fr;}}
+
+  .card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:17px;}
+  .card-t{font-family:'Syne',sans-serif;font-size:13.5px;font-weight:700;margin-bottom:7px;}
+  .card-b{font-size:12.5px;color:var(--muted);line-height:1.6;}
+  .card-b b{color:#c5ccd8;}
+
+  .tag{display:inline-flex;align-items:center;font-size:9.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:2px 9px;border-radius:12px;margin-bottom:8px;}
+  .tok{background:var(--ok-g);color:var(--ok);}
+  .tbl{background:var(--blue-g);color:var(--blue);}
+  .tv{background:var(--violet-g);color:var(--violet);}
+  .tw{background:var(--warn-g);color:var(--warn);}
+  .tr{background:var(--risk-g);color:var(--risk);}
+  .tg{background:var(--gpt-g);color:var(--gpt);}
+  .tgm{background:var(--gem-g);color:var(--gem);}
+  .tcl{background:var(--claude-g);color:var(--claude);}
+  .to{background:var(--orange-g);color:var(--orange);}
+  .tb2{background:var(--brad-g);color:var(--brad);}
+
+  .callout{border-left:3px solid var(--gpt);background:var(--s1);border-radius:0 10px 10px 0;padding:14px 18px;font-size:13px;color:#c5ccd8;line-height:1.65;margin:16px 0;}
+  .callout b{color:var(--text);}
+  .callout.risk{border-left-color:var(--risk);}
+  .callout.warn{border-left-color:var(--warn);}
+  .callout.ok{border-left-color:var(--ok);}
+  .callout.violet{border-left-color:var(--violet);}
+
+  pre.code{font-family:'DM Mono',monospace;font-size:11.5px;background:var(--s1);border:1px solid var(--b1);border-radius:10px;padding:20px;line-height:1.8;overflow-x:auto;white-space:pre;margin:14px 0;}
+  pre.code .kw{color:var(--blue);}
+  pre.code .str{color:var(--ok);}
+  pre.code .cm{color:var(--muted2);}
+  pre.code .cl{color:var(--orange);}
+  pre.code .dc{color:var(--violet);}
+  pre.code .gpt{color:var(--gpt);}
+  pre.code .gem{color:var(--gem);}
+  pre.code .mcp{color:var(--claude);}
+  pre.code .num{color:var(--pix);}
+  code{font-family:'DM Mono',monospace;font-size:11.5px;background:var(--s2);padding:2px 6px;border-radius:4px;color:var(--ok);}
+
+  table.t{width:100%;border-collapse:collapse;margin:12px 0 22px;font-size:12.5px;}
+  table.t th{text-align:left;font-family:'DM Mono';font-size:9.5px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);padding:9px 12px;border-bottom:1px solid var(--b1);}
+  table.t td{padding:10px 12px;border-bottom:1px solid var(--b2);color:#c5ccd8;vertical-align:top;}
+  table.t tr:last-child td{border-bottom:none;}
+
+  /* ARCH LAYERS */
+  .layers{display:flex;flex-direction:column;gap:3px;margin:18px 0 26px;}
+  .layer{border-radius:10px;padding:12px 17px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;border:1px solid var(--b1);}
+  .layer-n{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;}
+  .layer-n small{display:block;font-family:'DM Mono';font-weight:400;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
+  .layer-pills{display:flex;gap:7px;flex-wrap:wrap;}
+  .pill{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:3px 10px;font-size:11px;color:#c5ccd8;}
+  .larr{color:var(--muted2);text-align:center;padding:2px 0;font-size:11px;}
+
+  /* MODEL COLUMNS */
+  .model-cols{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px;margin:18px 0;}
+  .model-col{border-radius:12px;padding:16px;border:1.5px solid;}
+  .model-col.claude{border-color:rgba(204,120,92,.35);background:rgba(204,120,92,.05);}
+  .model-col.gpt{border-color:rgba(16,163,127,.35);background:rgba(16,163,127,.05);}
+  .model-col.gem{border-color:rgba(66,133,244,.35);background:rgba(66,133,244,.05);}
+  .model-col-head{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .model-dot{width:10px;height:10px;border-radius:50%;}
+  .model-col-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+
+  /* TOOL CARDS */
+  .tool-card{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:18px;margin-bottom:12px;}
+  .tool-name{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--gpt);margin-bottom:4px;}
+  .tool-desc{font-size:12.5px;color:var(--muted);margin-bottom:12px;line-height:1.6;}
+  .tool-schema{background:var(--s2);border-radius:8px;padding:13px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.7;overflow-x:auto;}
+  .tool-axway{margin-top:10px;background:rgba(78,168,222,.05);border:1px solid rgba(78,168,222,.2);border-radius:8px;padding:10px 13px;font-size:11.5px;}
+  .tool-axway-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--blue);margin-bottom:4px;}
+  .tool-auth{margin-top:8px;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px 13px;font-size:11.5px;color:#fca5a5;}
+  .tool-auth-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--risk);margin-bottom:4px;}
+
+  /* COMPARE TABLE */
+  .cmp-head{display:grid;grid-template-columns:200px 1fr 1fr 1fr;gap:0;margin-bottom:3px;}
+  .cmp-row{display:grid;grid-template-columns:200px 1fr 1fr 1fr;gap:0;border-bottom:1px solid var(--b2);padding:10px 0;}
+  .cmp-row:last-child{border-bottom:none;}
+  .cmp-label{font-size:12px;color:var(--muted);padding-right:12px;}
+  .cmp-cell{font-size:11.5px;padding:0 8px;color:#c5ccd8;font-family:'DM Mono',monospace;}
+
+  /* FLOW STEPS */
+  .flow{display:flex;flex-direction:column;gap:8px;margin:16px 0;}
+  .fstep{background:var(--s1);border:1px solid var(--b1);border-left:3px solid;border-radius:0 9px 9px 0;padding:11px 15px;display:flex;gap:12px;}
+  .fnum{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;min-width:22px;margin-top:2px;}
+  .fbody b{display:block;font-size:13px;font-family:'Syne',sans-serif;margin-bottom:3px;}
+  .fbody span{font-size:12px;color:var(--muted);}
+
+  /* ADR */
+  .adr{background:var(--s1);border:1px solid var(--b1);border-radius:12px;padding:17px;margin-bottom:12px;}
+  .adr-id{font-family:'DM Mono',monospace;font-size:11px;color:var(--gpt);margin-bottom:4px;}
+  .adr-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:10px;}
+  .adr-row{display:flex;gap:10px;font-size:12.5px;margin-bottom:6px;}
+  .adr-label{color:var(--muted);min-width:80px;flex-shrink:0;}
+  .adr-val{color:#c5ccd8;line-height:1.55;flex:1;}
+
+  .footer{text-align:center;padding:28px 0 14px;font-size:11px;color:var(--muted2);border-top:1px solid var(--b1);margin-top:48px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-tag">Especificação Técnica · Banking MCP Server · Multi-Modelo</div>
+  <h1>Dados bancários pessoais<br>para <em style="color:var(--claude)">Claude</em>, <em style="color:var(--gpt)">GPT</em> e <em style="color:var(--gem)">Gemini</em><br><em style="color:var(--orange)">via Axway</em></h1>
+  <p class="hero-sub">A mesma estrutura do VaaS MCP Server — com duas mudanças críticas: autenticação do usuário (OAuth2 Authorization Code + PKCE em vez de client_credentials) e uma camada de tradução de protocolo que serve os três modelos com o mesmo executor central.</p>
+  <div class="model-pills">
+    <div class="mpill mpill-claude">◆ Claude (MCP nativo)</div>
+    <div class="mpill mpill-gpt">● GPT (Function Calling)</div>
+    <div class="mpill mpill-gem">◈ Gemini (Function Declarations)</div>
+    <div class="mpill mpill-axway">⚡ Axway · APIs bancárias</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <button class="nt a" onclick="show('diferenca',this)">O que muda</button>
+  <button class="nt" onclick="show('arquitetura',this)">Arquitetura</button>
+  <button class="nt" onclick="show('auth',this)">Auth do Usuário</button>
+  <button class="nt" onclick="show('protocolo',this)">Tradução de Protocolo</button>
+  <button class="nt" onclick="show('tools',this)">Catálogo de Tools</button>
+  <button class="nt" onclick="show('lgpd',this)">LGPD &amp; Sigilo</button>
+  <button class="nt" onclick="show('deploy',this)">Deployment</button>
+  <button class="nt" onclick="show('adrs',this)">ADRs</button>
+</nav>
+
+<div class="main">
+
+<!-- ══════════════════════════════════════════
+     O QUE MUDA
+══════════════════════════════════════════ -->
+<div class="sec a" id="sec-diferenca">
+  <div class="sh"><span class="sn">01</span><h2 class="st">O que muda — e o que reaproveita</h2></div>
+  <p class="ss">A resposta direta: a estrutura reaproveita. Mas dois pontos mudam de forma fundamental e precisam ser resolvidos antes de qualquer implementação.</p>
+
+  <div class="g2">
+    <div class="card" style="border-color:rgba(239,68,68,.25);">
+      <span class="tag tr">Muda — crítico</span>
+      <div class="card-t">Modelo de autenticação</div>
+      <div class="card-b">
+        O VaaS usa <code>client_credentials</code> — identidade de <b>serviço</b>. Saldo, extrato e fatura são dados <b>pessoais do usuário</b> — exigem que o próprio usuário autorize o acesso.<br><br>
+        Isso muda o fluxo OAuth2 para <b>Authorization Code + PKCE</b>. O token que chega ao Axway carrega o <code>sub</code> (identidade) do usuário — não do serviço.<br><br>
+        <b>Sem isso:</b> o Axway entregaria dados de um cliente para outro. Isso é uma brecha de sigilo bancário — não um bug de software.
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(239,68,68,.25);">
+      <span class="tag tr">Muda — técnico</span>
+      <div class="card-t">Protocolo de comunicação</div>
+      <div class="card-b">
+        Claude fala <b>MCP</b> (protocolo nativo Anthropic). GPT fala <b>Function Calling</b> (formato OpenAI). Gemini fala <b>Function Declarations</b> (formato Google).<br><br>
+        São três formatos diferentes para a mesma intenção — "execute esta função com estes parâmetros". É preciso uma <b>camada de tradução de protocolo</b> que converte cada formato para o executor central compartilhado.<br><br>
+        <b>Sem isso:</b> seria necessário implementar e manter três servidores separados com a mesma lógica.
+      </div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card" style="border-color:rgba(45,212,168,.2);">
+      <span class="tag tok">Reaproveita — sem alteração</span>
+      <div class="card-t">Estrutura do executor</div>
+      <div class="card-b">
+        <code>ToolDefinition</code>, <code>AxwayMapping</code>, <code>MiddlewarePipeline</code>, <code>AxwayClient</code>, <code>CircuitBreaker</code>, <code>AuditMiddleware</code> — idênticos ao VaaS MCP Server.<br><br>
+        Deployment (ECS Fargate), observabilidade (CloudWatch + X-Ray), secrets (Secrets Manager) — idênticos.
+      </div>
+    </div>
+    <div class="card" style="border-color:rgba(45,212,168,.2);">
+      <span class="tag tok">Reaproveita — com adaptação</span>
+      <div class="card-t">Gate e Idempotência</div>
+      <div class="card-b">
+        Tools de consulta (saldo, extrato) são leitura — não precisam de Gate de Política.<br><br>
+        Idempotência continua relevante para <b>consultas em cache</b>: a mesma pergunta "qual meu saldo?" não deve gerar duas chamadas Axway em 30 segundos. Adaptar o <code>IdempotencyMiddleware</code> para suportar TTL curto de cache de leitura.
+      </div>
+    </div>
+  </div>
+
+  <table class="t">
+    <tr><th>Dimensão</th><th>VaaS MCP Server</th><th>Banking MCP Server</th></tr>
+    <tr><td><b>Auth de entrada (quem chama)</b></td><td>Token da Bridge/agente</td><td>Token da Bridge + token do usuário (delegado)</td></tr>
+    <tr><td><b>Auth de saída (Axway)</b></td><td>client_credentials (serviço)</td><td>Authorization Code PKCE (usuário)</td></tr>
+    <tr><td><b>Modelos suportados</b></td><td>Claude / Bridge</td><td>Claude + GPT + Gemini</td></tr>
+    <tr><td><b>Tipo de dado</b></td><td>Operacional (pagamentos, veículos)</td><td>Pessoal (saldo, extrato, fatura, apólice)</td></tr>
+    <tr><td><b>Gate de Política</b></td><td>Obrigatório para writes</td><td>Não aplicável (só leitura nas 4 tools)</td></tr>
+    <tr><td><b>Idempotência</b></td><td>DynamoDB para dedup de pagamentos</td><td>Cache de leitura (TTL curto)</td></tr>
+    <tr><td><b>LGPD</b></td><td>Dados de veículo + negócio</td><td>Dados pessoais financeiros — maior restrição</td></tr>
+    <tr><td><b>Serviço separado?</b></td><td>vaas-mcp-server</td><td>bradesco-banking-mcp-server (novo módulo)</td></tr>
+  </table>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ARQUITETURA
+══════════════════════════════════════════ -->
+<div class="sec" id="sec-arquitetura">
+  <div class="sh"><span class="sn">02</span><h2 class="st">Arquitetura — Visão Completa</h2></div>
+  <p class="ss">Três modelos de IA, três protocolos de entrada, um executor central, um gateway Axway, quatro APIs bancárias.</p>
+
+  <div class="layers">
+    <div class="layer" style="background:rgba(204,120,92,.05);border-color:rgba(204,120,92,.25);">
+      <div class="layer-n"><small>Modelos de IA</small>Quem chama as tools</div>
+      <div class="layer-pills">
+        <span class="pill" style="border-color:var(--claude);color:var(--claude);">◆ Claude (Bridge) · MCP Protocol</span>
+        <span class="pill" style="border-color:var(--gpt);color:var(--gpt);">● GPT-4o · Function Calling</span>
+        <span class="pill" style="border-color:var(--gem);color:var(--gem);">◈ Gemini 1.5 Pro · Function Declarations</span>
+      </div>
+    </div>
+    <div class="larr">↓ HTTPS — cada modelo fala seu protocolo nativo</div>
+
+    <div class="layer" style="background:rgba(16,163,127,.05);border-color:rgba(16,163,127,.25);">
+      <div class="layer-n"><small>Camada de tradução — este servidor</small>bradesco-banking-mcp-server</div>
+      <div class="layer-pills">
+        <span class="pill" style="border-color:var(--claude);color:var(--claude);">/mcp (SSE) → Claude</span>
+        <span class="pill" style="border-color:var(--gpt);color:var(--gpt);">/openai → GPT</span>
+        <span class="pill" style="border-color:var(--gem);color:var(--gem);">/gemini → Gemini</span>
+        <span class="pill">→ Core Executor (compartilhado)</span>
+        <span class="pill">Auth Middleware (user token)</span>
+        <span class="pill">Cache Middleware (TTL)</span>
+        <span class="pill">LGPD Sanitizer</span>
+        <span class="pill">Audit Logger</span>
+      </div>
+    </div>
+    <div class="larr">↓ HTTPS + Bearer Token do usuário (OAuth2 Authorization Code) — user-scoped</div>
+
+    <div class="layer" style="background:rgba(255,122,69,.05);border-color:rgba(255,122,69,.25);">
+      <div class="layer-n"><small>Gateway existente</small>Axway API Gateway</div>
+      <div class="layer-pills">
+        <span class="pill">Valida token do usuário</span>
+        <span class="pill">Aplica scopes por API</span>
+        <span class="pill">Rate limiting por cliente</span>
+        <span class="pill">Audit log Axway</span>
+      </div>
+    </div>
+    <div class="larr">↓ Backends do conglomerado Bradesco</div>
+
+    <div class="layer" style="background:rgba(204,9,47,.04);border-color:rgba(204,9,47,.2);">
+      <div class="layer-n"><small>APIs bancárias</small>Dados pessoais do cliente</div>
+      <div class="layer-pills">
+        <span class="pill">Core Bancário · Saldo e Extrato</span>
+        <span class="pill">Cartão · Fatura</span>
+        <span class="pill">Bradesco Seguros · Apólice</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout ok"><b>O insight fundamental:</b> os três modelos de IA recebem as mesmas tools com os mesmos schemas — o que muda é apenas o envelope do protocolo. Um Gemini perguntando "qual meu saldo?" e um GPT perguntando "what's my balance?" terminam chamando o mesmo <code>consultar_saldo</code> no mesmo executor, que chama o mesmo endpoint Axway com o token do mesmo usuário.</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     AUTH DO USUÁRIO
+══════════════════════════════════════════ -->
+<div class="sec" id="sec-auth">
+  <div class="sh"><span class="sn">03</span><h2 class="st">Autenticação do Usuário — A Mudança Crítica</h2></div>
+  <p class="ss">Este é o ponto mais importante da especificação. Dados bancários pessoais exigem que o usuário consinta e que o token carregue a identidade dele — não do serviço.</p>
+
+  <div class="callout risk"><b>Por que não usar client_credentials aqui:</b> com client_credentials, o MCP Server tem um token de serviço que pode acessar qualquer conta bancária do Axway que o serviço tenha permissão. Uma falha de lógica no mapeamento de usuário expõe dados de outros clientes. Com Authorization Code, o token tem o <code>sub</code> do usuário embutido — o Axway rejeita na camada de gateway qualquer tentativa de acessar dados de outro usuário, independente do que o serviço solicitar.</div>
+
+  <h3 class="sub">Fluxo completo — do app ao dado bancário</h3>
+  <div class="flow">
+    <div class="fstep" style="border-left-color:var(--violet);">
+      <span class="fnum" style="color:var(--violet);">1</span>
+      <div class="fbody"><b>Usuário já está autenticado no app Bradesco</b><span>O app Bradesco (mobile ou web) já completou o Authorization Code + PKCE flow com o servidor de identidade Bradesco (CIAM — Azure Entra ID ou Keycloak). O app tem um <code>access_token</code> com scopes do usuário.</span></div>
+    </div>
+    <div class="fstep" style="border-left-color:var(--gpt);">
+      <span class="fnum" style="color:var(--gpt);">2</span>
+      <div class="fbody"><b>App passa o token do usuário para o agente de IA</b><span>Quando o usuário interage com o agente (Claude, GPT ou Gemini) dentro do app, o app inclui o token de usuário no contexto da requisição para o agente. O agente não conhece o token diretamente — ele chega ao Banking MCP Server via cabeçalho de autorização delegada.</span></div>
+    </div>
+    <div class="fstep" style="border-left-color:var(--orange);">
+      <span class="fnum" style="color:var(--orange);">3</span>
+      <div class="fbody"><b>Banking MCP Server valida o token de usuário</b><span>Antes de qualquer tool call, o <code>UserAuthMiddleware</code> valida o JWT do usuário via JWKS do CIAM Bradesco. Extrai o <code>sub</code> (userId), os scopes disponíveis e o <code>exp</code> (expiração). Rejeita com <code>401</code> se token inválido ou expirado.</span></div>
+    </div>
+    <div class="fstep" style="border-left-color:var(--blue);">
+      <span class="fnum" style="color:var(--blue);">4</span>
+      <div class="fbody"><b>Verifica se o scope cobre a tool solicitada</b><span>Cada tool requer um scope específico. <code>consultar_saldo</code> exige <code>conta:saldo:read</code>. Se o token do usuário não tem esse scope (usuário não consentiu), retorna <code>403</code> com mensagem clara ao agente.</span></div>
+    </div>
+    <div class="fstep" style="border-left-color:var(--ok);">
+      <span class="fnum" style="color:var(--ok);">5</span>
+      <div class="fbody"><b>Chama o Axway com o token do usuário (não do serviço)</b><span>O <code>AxwayClient</code> usa o <b>token do usuário</b> como Bearer — não o token de serviço do VaaS. O Axway valida que o <code>sub</code> do token corresponde ao cliente da conta solicitada. Blindagem nativa no gateway.</span></div>
+    </div>
+    <div class="fstep" style="border-left-color:var(--warn);">
+      <span class="fnum" style="color:var(--warn);">6</span>
+      <div class="fbody"><b>Token de serviço para auditoria complementar</b><span>O Banking MCP Server ainda usa suas próprias credenciais de serviço para registrar a chamada no audit log — mas elas nunca chegam ao Axway como auth de acesso a dados. Separação de concerns: serviço autentica para logar, usuário autentica para acessar.</span></div>
+    </div>
+  </div>
+
+  <h3 class="sub">Implementação do UserAuthMiddleware</h3>
+  <pre class="code"><span class="cm">// src/middleware/user-auth.ts</span>
+<span class="kw">import</span> { createRemoteJWKSet, jwtVerify } <span class="kw">from</span> <span class="str">'jose'</span>;
+
+<span class="kw">const</span> JWKS = createRemoteJWKSet(
+  <span class="kw">new</span> URL(process.env.<span class="dc">CIAM_JWKS_URL</span>) <span class="cm">// ex: https://login.bradesco.com.br/.well-known/jwks.json</span>
+);
+
+<span class="kw">export async function</span> <span class="cl">validateUserToken</span>(
+  bearerToken: <span class="kw">string</span>,
+  requiredScope: <span class="kw">string</span>
+): <span class="kw">Promise</span>&lt;<span class="cl">UserContext</span>&gt; {
+
+  <span class="cm">// 1. Verifica assinatura, issuer e expiração</span>
+  <span class="kw">const</span> { payload } = <span class="kw">await</span> jwtVerify(bearerToken, JWKS, {
+    issuer:   process.env.<span class="dc">CIAM_ISSUER</span>,   <span class="cm">// ex: https://login.bradesco.com.br</span>
+    audience: <span class="str">'bradesco-banking-mcp'</span>
+  });
+
+  <span class="cm">// 2. Verifica se o escopo necessário está presente</span>
+  <span class="kw">const</span> tokenScopes = (payload.scope <span class="kw">as string</span> || <span class="str">''</span>).split(<span class="str">' '</span>);
+  <span class="kw">if</span> (!tokenScopes.includes(requiredScope)) {
+    <span class="kw">throw new</span> <span class="cl">ScopeError</span>(<span class="str">`Token não possui o scope '${requiredScope}' necessário para esta consulta`</span>);
+  }
+
+  <span class="cm">// 3. Retorna contexto do usuário para uso no Axway call e auditoria</span>
+  <span class="kw">return</span> {
+    userId:    payload.sub!,            <span class="cm">// identidade do usuário — nunca exposta ao agente</span>
+    clienteId: payload.cliente_id <span class="kw">as string</span>, <span class="cm">// ID interno Bradesco</span>
+    scopes:    tokenScopes,
+    expiresAt: payload.exp! * <span class="num">1000</span>
+  };
+}</pre>
+</div>
+
+<!-- ══════════════════════════════════════════
+     TRADUÇÃO DE PROTOCOLO
+══════════════════════════════════════════ -->
+<div class="sec" id="sec-protocolo">
+  <div class="sh"><span class="sn">04</span><h2 class="st">Tradução de Protocolo — Um Executor, Três Entradas</h2></div>
+  <p class="ss">Cada modelo de IA usa um formato diferente para declarar e chamar tools. O servidor expõe três endpoints — um por modelo — que traduzem para o mesmo executor central.</p>
+
+  <div class="model-cols">
+    <div class="model-col claude">
+      <div class="model-col-head">
+        <div class="model-dot" style="background:var(--claude);"></div>
+        <div class="model-col-title" style="color:var(--claude);">Claude · MCP Nativo</div>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);line-height:1.7;">Endpoint: <code>/mcp</code> (SSE)<br>SDK: <code>@modelcontextprotocol/sdk</code><br>Protocolo: JSON-RPC 2.0<br><br>Claude entende MCP nativamente — sem adaptação de protocolo. O <code>StreamableHTTPServerTransport</code> já lida com o formato correto.</div>
+    </div>
+    <div class="model-col gpt">
+      <div class="model-col-head">
+        <div class="model-dot" style="background:var(--gpt);"></div>
+        <div class="model-col-title" style="color:var(--gpt);">GPT · Function Calling</div>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);line-height:1.7;">Endpoint: <code>/openai/tools</code> (REST)<br>SDK: <code>openai</code> npm package<br>Protocolo: OpenAI tools format<br><br>GPT declara tools como objetos <code>{ type: "function", function: {...} }</code> e chama via <code>tool_calls</code> na resposta do chat. O adaptador converte para o executor interno.</div>
+    </div>
+    <div class="model-col gem">
+      <div class="model-col-head">
+        <div class="model-dot" style="background:var(--gem);"></div>
+        <div class="model-col-title" style="color:var(--gem);">Gemini · Function Declarations</div>
+      </div>
+      <div style="font-size:11.5px;color:var(--muted);line-height:1.7;">Endpoint: <code>/gemini/tools</code> (REST)<br>SDK: <code>@google/generative-ai</code><br>Protocolo: Gemini FunctionDeclaration<br><br>Gemini usa <code>FunctionDeclaration</code> com schema de tipo <code>OBJECT</code> diferente do JSON Schema padrão. O adaptador converte o schema e as chamadas.</div>
+    </div>
+  </div>
+
+  <h3 class="sub">O mesmo schema de tool em três formatos</h3>
+  <pre class="code"><span class="cm">// FONTE DA VERDADE — ToolDefinition interno (agnóstico de modelo)</span>
+<span class="kw">const</span> consultarSaldoDef: <span class="cl">ToolDefinition</span> = {
+  name:        <span class="str">'consultar_saldo'</span>,
+  description: <span class="str">'Retorna o saldo disponível e bloqueado da conta corrente do usuário autenticado.'</span>,
+  inputSchema: {
+    type: <span class="str">'object'</span>,
+    properties: {
+      tipo_conta: { type: <span class="str">'string'</span>, enum: [<span class="str">'corrente'</span>, <span class="str">'poupanca'</span>], description: <span class="str">'Tipo de conta'</span> }
+    }
+  },
+  requiredScope: <span class="str">'conta:saldo:read'</span>,
+  allowsWrite:   <span class="kw">false</span>,
+  idempotent:    <span class="kw">true</span>,   <span class="cm">// cache 30s — não bate no Axway na mesma pergunta</span>
+  cacheTtlMs:    <span class="num">30_000</span>,
+  axwayMap: { method: <span class="str">'GET'</span>, path: <span class="str">'/contas/v1/saldo'</span>, apiId: <span class="str">'core-bancario-api'</span>, timeout: <span class="num">3000</span> }
+};
+
+<span class="cm">─────────────────────────────────────────────────────────────────</span>
+
+<span class="cm">// 🟠 FORMATO CLAUDE — MCP Tool (gerado automaticamente pelo ToolRegistry)</span>
+{
+  name:        <span class="mcp">"consultar_saldo"</span>,
+  description: <span class="mcp">"Retorna o saldo disponível e bloqueado..."</span>,
+  inputSchema: { type: <span class="mcp">"object"</span>, properties: { tipo_conta: ... } }
+}
+
+<span class="cm">─────────────────────────────────────────────────────────────────</span>
+
+<span class="cm">// 🟢 FORMATO GPT — OpenAI Function (gerado pelo OpenAIAdapter)</span>
+{
+  type: <span class="gpt">"function"</span>,
+  <span class="gpt">function</span>: {
+    name:        <span class="gpt">"consultar_saldo"</span>,
+    description: <span class="gpt">"Retorna o saldo disponível e bloqueado..."</span>,
+    parameters:  { type: <span class="gpt">"object"</span>, properties: { tipo_conta: { type: <span class="gpt">"string"</span>, enum: [...] } } }
+  }
+}
+<span class="cm">// GPT responde com tool_calls → o adaptador extrai name + arguments e chama o executor</span>
+
+<span class="cm">─────────────────────────────────────────────────────────────────</span>
+
+<span class="cm">// 🔵 FORMATO GEMINI — FunctionDeclaration (gerado pelo GeminiAdapter)</span>
+{
+  name:        <span class="gem">"consultar_saldo"</span>,
+  description: <span class="gem">"Retorna o saldo disponível e bloqueado..."</span>,
+  parameters: {
+    type: <span class="gem">"OBJECT"</span>,   <span class="cm">// Gemini usa UPPERCASE para tipos</span>
+    properties: { tipo_conta: { type: <span class="gem">"STRING"</span>, enum: [...] } }
+  }
+}
+<span class="cm">// Gemini responde com functionCall → o adaptador extrai e chama o executor</span></pre>
+
+  <h3 class="sub">Implementação da camada de adaptadores</h3>
+  <pre class="code"><span class="cm">// src/adapters/openai-adapter.ts — endpoint /openai/tools</span>
+<span class="kw">import express from</span> <span class="str">'express'</span>;
+<span class="kw">const</span> router = express.Router();
+
+<span class="cm">// GET /openai/tools — retorna lista de tools no formato OpenAI</span>
+router.get(<span class="str">'/tools'</span>, (req, res) =&gt; {
+  <span class="kw">const</span> openAiTools = <span class="cl">ToolRegistry</span>.getAll().map(tool =&gt; ({
+    type: <span class="str">'function'</span>,
+    function: {
+      name:        tool.name,
+      description: tool.description,
+      parameters:  tool.inputSchema  <span class="cm">// JSON Schema é compatível diretamente</span>
+    }
+  }));
+  res.json({ tools: openAiTools });
+});
+
+<span class="cm">// POST /openai/tools/call — recebe tool_call do GPT e executa</span>
+router.post(<span class="str">'/tools/call'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> { tool_call, user_token } = req.body;   <span class="cm">// user_token vem do app</span>
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="cl">CoreExecutor</span>.execute({
+    toolName:  tool_call.function.name,
+    input:     JSON.parse(tool_call.function.arguments),
+    userToken: user_token,
+    source:    <span class="str">'gpt'</span>
+  });
+  <span class="cm">// Resposta no formato que o GPT espera como tool result</span>
+  res.json({ role: <span class="str">'tool'</span>, tool_call_id: tool_call.id, content: JSON.stringify(result) });
+});
+
+<span class="cm">// src/adapters/gemini-adapter.ts — endpoint /gemini/tools</span>
+router.post(<span class="str">'/tools/call'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> { functionCall, user_token } = req.body;
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="cl">CoreExecutor</span>.execute({
+    toolName:  functionCall.name,
+    input:     functionCall.args,   <span class="cm">// Gemini usa 'args' em vez de 'arguments'</span>
+    userToken: user_token,
+    source:    <span class="str">'gemini'</span>
+  });
+  res.json({ functionResponse: { name: functionCall.name, response: result } });
+});</pre>
+</div>
+
+<!-- ══════════════════════════════════════════
+     CATÁLOGO DE TOOLS
+══════════════════════════════════════════ -->
+<div class="sec" id="sec-tools">
+  <div class="sh"><span class="sn">05</span><h2 class="st">Catálogo de Tools Bancárias</h2></div>
+  <p class="ss">4 tools de leitura. Nenhuma é de escrita — toda mutação (pagamentos, transferências) permanece fora do escopo desta versão e exige aprovação regulatória adicional.</p>
+
+  <!-- TOOL 1 -->
+  <div class="tool-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+      <div class="tool-name">consultar_saldo</div>
+      <div style="display:flex;gap:7px;"><span class="tag tok">Leitura</span><span class="tag" style="background:rgba(16,163,127,.1);color:var(--gpt);">Cache 30s</span></div>
+    </div>
+    <div class="tool-desc">Retorna o saldo disponível, bloqueado e limite de crédito da conta corrente ou poupança do usuário autenticado. Chamar sempre que o usuário perguntar sobre saldo, disponível ou limite. Nunca inferir saldo de operações anteriores.</div>
+    <div class="tool-schema"><span style="color:var(--muted)">input:</span>
+  tipo_conta?: <span style="color:var(--ok)">"corrente" | "poupanca"</span>  <span style="color:var(--muted2)">// default: corrente</span>
+
+<span style="color:var(--muted)">output:</span>
+  saldo_disponivel:  <span style="color:var(--pix)">number</span>  <span style="color:var(--muted2)">// centavos — NUNCA float</span>
+  saldo_bloqueado:   <span style="color:var(--pix)">number</span>  <span style="color:var(--muted2)">// retido por TEDs, cheques, etc.</span>
+  limite_credito:    <span style="color:var(--pix)">number</span>  <span style="color:var(--muted2)">// apenas se conta com cheque especial</span>
+  data_atualizacao:  <span style="color:var(--ok)">string</span>  <span style="color:var(--muted2)">// ISO 8601 — agente deve informar ao usuário</span>
+  <span style="color:var(--warn)">// NOTA: o userId vem do token — o agente NUNCA passa conta_id</span></div>
+    <div class="tool-axway"><div class="tool-axway-label">Mapeamento Axway</div><code>GET /contas/v1/saldo</code> · API ID: <code>core-bancario-saldo-api</code> · Scope: <code>conta:saldo:read</code> · Timeout: 3s</div>
+    <div class="tool-auth"><div class="tool-auth-label">⚠ Auth obrigatória do usuário</div>O Axway extrai o <code>sub</code> do Bearer token e retorna apenas os dados da conta deste usuário. Sem token de usuário válido com scope <code>conta:saldo:read</code> → 403 no Axway antes de chegar ao backend.</div>
+  </div>
+
+  <!-- TOOL 2 -->
+  <div class="tool-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+      <div class="tool-name">consultar_extrato</div>
+      <div style="display:flex;gap:7px;"><span class="tag tok">Leitura</span><span class="tag" style="background:rgba(16,163,127,.1);color:var(--gpt);">Cache 5min</span></div>
+    </div>
+    <div class="tool-desc">Retorna as transações da conta corrente em um período. Usar para responder perguntas sobre movimentações, gastos por categoria, pagamentos realizados. O período máximo retornável é 90 dias — para períodos maiores, o usuário deve acessar o app diretamente.</div>
+    <div class="tool-schema"><span style="color:var(--muted)">input:</span>
+  periodo_dias:    <span style="color:var(--pix)">number</span>  <span style="color:var(--muted2)">// 7, 15, 30, 60 ou 90 — default: 30</span>
+  tipo_lancamento?:<span style="color:var(--ok)">"debito" | "credito" | "todos"</span>  <span style="color:var(--muted2)">// default: todos</span>
+
+<span style="color:var(--muted)">output:</span>
+  lancamentos: Array&lt;{
+    data:        <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// ISO 8601</span>
+    descricao:   <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// texto do lançamento (mascarado pelo enricher se PII)</span>
+    valor:       <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// centavos · positivo=crédito · negativo=débito</span>
+    tipo:        <span style="color:var(--ok)">"debito" | "credito" | "pix" | "ted" | "boleto"</span>
+    saldo_apos:  <span style="color:var(--pix)">number</span>   <span style="color:var(--muted2)">// saldo após este lançamento</span>
+  }&gt;
+  total_debitos:  <span style="color:var(--pix)">number</span>  <span style="color:var(--muted2)">// adicionado pelo enricher</span>
+  total_creditos: <span style="color:var(--pix)">number</span>  <span style="color:var(--muted2)">// adicionado pelo enricher</span></div>
+    <div class="tool-axway"><div class="tool-axway-label">Mapeamento Axway</div><code>GET /contas/v1/extrato?dias={periodo_dias}&tipo={tipo_lancamento}</code> · API ID: <code>core-bancario-extrato-api</code> · Scope: <code>conta:extrato:read</code> · Timeout: 6s</div>
+    <div class="tool-auth"><div class="tool-auth-label">⚠ Dado mais sensível — scope separado</div>Extrato é mais sensível que saldo — scope distinto (<code>conta:extrato:read</code>) exige consentimento explícito adicional no fluxo de autorização. Usuário pode ter consentido com saldo mas não com extrato.</div>
+  </div>
+
+  <!-- TOOL 3 -->
+  <div class="tool-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+      <div class="tool-name">consultar_fatura_cartao</div>
+      <div style="display:flex;gap:7px;"><span class="tag tok">Leitura</span><span class="tag" style="background:rgba(16,163,127,.1);color:var(--gpt);">Cache 5min</span></div>
+    </div>
+    <div class="tool-desc">Retorna a fatura atual ou uma fatura fechada do cartão de crédito Bradesco. Inclui valor total, mínimo, data de vencimento e lista de compras. Para cartões adicionais, retorna apenas os dados do titular autenticado.</div>
+    <div class="tool-schema"><span style="color:var(--muted)">input:</span>
+  mes_referencia?: <span style="color:var(--ok)">string</span>  <span style="color:var(--muted2)">// "YYYY-MM" — default: fatura atual aberta</span>
+  cartao_id?:      <span style="color:var(--ok)">string</span>  <span style="color:var(--muted2)">// default: cartão principal — 4 últimos dígitos</span>
+
+<span style="color:var(--muted)">output:</span>
+  valor_total:      <span style="color:var(--pix)">number</span>
+  valor_minimo:     <span style="color:var(--pix)">number</span>
+  data_vencimento:  <span style="color:var(--ok)">string</span>
+  status:           <span style="color:var(--ok)">"aberta" | "fechada" | "paga" | "vencida"</span>
+  compras: Array&lt;{
+    data:      <span style="color:var(--ok)">string</span>
+    comercio:  <span style="color:var(--ok)">string</span>
+    valor:     <span style="color:var(--pix)">number</span>
+    parcela?:  <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// ex: "2/6"</span>
+  }&gt;
+  dias_para_vencimento: <span style="color:var(--pix)">number</span>  <span style="color:var(--muted2)">// adicionado pelo enricher</span>
+  alerta_vencimento:    <span style="color:var(--ok)">string | null</span>  <span style="color:var(--muted2)">// "Vence em 2 dias" se urgente</span></div>
+    <div class="tool-axway"><div class="tool-axway-label">Mapeamento Axway</div><code>GET /cartoes/v2/{cartao_id}/fatura?mes={mes_referencia}</code> · API ID: <code>cartao-fatura-api</code> · Scope: <code>cartao:fatura:read</code> · Timeout: 5s</div>
+    <div class="tool-auth"><div class="tool-auth-label">⚠ Dados de compras — PII</div>A lista de compras pode expor hábitos de consumo — dado sensível sob LGPD. O <code>LgpdSanitizer</code> remove compras em estabelecimentos classificados como sensíveis (saúde, serviços íntimos) antes de enviar ao agente.</div>
+  </div>
+
+  <!-- TOOL 4 -->
+  <div class="tool-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+      <div class="tool-name">consultar_apolice_seguro</div>
+      <div style="display:flex;gap:7px;"><span class="tag tok">Leitura</span><span class="tag" style="background:rgba(16,163,127,.1);color:var(--gpt);">Cache 30min</span></div>
+    </div>
+    <div class="tool-desc">Retorna as apólices de seguro ativas do usuário. Para seguro veicular, inclui dados do veículo, coberturas, prêmio e vencimento. Usar quando o usuário perguntar sobre seu seguro, cobertura ou próximo vencimento.</div>
+    <div class="tool-schema"><span style="color:var(--muted)">input:</span>
+  tipo?:  <span style="color:var(--ok)">"auto" | "vida" | "residencial"</span>  <span style="color:var(--muted2)">// default: retorna todos</span>
+
+<span style="color:var(--muted)">output:</span>
+  apolices: Array&lt;{
+    numero:         <span style="color:var(--ok)">string</span>
+    tipo:           <span style="color:var(--ok)">"auto" | "vida" | "residencial"</span>
+    status:         <span style="color:var(--ok)">"ativa" | "suspensa" | "cancelada"</span>
+    premio_mensal:  <span style="color:var(--pix)">number</span>
+    vencimento:     <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// data da apólice</span>
+    coberturas:     <span style="color:var(--ok)">string[]</span>
+    veiculo?: {          <span style="color:var(--muted2)">// apenas para tipo "auto"</span>
+      modelo:  <span style="color:var(--ok)">string</span>
+      placa:   <span style="color:var(--ok)">string</span>   <span style="color:var(--muted2)">// mascarado: ABC-1***</span>
+      ano:     <span style="color:var(--pix)">number</span>
+    }
+    dias_para_vencimento: <span style="color:var(--pix)">number</span>  <span style="color:var(--muted2)">// enricher</span>
+  }&gt;</div>
+    <div class="tool-axway"><div class="tool-axway-label">Mapeamento Axway</div><code>GET /seguros/v1/apolices?tipo={tipo}</code> · API ID: <code>bradesco-seguros-apolice-api</code> · Scope: <code>seguro:apolice:read</code> · Timeout: 4s</div>
+    <div class="tool-auth"><div class="tool-auth-label">⚠ Dado sensível</div>Apólice de seguro revela patrimônio e veículos do usuário. Cache mais longo (30min) é seguro porque apólices mudam raramente — mas o cache é por userId (nunca compartilhado entre usuários).</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     LGPD E SIGILO BANCÁRIO
+══════════════════════════════════════════ -->
+<div class="sec" id="sec-lgpd">
+  <div class="sh"><span class="sn">06</span><h2 class="st">LGPD &amp; Sigilo Bancário</h2></div>
+  <p class="ss">Dados bancários pessoais têm dupla proteção: LGPD (dado pessoal financeiro) e Lei Complementar 105/2001 (sigilo bancário). O servidor precisa respeitar ambas.</p>
+
+  <div class="callout risk"><b>O que o agente NUNCA deve receber:</b> número completo da conta, CPF do usuário, número completo do cartão, chave PIX, dados de estabelecimentos classificados como sensíveis (farmácias, clínicas, etc. na fatura), endereço (da apólice residencial). O <code>LgpdSanitizer</code> remove esses campos antes de qualquer dado chegar ao contexto do modelo.</div>
+
+  <h3 class="sub">LgpdSanitizer — o que é mascarado por tool</h3>
+  <table class="t">
+    <tr><th>Tool</th><th>Campo raw do Axway</th><th>O que o agente recebe</th></tr>
+    <tr><td>consultar_saldo</td><td><code>agencia: "0001"</code>, <code>conta: "12345-6"</code></td><td>Não incluídos na resposta</td></tr>
+    <tr><td>consultar_extrato</td><td><code>cpf_favorecido: "123.456.789-00"</code></td><td>Removido</td></tr>
+    <tr><td>consultar_extrato</td><td><code>descricao: "FARMACIA SAOJOAO 12/03"</code></td><td><code>"Estabelecimento de saúde 12/03"</code></td></tr>
+    <tr><td>consultar_fatura_cartao</td><td><code>comercio: "CLINICA DR SILVA"</code></td><td><code>"Serviço de saúde"</code></td></tr>
+    <tr><td>consultar_apolice_seguro</td><td><code>placa: "ABC-1234"</code></td><td><code>"ABC-1***"</code></td></tr>
+    <tr><td>consultar_apolice_seguro</td><td><code>endereco: "Rua X, 123, São Paulo"</code></td><td>Não incluído</td></tr>
+  </table>
+
+  <pre class="code"><span class="cm">// src/middleware/lgpd-sanitizer.ts</span>
+<span class="kw">const</span> SENSITIVE_CATEGORIES = [
+  <span class="str">'FARMAC'</span>, <span class="str">'CLINICA'</span>, <span class="str">'HOSPITAL'</span>, <span class="str">'LABORAT'</span>, <span class="str">'PSICOLOG'</span>,
+  <span class="str">'UROLOGIS'</span>, <span class="str">'GINECOL'</span>, <span class="str">'ONCOLOG'</span>
+];
+
+<span class="kw">export function</span> <span class="cl">sanitizeForModel</span>(toolName: <span class="kw">string</span>, rawResponse: <span class="kw">unknown</span>): <span class="kw">unknown</span> {
+  <span class="kw">switch</span> (toolName) {
+    <span class="kw">case</span> <span class="str">'consultar_extrato'</span>:
+      <span class="kw">return</span> sanitizeExtrato(rawResponse);
+    <span class="kw">case</span> <span class="str">'consultar_fatura_cartao'</span>:
+      <span class="kw">return</span> sanitizeFatura(rawResponse);
+    <span class="kw">default</span>:
+      <span class="kw">return</span> rawResponse;
+  }
+}
+
+<span class="kw">function</span> <span class="cl">sanitizeFatura</span>(fatura: <span class="kw">any</span>) {
+  <span class="kw">return</span> {
+    ...fatura,
+    compras: fatura.compras.map((c: <span class="kw">any</span>) => ({
+      ...c,
+      comercio: isSensitiveCategory(c.comercio)
+        ? <span class="str">'Serviço de saúde'</span>   <span class="cm">// não revela qual clínica</span>
+        : c.comercio
+    }))
+  };
+}
+
+<span class="kw">function</span> <span class="cl">isSensitiveCategory</span>(nome: <span class="kw">string</span>): <span class="kw">boolean</span> {
+  <span class="kw">const</span> upper = nome.toUpperCase();
+  <span class="kw">return</span> SENSITIVE_CATEGORIES.some(cat =&gt; upper.includes(cat));
+}</pre>
+
+  <div class="callout violet"><b>Base legal LGPD para esta integração:</b> execução de contrato (Art. 7º, V) — o usuário tem contrato com o Bradesco e consultar seus próprios dados está dentro do objeto do contrato. O consentimento explícito (Art. 7º, I) é capturado no fluxo OAuth2 de autorização de scopes — cada scope é um consentimento distinto.</div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     DEPLOYMENT
+══════════════════════════════════════════ -->
+<div class="sec" id="sec-deploy">
+  <div class="sh"><span class="sn">07</span><h2 class="st">Deployment — Módulo separado, patterns compartilhados</h2></div>
+  <p class="ss">Serviço separado do VaaS MCP Server por postura de segurança diferente, mas deploy em ECS Fargate com a mesma estrutura.</p>
+
+  <h3 class="sub">Por que serviço separado — não o mesmo container</h3>
+  <div class="g3">
+    <div class="card">
+      <div class="card-t">IAM Task Role diferente</div>
+      <div class="card-b">O Banking MCP Server precisa acessar o JWKS do CIAM para validar tokens de usuário. O VaaS MCP Server não precisa disso. <b>Least privilege exige roles separadas.</b></div>
+    </div>
+    <div class="card">
+      <div class="card-t">Secrets separados</div>
+      <div class="card-b">As credenciais Axway do Banking Server têm scopes de leitura de dados pessoais — muito mais restritivos. <b>Vazamento de um não compromete o outro.</b></div>
+    </div>
+    <div class="card">
+      <div class="card-t">Escala independente</div>
+      <div class="card-b">Consultas bancárias têm picos diferentes de pagamentos VaaS. ECS Auto Scaling opera por serviço — containers independentes escalam independentemente.</div>
+    </div>
+  </div>
+
+  <pre class="code"><span class="cm"># Estrutura do repositório — monorepo ou dois repos?</span>
+<span class="cm"># Recomendação: mesmo repositório, pacotes separados</span>
+
+bradesco-mcp-servers/
+├── packages/
+│   ├── <span class="cl">mcp-core/</span>              <span class="cm">// ToolDefinition, AxwayClient, MiddlewarePipeline — compartilhado</span>
+│   ├── <span class="cl">vaas-mcp-server/</span>        <span class="cm">// VaaS tools (pagamentos, veículos)</span>
+│   └── <span class="cl">banking-mcp-server/</span>     <span class="cm">// Banking tools (saldo, extrato, fatura, apólice)</span>
+│       ├── src/
+│       │   ├── <span class="cl">server.ts</span>
+│       │   ├── adapters/
+│       │   │   ├── <span class="cl">mcp-adapter.ts</span>    <span class="cm">// Claude / Bridge</span>
+│       │   │   ├── <span class="cl">openai-adapter.ts</span> <span class="cm">// GPT</span>
+│       │   │   └── <span class="cl">gemini-adapter.ts</span> <span class="cm">// Gemini</span>
+│       │   ├── tools/
+│       │   │   ├── <span class="cl">saldo.tool.ts</span>
+│       │   │   ├── <span class="cl">extrato.tool.ts</span>
+│       │   │   ├── <span class="cl">fatura.tool.ts</span>
+│       │   │   └── <span class="cl">apolice.tool.ts</span>
+│       │   └── middleware/
+│       │       ├── <span class="cl">user-auth.ts</span>      <span class="cm">// NOVO — validação do token de usuário</span>
+│       │       └── <span class="cl">lgpd-sanitizer.ts</span> <span class="cm">// NOVO — mascaramento de PII</span>
+│       └── Dockerfile
+├── package.json  <span class="cm">// workspaces</span>
+└── turbo.json    <span class="cm">// build pipeline</span></pre>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ADRs
+══════════════════════════════════════════ -->
+<div class="sec" id="sec-adrs">
+  <div class="sh"><span class="sn">08</span><h2 class="st">Architecture Decision Records</h2></div>
+
+  <div class="adr">
+    <div class="adr-id">BANK-ADR-001</div>
+    <div class="adr-title">Authorization Code + PKCE — não client_credentials para dados pessoais</div>
+    <div class="adr-row"><span class="adr-label">Contexto:</span><span class="adr-val">O VaaS MCP Server usa client_credentials (identidade de serviço). O Banking Server poderia fazer o mesmo e usar o userId de outra fonte (sessão do app, header customizado).</span></div>
+    <div class="adr-row"><span class="adr-label">Decisão:</span><span class="adr-val">Usar o token OAuth2 do usuário como Bearer no Axway. O Axway valida que o sub do token é o dono da conta solicitada — isso é uma garantia da camada de gateway, não de código de aplicação.</span></div>
+    <div class="adr-row"><span class="adr-label">Alternativa descartada:</span><span class="adr-val">client_credentials + header X-User-ID: o Axway não validaria que o serviço tem permissão de acessar aquele usuário específico. Dependeria 100% da lógica do banking-mcp-server não ter bugs de autorização — risco inaceitável para dados bancários.</span></div>
+  </div>
+
+  <div class="adr">
+    <div class="adr-id">BANK-ADR-002</div>
+    <div class="adr-title">Um executor central com três adaptadores de protocolo</div>
+    <div class="adr-row"><span class="adr-label">Contexto:</span><span class="adr-val">Poderia criar três servidores independentes (um por modelo) ou um servidor com adaptadores.</span></div>
+    <div class="adr-row"><span class="adr-label">Decisão:</span><span class="adr-val">Um servidor, três endpoints de protocolo, um executor central. A lógica de tool, middleware e Axway client é implementada uma vez. Os adaptadores são thin — só traduzem o envelope do protocolo.</span></div>
+    <div class="adr-row"><span class="adr-label">Consequência:</span><span class="adr-val">Quando uma tool muda (ex: novo campo no extrato), a mudança reflete nos três modelos automaticamente. Quando um modelo lança uma nova versão do protocolo, só o adaptador daquele modelo precisa ser atualizado.</span></div>
+  </div>
+
+  <div class="adr">
+    <div class="adr-id">BANK-ADR-003</div>
+    <div class="adr-title">Cache por userId — não cache global</div>
+    <div class="adr-row"><span class="adr-label">Contexto:</span><span class="adr-val">O cache de leitura (saldo 30s, extrato 5min) precisa ser isolado por usuário.</span></div>
+    <div class="adr-row"><span class="adr-label">Decisão:</span><span class="adr-val">Chave do cache: <code>hash(userId + toolName + inputHash)</code>. Nunca <code>hash(toolName + inputHash)</code>. Um cache global exporia o saldo de um usuário para outro.</span></div>
+    <div class="adr-row"><span class="adr-label">Implementação:</span><span class="adr-val">ElastiCache Redis com TTL por entry. Em memória é insuficiente porque múltiplas instâncias ECS teriam caches independentes — um usuário poderia bater no Axway N vezes se fosse roteado para instâncias diferentes.</span></div>
+  </div>
+
+  <div class="adr">
+    <div class="adr-id">BANK-ADR-004</div>
+    <div class="adr-title">Escopo por tool — não escopo global de "leitura bancária"</div>
+    <div class="adr-row"><span class="adr-label">Contexto:</span><span class="adr-val">Poderíamos pedir um único scope <code>bancario:read</code> que cobre saldo, extrato, fatura e apólice.</span></div>
+    <div class="adr-row"><span class="adr-label">Decisão:</span><span class="adr-val">Scopes granulares: <code>conta:saldo:read</code>, <code>conta:extrato:read</code>, <code>cartao:fatura:read</code>, <code>seguro:apolice:read</code>. Princípio de mínimo privilégio e granularidade de consentimento.</span></div>
+    <div class="adr-row"><span class="adr-label">Consequência:</span><span class="adr-val">O usuário pode consentir com saldo mas não com extrato. Uma brecha de segurança no tratamento de extrato não expõe saldo — os scopes são validados independentemente no Axway.</span></div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">Bradesco · Open Platform · Banking MCP Server · Multi-Modelo · Claude · GPT · Gemini · Especificação Técnica · Julho/2026</div>
+
+<script>
+function show(id, btn){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('a'));
+  document.querySelectorAll('.nt').forEach(b=>b.classList.remove('a'));
+  document.getElementById('sec-'+id).classList.add('a');
+  btn.classList.add('a');
+}
+</script>
+</body>
+</html>
