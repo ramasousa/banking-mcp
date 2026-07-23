@@ -29,8 +29,14 @@
 import crypto from 'node:crypto';
 import express from 'express';
 
-const ISSUER =
-  process.env.MCP_PUBLIC_URL || `http://localhost:${process.env.PORT || 3000}`;
+// URL pública do servidor. Em deploy (ex.: Render) é detectada sozinha via
+// RENDER_EXTERNAL_URL; localmente cai no localhost. Exportada p/ o http.js logar.
+export const PUBLIC_URL =
+  process.env.MCP_PUBLIC_URL ||
+  process.env.RENDER_EXTERNAL_URL ||
+  `http://localhost:${process.env.PORT || 3000}`;
+
+const ISSUER = PUBLIC_URL;
 const RESOURCE = `${ISSUER}/mcp`;
 const SCOPES = ['contas.saldo.read', 'contas.extrato.read'];
 

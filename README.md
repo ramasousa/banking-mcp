@@ -97,6 +97,26 @@ conversa e o Claude chama a tool.
 > ℹ️ Quem adiciona o connector é o usuário, nas configurações do Claude.ai — não
 > há instalação automática a partir do chat.
 
+### Sem notebook? Deploy pelo navegador (funciona no iPad)
+
+Dá para publicar o servidor **sem CLI e sem computador**, usando o blueprint
+`render.yaml` (tudo pelo Safari):
+
+1. Acesse **render.com** e entre com o GitHub.
+2. **New → Blueprint** → selecione o repositório `banking-mcp`.
+3. Confirme. O Render lê o `render.yaml`, instala e sobe o serviço.
+4. Você recebe uma URL pública, ex.: `https://bradesco-banking-mcp.onrender.com`.
+   O endpoint do connector é essa URL **+ `/mcp`**.
+
+A URL pública é detectada sozinha (`RENDER_EXTERNAL_URL`), então os metadados de
+OAuth já apontam para o host certo. O deploy começa **sem OAuth**
+(`MCP_REQUIRE_AUTH=false`) para o primeiro teste "só ver as tools funcionando";
+para exercitar o fluxo OAuth+PKCE, mude essa variável para `true` no painel do
+Render (aba *Environment*) e reconecte no Claude.
+
+Depois, no app/site do Claude: **Settings → Connectors → Add custom connector** →
+cole a URL `…/mcp`. (Custom connectors exigem plano pago — Pro/Max/Team/Enterprise.)
+
 ### Autenticação (OAuth 2.1 + PKCE)
 
 O `mcp/auth.js` traz o **esqueleto** do fluxo exigido pela spec do MCP:
@@ -125,6 +145,7 @@ Veja o fluxo desenhado em `specs/banking-mcp-auth-flow.html`.
 | `mcp/http.js` | Transporte Streamable HTTP — Connector no Claude.ai (remoto) |
 | `mcp/auth.js` | Esqueleto de OAuth 2.1 + PKCE (mock hoje, Axway depois) |
 | `claude_desktop_config.example.json` | Exemplo de registro do MCP no Claude Desktop |
+| `render.yaml` | Blueprint para deploy do MCP remoto pelo navegador (sem notebook) |
 | `index.html` | Landing page do projeto Bradesco MCP |
 | `specs/` | Especificações do MCP Server e do fluxo de autenticação |
 

@@ -20,7 +20,7 @@
 import express from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { createBankingServer } from './core.js';
-import { authRouter, requireAuth } from './auth.js';
+import { authRouter, requireAuth, PUBLIC_URL } from './auth.js';
 
 const PORT = process.env.PORT || 3000;
 const REQUIRE_AUTH = process.env.MCP_REQUIRE_AUTH !== 'false';
@@ -77,11 +77,9 @@ app.get('/mcp', methodNotAllowed);
 app.delete('/mcp', methodNotAllowed);
 
 app.listen(PORT, () => {
-  console.log(`\n  Bradesco Banking MCP (HTTP)  →  http://localhost:${PORT}/mcp`);
+  console.log(`\n  Bradesco Banking MCP (HTTP)  →  ${PUBLIC_URL}/mcp`);
   console.log(
     `  OAuth: ${REQUIRE_AUTH ? '2.1 + PKCE (esqueleto, dados fictícios)' : 'DESLIGADA (MCP_REQUIRE_AUTH=false)'}`,
   );
-  console.log(
-    `  Metadata: http://localhost:${PORT}/.well-known/oauth-protected-resource\n`,
-  );
+  console.log(`  Metadata: ${PUBLIC_URL}/.well-known/oauth-protected-resource\n`);
 });
