@@ -28,11 +28,20 @@ export const SERVER_INFO = { name: 'banking-mcp-demo', version: '1.0.0' };
  *   No transporte HTTP com OAuth, carrega o token do usuário (para o Axway).
  *   No stdio/local (sem auth), devolve um objeto vazio — o mock ignora.
  */
+// As tools do mock-bank.js usam `input_schema` (formato da API da Anthropic).
+// O protocolo MCP exige `inputSchema` (camelCase) — sem isso o cliente descarta
+// as ferramentas ("nenhuma ferramenta disponível"). Convertemos aqui, mantendo
+// o mock-bank.js intacto para o outro demo (server.js).
+const MCP_TOOLS = tools.map(({ input_schema, inputSchema, ...rest }) => ({
+  ...rest,
+  inputSchema: inputSchema || input_schema || { type: 'object', properties: {} },
+}));
+
 export function createBankingServer(getContext = () => ({})) {
   const server = new Server(SERVER_INFO, { capabilities: { tools: {} } });
 
-  // tools/list — reaproveita direto o array `tools` do mock-bank (JSON Schema).
-  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools }));
+  // tools/list — expõe as tools já no formato MCP (inputSchema).
+  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: MCP_TOOLS }));
 
   // tools/call — resolve o executor e devolve o resultado como texto JSON.
   server.setRequestHandler(CallToolRequestSchema, async (req, extra) => {
