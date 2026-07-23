@@ -18,7 +18,7 @@ import {
 } from '@modelcontextprotocol/sdk/types.js';
 import { tools, executores } from '../mock-bank.js';
 
-export const SERVER_INFO = { name: 'bradesco-banking-mcp', version: '1.0.0' };
+export const SERVER_INFO = { name: 'banking-mcp-demo', version: '1.0.0' };
 
 /**
  * Cria uma instância do MCP Server já com as tools registradas.

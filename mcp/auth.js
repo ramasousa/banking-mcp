@@ -202,34 +202,44 @@ export function requireAuth(req, res, next) {
   next();
 }
 
-// Tela de consentimento mínima (DEMO). Em produção, isto é o login do banco.
+// Tela de consentimento GENÉRICA de demonstração.
+//
+// IMPORTANTE: NÃO imite a marca de um banco real aqui (nome, logo, cores).
+// Uma página em domínio de terceiro que se passa por um banco é classificada
+// como phishing pelo Google Safe Browsing e bloqueada nos navegadores (e pode
+// impedir a conexão do connector). Esta é uma tela neutra, claramente um demo.
 function consentPage(approveUrl, scope) {
   const escaped = String(approveUrl).replace(/"/g, '&quot;');
   return `<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Autorizar acesso · Bradesco</title>
+<title>Autorizar acesso · Demo MCP</title>
 <style>
   body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f4f4f6;
     margin:0;display:grid;place-items:center;min-height:100vh;color:#1a1a1a}
-  .card{background:#fff;max-width:400px;width:92%;padding:32px;border-radius:16px;
+  .card{background:#fff;max-width:420px;width:92%;padding:32px;border-radius:16px;
     box-shadow:0 10px 40px rgba(0,0,0,.08)}
-  .brand{color:#CC092F;font-weight:800;font-size:20px;margin:0 0 4px}
-  h1{font-size:17px;margin:12px 0 4px}
+  .brand{color:#2563eb;font-weight:800;font-size:18px;margin:0 0 4px}
+  .demo{display:inline-block;background:#fde68a;color:#92400e;font-size:11px;font-weight:700;
+    padding:3px 8px;border-radius:999px;margin-bottom:8px;letter-spacing:.02em}
+  h1{font-size:17px;margin:10px 0 4px}
   p{color:#555;font-size:14px;line-height:1.5}
   ul{font-size:14px;color:#333;padding-left:18px}
-  a.btn{display:block;text-align:center;background:#CC092F;color:#fff;text-decoration:none;
+  a.btn{display:block;text-align:center;background:#2563eb;color:#fff;text-decoration:none;
     padding:12px;border-radius:10px;font-weight:600;margin-top:20px}
   .warn{font-size:12px;color:#999;margin-top:14px}
 </style></head><body>
   <div class="card">
-    <p class="brand">Bradesco</p>
-    <h1>Autorizar o assistente Claude</h1>
-    <p>O aplicativo está pedindo permissão para acessar, em seu nome:</p>
-    <ul><li>Saldo da conta</li><li>Extrato e movimentações</li></ul>
+    <span class="demo">DEMONSTRAÇÃO · DADOS FICTÍCIOS</span>
+    <p class="brand">Conta Demo · MCP</p>
+    <h1>Autorizar o assistente (via MCP)</h1>
+    <p>Esta é uma <strong>API de demonstração</strong> (não é um banco real). Ela está
+       pedindo permissão para acessar dados <strong>fictícios</strong> de exemplo:</p>
+    <ul><li>Saldo (fictício)</li><li>Extrato e movimentações (fictícias)</li></ul>
     <p><strong>Escopo:</strong> ${escaped ? (scope || 'contas.saldo.read contas.extrato.read') : ''}</p>
-    <a class="btn" href="${escaped}">Autorizar acesso</a>
-    <p class="warn">⚠️ Ambiente de demonstração — dados fictícios. Nenhuma conta real é acessada.</p>
+    <a class="btn" href="${escaped}">Autorizar acesso (demo)</a>
+    <p class="warn">⚠️ Ambiente de demonstração — nenhuma instituição real é acessada e
+       nenhum dado real é exposto.</p>
   </div>
 </body></html>`;
 }
