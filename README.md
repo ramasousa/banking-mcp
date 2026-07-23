@@ -41,6 +41,78 @@ O front detecta o backend via `GET /api/health`; se a chave não estiver
 configurada (ou o backend não estiver no ar), a página cai automaticamente no
 **modo simulado**.
 
+## MCP Server (plugável no Claude.ai e no Claude Desktop)
+
+Além da demo de _tool use_ acima, o repositório expõe as mesmas 4 ferramentas
+como um **MCP Server de verdade** — que fala o protocolo padrão (`tools/list`,
+`tools/call`) e pode ser conectado a **qualquer cliente MCP**. Há dois
+transportes, servidos pelo mesmo núcleo (`mcp/core.js`, que reaproveita o
+`mock-bank.js`):
+
+```
+mock-bank.js (tools + executores)
+      │
+   mcp/core.js
+      ├─▶ mcp/stdio.js  → LOCAL  → Claude Desktop
+      └─▶ mcp/http.js   → REMOTO → Connector no Claude.ai  (OAuth 2.1 + PKCE)
+```
+
+### Modo local (stdio) — Claude Desktop
+
+```bash
+npm install
+npm run mcp:stdio   # teste rápido; o Claude Desktop sobe o processo sozinho
+```
+
+Registre em `claude_desktop_config.json` (veja `claude_desktop_config.example.json`)
+e reinicie o Claude Desktop:
+
+```json
+{
+  "mcpServers": {
+    "bradesco-banking": {
+      "command": "node",
+      "args": ["/CAMINHO/ABSOLUTO/PARA/banking-mcp/mcp/stdio.js"]
+    }
+  }
+}
+```
+
+### Modo remoto (HTTP) — Connector no Claude.ai
+
+```bash
+# dev local, sem OAuth, só para testar as tools:
+MCP_REQUIRE_AUTH=false npm run mcp:http
+
+# produção: publique em HTTPS e informe a URL pública para os metadados:
+MCP_PUBLIC_URL="https://banking-mcp.suaempresa.com" npm run mcp:http
+```
+
+Depois, no **Claude.ai → Settings → Connectors → Add custom connector**, cole a
+URL do endpoint `/mcp`. O Claude descobre as tools sozinho e, como saldo/extrato
+são dados pessoais, dispara o fluxo de **OAuth 2.1 (Authorization Code + PKCE)**
+antes de acessá-los. Pergunte _"qual é o meu saldo no Bradesco?"_ em qualquer
+conversa e o Claude chama a tool.
+
+> ℹ️ Quem adiciona o connector é o usuário, nas configurações do Claude.ai — não
+> há instalação automática a partir do chat.
+
+### Autenticação (OAuth 2.1 + PKCE)
+
+O `mcp/auth.js` traz o **esqueleto** do fluxo exigido pela spec do MCP:
+metadados (`/.well-known/oauth-protected-resource` e `oauth-authorization-server`),
+`/authorize`, `/token` (validando PKCE **S256**) e o middleware que protege o
+`/mcp`. **Hoje ele emite tokens fictícios em memória.** Para produção:
+
+1. Em `/authorize`, redirecione para o **IdP do Bradesco** em vez da tela de
+   consentimento da demo; no callback, troque o code do banco pelo token real.
+2. Passe esse token do usuário aos executores (já chega em `ctx.accessToken` no
+   `mcp/core.js`) para chamar o **Axway/Core Bancário**.
+3. Troque o store em memória por Redis/DB e trate expiração/refresh — ou deixe
+   este servidor apenas como **Resource Server**, delegando tudo ao IdP.
+
+Veja o fluxo desenhado em `specs/banking-mcp-auth-flow.html`.
+
 ## Arquivos
 
 | Arquivo | Papel |
@@ -48,6 +120,11 @@ configurada (ou o backend não estiver no ar), a página cai automaticamente no
 | `bradesco-chat.html` | UI do app + chat (modo simulado embutido, modo real via `/api/chat`) |
 | `server.js` | Backend Express: proxy para o Claude com _tool use_ + arquivos estáticos |
 | `mock-bank.js` | Dados fictícios e executores das tools (substitua pelo Axway/Core Bancário) |
+| `mcp/core.js` | Núcleo do MCP Server (registra as tools, agnóstico de transporte) |
+| `mcp/stdio.js` | Transporte stdio — Claude Desktop (local) |
+| `mcp/http.js` | Transporte Streamable HTTP — Connector no Claude.ai (remoto) |
+| `mcp/auth.js` | Esqueleto de OAuth 2.1 + PKCE (mock hoje, Axway depois) |
+| `claude_desktop_config.example.json` | Exemplo de registro do MCP no Claude Desktop |
 | `index.html` | Landing page do projeto Bradesco MCP |
 | `specs/` | Especificações do MCP Server e do fluxo de autenticação |
 

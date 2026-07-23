@@ -1,0 +1,11 @@
+{
+  "//": "Exemplo de registro do MCP Server local (stdio) no Claude Desktop.",
+  "//_onde": "macOS: ~/Library/Application Support/Claude/claude_desktop_config.json | Windows: %APPDATA%\\Claude\\claude_desktop_config.json",
+  "//_uso": "Troque o caminho absoluto abaixo pelo caminho real deste repositório e reinicie o Claude Desktop.",
+  "mcpServers": {
+    "bradesco-banking": {
+      "command": "node",
+      "args": ["/CAMINHO/ABSOLUTO/PARA/banking-mcp/mcp/stdio.js"]
+    }
+  }
+}
