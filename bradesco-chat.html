@@ -220,7 +220,7 @@
     </div>
   </div>
 
-  <p class="foot-note">Ambiente de demonstração — dados fictícios. Nenhuma conexão real com o <b>Core Bancário Bradesco</b>.</p>
+  <p class="foot-note">Ambiente de demonstração — dados fictícios. Com <b>backend</b> ativo (<code>server.js</code>) e uma <b>ANTHROPIC_API_KEY</b>, o chat conversa com o Claude real; sem isso, roda em modo simulado. Nenhuma conexão real com o Core Bancário Bradesco.</p>
 </div>
 
 <script>
@@ -313,27 +313,32 @@
     }, 950);
   }
 
-  /* ── RESPONSE BUILDERS ── */
-  function saldoCard(){
+  /* ── RESPONSE BUILDERS ──
+     Cada builder aceita os dados (vindos do backend) e cai nos globais
+     de mock quando chamado sem argumento (modo simulado). */
+  function saldoCard(a){
+    a = a || ACCT;
     var d = document.createElement('div');
     d.className = 'rich';
     d.innerHTML =
-      '<div class="rich-head"><div class="rh-label">Conta Corrente</div><div class="rh-acct">Ag '+ACCT.ag+' · Conta '+ACCT.conta+'</div></div>'+
+      '<div class="rich-head"><div class="rh-label">Conta Corrente</div><div class="rh-acct">Ag '+a.ag+' · Conta '+a.conta+'</div></div>'+
       '<div class="bal-main">'+
-        '<div class="bal-row"><span class="bal-k">Saldo disponível</span><span class="bal-v big">'+BRL(ACCT.disponivel)+'</span></div>'+
-        '<div class="bal-row"><span class="bal-k">Valor bloqueado</span><span class="bal-v blocked">'+BRL(ACCT.bloqueado)+'</span></div>'+
-        '<div class="bal-row"><span class="bal-k">Limite cheque especial</span><span class="bal-v">'+BRL(ACCT.limite)+'</span></div>'+
+        '<div class="bal-row"><span class="bal-k">Saldo disponível</span><span class="bal-v big">'+BRL(a.disponivel)+'</span></div>'+
+        '<div class="bal-row"><span class="bal-k">Valor bloqueado</span><span class="bal-v blocked">'+BRL(a.bloqueado)+'</span></div>'+
+        '<div class="bal-row"><span class="bal-k">Limite cheque especial</span><span class="bal-v">'+BRL(a.limite)+'</span></div>'+
       '</div>'+
       '<div class="bal-div"></div>'+
       '<div class="bal-foot">🔒 consultar_saldo · scope conta:saldo:read</div>';
     return d;
   }
 
-  function extratoCard(){
+  function extratoCard(grupos, conta){
+    grupos = grupos || EXTRATO;
+    conta = conta || ACCT.conta;
     var d = document.createElement('div');
     d.className = 'rich';
-    var html = '<div class="rich-head"><div class="rh-label">Extrato · últimos 3 dias</div><div class="rh-acct">Conta '+ACCT.conta+'</div></div><div class="stmt-list">';
-    EXTRATO.forEach(function(g){
+    var html = '<div class="rich-head"><div class="rh-label">Extrato · últimos dias</div><div class="rh-acct">Conta '+conta+'</div></div><div class="stmt-list">';
+    grupos.forEach(function(g){
       html += '<div class="stmt-day">'+g.day+'</div>';
       g.items.forEach(function(it){
         var din = it.dir==='in';
@@ -349,24 +354,28 @@
     return d;
   }
 
-  function gastosCard(){
+  function gastosCard(gastos, total){
+    gastos = gastos || GASTOS;
+    total = (total == null) ? GASTO_TOTAL : total;
     var d = document.createElement('div');
     d.className = 'rich';
-    var html = '<div class="rich-head"><div class="rh-label">Gastos · julho 2026</div><div class="rh-acct">Total '+BRL(GASTO_TOTAL)+'</div></div><div class="spend">';
-    GASTOS.forEach(function(g){
+    var html = '<div class="rich-head"><div class="rh-label">Gastos · mês atual</div><div class="rh-acct">Total '+BRL(total)+'</div></div><div class="spend">';
+    gastos.forEach(function(g){
       html += '<div class="sp-row"><div class="sp-top"><span class="cat">'+g.cat+'</span><span class="val">'+BRL(g.val)+'</span></div>'+
         '<div class="sp-track"><div class="sp-fill" style="width:'+g.pct+'%;background:'+g.color+'"></div></div></div>';
     });
-    html += '</div><div class="bal-foot">🔒 consultar_extrato · agregado por categoria</div>';
+    html += '</div><div class="bal-foot">🔒 consultar_gastos · agregado por categoria</div>';
     d.innerHTML = html;
     return d;
   }
 
-  function pixCard(){
+  function pixCard(pix, conta){
+    pix = pix || PIX;
+    conta = conta || ACCT.conta;
     var d = document.createElement('div');
     d.className = 'rich';
-    var html = '<div class="rich-head"><div class="rh-label">PIX · movimentações recentes</div><div class="rh-acct">Conta '+ACCT.conta+'</div></div><div class="stmt-list">';
-    PIX.forEach(function(it){
+    var html = '<div class="rich-head"><div class="rh-label">PIX · movimentações recentes</div><div class="rh-acct">Conta '+conta+'</div></div><div class="stmt-list">';
+    pix.forEach(function(it){
       var din = it.dir==='in';
       html += '<div class="stmt-item">'+
         '<div class="si-ic '+it.dir+'">'+it.ic+'</div>'+
@@ -390,7 +399,7 @@
     return 'fallback';
   }
 
-  function respond(q){
+  function respondSim(q){
     var intent = classify(q);
     var t = typing();
 
@@ -446,6 +455,83 @@
         addBotText('Ainda estou focado em consultas de <b>saldo</b> e <b>extrato</b> nesta demo 🙂 Experimente perguntar <i>"qual meu saldo?"</i> ou <i>"ver extrato"</i>.');
       }, 800);
     }
+  }
+
+  /* ── MODO REAL (backend + Claude) ──
+     O backend decide quais tools chamar via Claude e devolve:
+       { reply, steps:[{tool, meta, data}] }
+     Renderizamos o chip da tool + o card a partir de `data`, depois o texto. */
+  var MODE = 'sim';         // 'sim' | 'real' — definido pelo /api/health
+  var history = [];         // histórico enviado ao backend
+
+  // probe: se houver backend com chave, entra em modo real
+  try {
+    fetch('/api/health').then(function(r){ return r.ok ? r.json() : null; }).then(function(h){
+      if(h && h.ready){
+        MODE = 'real';
+        var st = document.querySelector('.asst-status');
+        if(st){ st.innerHTML = '<span class="dot"></span> Online · Claude conectado'; }
+      }
+    }).catch(function(){});
+  } catch(e){}
+
+  function toolCallAsync(name, meta){
+    return new Promise(function(res){ toolCall(name, meta || '', res); });
+  }
+
+  function cardForStep(step){
+    var d = step.data || {};
+    switch(step.tool){
+      case 'consultar_saldo':   return saldoCard(d);
+      case 'consultar_extrato': return extratoCard(d.grupos, d.conta);
+      case 'consultar_gastos':  return gastosCard(d.gastos, d.total);
+      case 'consultar_pix':     return pixCard(d.pix, d.conta);
+      default: return null;
+    }
+  }
+
+  function respondReal(q){
+    var t = typing();
+    history.push({ role:'user', content:q });
+    fetch('/api/chat', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ messages: history })
+    })
+    .then(function(r){
+      if(!r.ok) throw new Error('http '+r.status);
+      return r.json();
+    })
+    .then(function(data){
+      t.remove();
+      // Renderiza os chips/cards das tools, um após o outro, e então o texto.
+      var chain = Promise.resolve();
+      (data.steps || []).forEach(function(step){
+        chain = chain.then(function(){
+          return toolCallAsync(step.tool, step.meta).then(function(){
+            var card = cardForStep(step);
+            if(card) addRich(card);
+          });
+        });
+      });
+      chain.then(function(){
+        if(data.reply){
+          addBotText(data.reply);
+          history.push({ role:'assistant', content:data.reply });
+        }
+      });
+    })
+    .catch(function(){
+      // Sem backend/erro → cai no modo simulado para não travar a demo.
+      t.remove();
+      history.pop();
+      respondSim(q);
+    });
+  }
+
+  function respond(q){
+    if(MODE === 'real'){ respondReal(q); }
+    else { respondSim(q); }
   }
 
   /* ── SEND ── */
