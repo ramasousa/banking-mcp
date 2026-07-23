@@ -49,10 +49,16 @@ app.use((req, res, next) => {
   next();
 });
 
-// Metadados de OAuth + endpoints /authorize e /token (sempre públicos).
-app.use(authRouter());
+// OAuth só entra em cena quando MCP_REQUIRE_AUTH=true. Com auth DESLIGADA
+// (padrão do demo), NÃO anunciamos metadados nem endpoints de OAuth — assim o
+// Claude conecta direto ao /mcp, sem tela de consentimento nem callback (que é
+// onde o fluxo de OAuth pode falhar). Para demonstrar o OAuth+PKCE, basta ligar
+// MCP_REQUIRE_AUTH=true.
+if (REQUIRE_AUTH) {
+  app.use(authRouter());
+}
 
-// Endpoint MCP — protegido por Bearer (a menos que MCP_REQUIRE_AUTH=false).
+// Endpoint MCP — protegido por Bearer só quando REQUIRE_AUTH está ligada.
 const guard = REQUIRE_AUTH
   ? requireAuth
   : (_req, _res, next) => next();
