@@ -1,0 +1,31 @@
+# ─────────────────────────────────────────────────────────────
+# Blueprint do Render — deploy do MCP Server remoto (HTTP) SEM notebook.
+#
+# Como usar (tudo pelo navegador, dá no iPad):
+#   1. Acesse https://render.com e entre com o GitHub.
+#   2. New → Blueprint → escolha o repositório ramasousa/banking-mcp.
+#   3. Confirme. O Render lê este arquivo e sobe o serviço.
+#   4. No fim você recebe uma URL pública, ex.:
+#        https://bradesco-banking-mcp.onrender.com
+#      O endpoint do connector é essa URL + /mcp.
+#
+# A URL pública é injetada automaticamente (RENDER_EXTERNAL_URL), então os
+# metadados de OAuth já apontam para o host certo — sem config manual.
+#
+# 1º teste começa SEM OAuth (MCP_REQUIRE_AUTH=false) para garantir que as
+# tools aparecem no Claude. Depois, para ver o fluxo OAuth+PKCE, mude essa
+# variável para "true" no painel do Render (Environment) e reconecte.
+#
+# Dados 100% fictícios (mock-bank.js) — nenhuma conta real é exposta.
+# Plano free: o serviço "dorme" após inatividade; a 1ª chamada leva ~50s.
+# ─────────────────────────────────────────────────────────────
+services:
+  - type: web
+    name: bradesco-banking-mcp
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm run mcp:http
+    envVars:
+      - key: MCP_REQUIRE_AUTH
+        value: "false"
