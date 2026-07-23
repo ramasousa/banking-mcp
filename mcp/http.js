@@ -27,6 +27,28 @@ const REQUIRE_AUTH = process.env.MCP_REQUIRE_AUTH !== 'false';
 
 const app = express();
 
+// ── CORS ──────────────────────────────────────────────────────
+// Clientes MCP baseados em navegador (ex.: o Claude.ai ao DESCOBRIR as
+// ferramentas via tools/list) fazem a chamada pelo browser. Sem estes
+// cabeçalhos, o navegador bloqueia a resposta e aparece "Não foi possível
+// recarregar as ferramentas do servidor". Também respondemos ao preflight
+// OPTIONS e expomos o Mcp-Session-Id / WWW-Authenticate.
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  res.header('Access-Control-Allow-Origin', origin || '*');
+  if (origin) res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Vary', 'Origin');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, Accept, mcp-session-id, mcp-protocol-version',
+  );
+  res.header('Access-Control-Expose-Headers', 'Mcp-Session-Id, WWW-Authenticate');
+  res.header('Access-Control-Max-Age', '86400');
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
+
 // Metadados de OAuth + endpoints /authorize e /token (sempre públicos).
 app.use(authRouter());
 
