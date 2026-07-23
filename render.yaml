@@ -6,8 +6,13 @@
 #   2. New → Blueprint → escolha o repositório ramasousa/banking-mcp.
 #   3. Confirme. O Render lê este arquivo e sobe o serviço.
 #   4. No fim você recebe uma URL pública, ex.:
-#        https://bradesco-banking-mcp.onrender.com
+#        https://mcp-conta-demo.onrender.com
 #      O endpoint do connector é essa URL + /mcp.
+#
+# ⚠️ NÃO use o nome de um banco real no `name` abaixo (vira o subdomínio
+# .onrender.com). Um host de terceiro com nome de banco é sinalizado como
+# phishing pelo Google Safe Browsing e bloqueado nos navegadores. Mantenha
+# um nome NEUTRO de demonstração.
 #
 # A URL pública é injetada automaticamente (RENDER_EXTERNAL_URL), então os
 # metadados de OAuth já apontam para o host certo — sem config manual.
@@ -21,7 +26,7 @@
 # ─────────────────────────────────────────────────────────────
 services:
   - type: web
-    name: bradesco-banking-mcp
+    name: mcp-conta-demo
     runtime: node
     plan: free
     buildCommand: npm install
