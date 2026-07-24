@@ -7,7 +7,9 @@
     "start": "node server.js",
     "dev": "node --watch server.js",
     "mcp:stdio": "node mcp/stdio.js",
-    "mcp:http": "node mcp/http.js"
+    "mcp:http": "node mcp/http.js",
+    "sap:stdio": "node sap-odata/stdio.js",
+    "sap:http": "node sap-odata/http.js"
   },
   "engines": {
     "node": ">=18"
