@@ -12,18 +12,25 @@
 //   • /register    → Dynamic Client Registration (stub)
 //   • requireAuth  → middleware que protege o endpoint /mcp
 //
-//   Claude.ai ──/authorize (PKCE)──▶ [consentimento] ──code──▶ Claude.ai
-//   Claude.ai ──/token (code+verifier)──▶ access_token
-//   Claude.ai ──/mcp  Authorization: Bearer <access_token>──▶ tools
+// Dois modos, escolhidos pelas variáveis de ambiente IDP_*:
 //
-// ⚠️ DEMO: os tokens são fictícios e ficam em memória. Em PRODUÇÃO:
-//   1) Em /authorize, REDIRECIONE para o IdP do Bradesco. No callback,
-//      troque o code do banco pelo token real do usuário e guarde-o
-//      associado ao seu authorization code.
-//   2) Em /token, devolva (ou referencie) esse token real.
-//   3) Troque o store em memória por Redis/DB e valide expiração/refresh.
-//   Alternativa recomendada: delegar TUDO ao IdP do Bradesco e deixar este
-//   servidor apenas como Resource Server (só valida o Bearer recebido).
+//  A) MOCK (sem IDP_*): /authorize mostra uma tela de consentimento de
+//     demonstração e emite um token fictício. Bom para testar o fluxo.
+//
+//  B) BROKER (com IDP_AUTHORIZE_URL/IDP_TOKEN_URL/IDP_CLIENT_ID): o servidor
+//     delega o LOGIN e o CONSENTIMENTO ao IdP real (ex.: Bradesco). É AQUI que
+//     o usuário vê QUEM está pedindo (seu client_id) e QUAIS escopos.
+//
+//     Claude ──/authorize──▶ [302] IdP do Bradesco (login + consentimento)
+//                                      │  ?code&state
+//     Claude ◀──/callback──────────────┘  (troca o code pelo token do usuário
+//                                          no /token do IdP e emite NOSSO code)
+//     Claude ──/token──▶ access_token ──/mcp Bearer──▶ tools ──▶ Axway
+//
+// ⚠️ Stores em memória e tokens de curta duração — em produção use Redis/DB,
+//    trate refresh/expiração, e registre o SEU app no portal do Bradesco/Axway
+//    (client_id próprio + redirect_uri = <PUBLIC_URL>/callback). NUNCA colete a
+//    senha do usuário: o login acontece sempre no domínio do banco.
 // ─────────────────────────────────────────────────────────────
 
 import crypto from 'node:crypto';
@@ -39,10 +46,31 @@ export const PUBLIC_URL =
 const ISSUER = PUBLIC_URL;
 const RESOURCE = `${ISSUER}/mcp`;
 const SCOPES = ['contas.saldo.read', 'contas.extrato.read'];
+const CALLBACK = `${ISSUER}/callback`;
 
-// Stores em memória (DEMO — não use em produção).
+// ── IdP externo (ex.: Bradesco) ────────────────────────────────
+// Quando configurado, o servidor vira um BROKER: o /authorize redireciona
+// para o IdP real (onde acontecem o login e o CONSENTIMENTO do usuário) e o
+// /callback troca o code pelo token do usuário. Sem estas variáveis, usa a
+// tela mock. Registre o SEU app no portal do Bradesco/Axway para obter o
+// client_id e cadastrar o redirect_uri = <PUBLIC_URL>/callback.
+// IDP_DEMO=true liga o IdP de demonstração embutido (mcp/demo-idp.js): o broker
+// passa a apontar para /idp/* deste mesmo servidor, sem precisar de credenciais
+// reais. Basta MCP_REQUIRE_AUTH=true + IDP_DEMO=true.
+const DEMO_IDP = process.env.IDP_DEMO === 'true';
+const IDP = {
+  authorizeUrl: process.env.IDP_AUTHORIZE_URL || (DEMO_IDP ? `${ISSUER}/idp/authorize` : undefined),
+  tokenUrl: process.env.IDP_TOKEN_URL || (DEMO_IDP ? `${ISSUER}/idp/token` : undefined),
+  clientId: process.env.IDP_CLIENT_ID || (DEMO_IDP ? 'demo-mcp-client' : undefined),
+  clientSecret: process.env.IDP_CLIENT_SECRET, // se o IdP exigir (client confidencial)
+  scope: process.env.IDP_SCOPE || 'openid profile contas.saldo.read contas.extrato.read',
+};
+const IDP_ENABLED = !!(IDP.authorizeUrl && IDP.tokenUrl && IDP.clientId);
+
+// Stores em memória (DEMO — troque por Redis/DB em produção).
 const codes = new Map(); // code  -> { clientId, redirectUri, codeChallenge, method, userToken, scope, exp }
 const tokens = new Map(); // token -> { clientId, sub, userToken, scope, exp }
+const pendentes = new Map(); // upstreamState -> { claudeRedirect, claudeState, claudeChallenge, verifier, exp }
 
 const now = () => Math.floor(Date.now() / 1000);
 const b64url = (buf) => buf.toString('base64url');
@@ -94,8 +122,10 @@ export function authRouter() {
     });
   });
 
-  // ── /authorize — valida PKCE e mostra o consentimento ──
-  // PRODUÇÃO: no lugar da tela abaixo, redirecione para o IdP do Bradesco.
+  // ── /authorize — início do fluxo ──
+  // É AQUI que o consentimento acontece. Com IdP configurado, redirecionamos
+  // para o banco (login + consentimento no domínio dele). Sem IdP, mostramos a
+  // tela mock de demonstração.
   router.get('/authorize', (req, res) => {
     const {
       redirect_uri,
@@ -109,10 +139,91 @@ export function authRouter() {
     if (code_challenge_method !== 'S256')
       return res.status(400).send('apenas code_challenge_method=S256 é suportado');
 
+    // ── BROKER: redireciona para o IdP real (ex.: Bradesco) ──
+    if (IDP_ENABLED) {
+      // PKCE NOVO para a etapa servidor↔IdP (independente do PKCE do Claude).
+      const verifier = rand(32);
+      const challenge = b64url(crypto.createHash('sha256').update(verifier).digest());
+      const upstreamState = rand(16);
+      pendentes.set(upstreamState, {
+        claudeRedirect: redirect_uri,
+        claudeState: req.query.state || '',
+        claudeChallenge: code_challenge, // PKCE do Claude, validado depois no /token
+        verifier,
+        exp: now() + 600,
+      });
+
+      const u = new URL(IDP.authorizeUrl);
+      u.searchParams.set('response_type', 'code');
+      u.searchParams.set('client_id', IDP.clientId);
+      u.searchParams.set('scope', IDP.scope);
+      u.searchParams.set('redirect_uri', CALLBACK); // cadastrado no IdP
+      u.searchParams.set('code_challenge', challenge);
+      u.searchParams.set('code_challenge_method', 'S256');
+      u.searchParams.set('state', upstreamState);
+      return res.redirect(u.toString());
+    }
+
+    // ── MOCK: tela de consentimento de demonstração ──
     const decision = new URL(`${ISSUER}/authorize/decision`);
     for (const k of ['client_id', 'redirect_uri', 'state', 'code_challenge', 'scope'])
       decision.searchParams.set(k, req.query[k] || '');
     res.type('html').send(consentPage(decision.toString(), req.query.scope));
+  });
+
+  // ── /callback — volta do IdP: troca o code pelo token do usuário ──
+  // O banco redireciona para cá com ?code&state. Trocamos o code pelo token
+  // real do usuário no /token do IdP e então emitimos NOSSO code para o Claude.
+  router.get('/callback', async (req, res) => {
+    const { code, state, error, error_description } = req.query;
+    if (error)
+      return res.status(400).send(`Erro do IdP: ${error} — ${error_description || ''}`);
+
+    const p = pendentes.get(state);
+    if (!p || p.exp < now())
+      return res.status(400).send('state inválido ou expirado.');
+    pendentes.delete(state);
+
+    let userToken;
+    try {
+      const body = new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: String(code || ''),
+        redirect_uri: CALLBACK,
+        code_verifier: p.verifier,
+        client_id: IDP.clientId,
+      });
+      const headers = { 'content-type': 'application/x-www-form-urlencoded' };
+      if (IDP.clientSecret)
+        headers.authorization =
+          'Basic ' + Buffer.from(`${IDP.clientId}:${IDP.clientSecret}`).toString('base64');
+
+      const r = await fetch(IDP.tokenUrl, { method: 'POST', headers, body });
+      if (!r.ok) throw new Error(`token endpoint respondeu ${r.status}`);
+      const tok = await r.json();
+      userToken = tok.access_token;
+      if (!userToken) throw new Error('resposta do IdP sem access_token');
+    } catch (e) {
+      console.error('Falha ao trocar code no IdP:', e?.message || e);
+      return res.status(502).send('Falha ao concluir a autorização no IdP.');
+    }
+
+    // Emite NOSSO authorization code para o Claude, guardando o token do usuário.
+    const ourCode = rand(24);
+    codes.set(ourCode, {
+      clientId: 'mcp-broker',
+      redirectUri: p.claudeRedirect,
+      codeChallenge: p.claudeChallenge,
+      method: 'S256',
+      userToken, // token REAL do usuário → usado pelos executores no Axway
+      scope: SCOPES.join(' '),
+      exp: now() + 300,
+    });
+
+    const back = new URL(p.claudeRedirect);
+    back.searchParams.set('code', ourCode);
+    if (p.claudeState) back.searchParams.set('state', p.claudeState);
+    res.redirect(back.toString());
   });
 
   // ── Aprovação do consentimento → emite o authorization code ──
