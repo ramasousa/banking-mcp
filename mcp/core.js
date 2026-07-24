@@ -1,14 +1,16 @@
 // ─────────────────────────────────────────────────────────────
 // Núcleo do MCP Server do Bradesco.
 //
-// Monta um servidor MCP que expõe as MESMAS 4 tools já definidas em
-// mock-bank.js (consultar_saldo, consultar_extrato, consultar_gastos,
-// consultar_pix), respondendo aos métodos padrão do protocolo:
-//   • tools/list  → lista as ferramentas (JSON Schema já pronto no mock)
+// Expõe o CATÁLOGO OFICIAL de tools (mcp/bradesco-catalog.js), conforme a
+// Especificação Técnica do Bradesco MCP Connector — Conta & Saldo, PIX,
+// Open Finance e Produtos Bancários, com title + anotações. Responde aos
+// métodos padrão do protocolo:
+//   • tools/list  → lista as ferramentas (com inputSchema/annotations)
 //   • tools/call  → executa a ferramenta e devolve o resultado
 //
 // Este core é agnóstico de transporte: é usado tanto pelo stdio.js
 // (Claude Desktop, local) quanto pelo http.js (Connector no Claude.ai).
+// (O chat demo em server.js continua usando o mock-bank.js diretamente.)
 // ─────────────────────────────────────────────────────────────
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -16,9 +18,9 @@ import {
   ListToolsRequestSchema,
   CallToolRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
-import { tools, executores } from '../mock-bank.js';
+import { tools, executores } from './bradesco-catalog.js';
 
-export const SERVER_INFO = { name: 'banking-mcp-demo', version: '1.0.0' };
+export const SERVER_INFO = { name: 'bradesco-mcp-connector', version: '1.0.0' };
 
 /**
  * Cria uma instância do MCP Server já com as tools registradas.
