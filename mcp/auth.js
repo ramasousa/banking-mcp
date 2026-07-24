@@ -54,12 +54,16 @@ const CALLBACK = `${ISSUER}/callback`;
 // /callback troca o code pelo token do usuário. Sem estas variáveis, usa a
 // tela mock. Registre o SEU app no portal do Bradesco/Axway para obter o
 // client_id e cadastrar o redirect_uri = <PUBLIC_URL>/callback.
+// IDP_DEMO=true liga o IdP de demonstração embutido (mcp/demo-idp.js): o broker
+// passa a apontar para /idp/* deste mesmo servidor, sem precisar de credenciais
+// reais. Basta MCP_REQUIRE_AUTH=true + IDP_DEMO=true.
+const DEMO_IDP = process.env.IDP_DEMO === 'true';
 const IDP = {
-  authorizeUrl: process.env.IDP_AUTHORIZE_URL, // endpoint de authorize do IdP
-  tokenUrl: process.env.IDP_TOKEN_URL, // endpoint de token do IdP
-  clientId: process.env.IDP_CLIENT_ID, // SEU client_id (não o de terceiros)
+  authorizeUrl: process.env.IDP_AUTHORIZE_URL || (DEMO_IDP ? `${ISSUER}/idp/authorize` : undefined),
+  tokenUrl: process.env.IDP_TOKEN_URL || (DEMO_IDP ? `${ISSUER}/idp/token` : undefined),
+  clientId: process.env.IDP_CLIENT_ID || (DEMO_IDP ? 'demo-mcp-client' : undefined),
   clientSecret: process.env.IDP_CLIENT_SECRET, // se o IdP exigir (client confidencial)
-  scope: process.env.IDP_SCOPE || 'openid profile',
+  scope: process.env.IDP_SCOPE || 'openid profile contas.saldo.read contas.extrato.read',
 };
 const IDP_ENABLED = !!(IDP.authorizeUrl && IDP.tokenUrl && IDP.clientId);
 

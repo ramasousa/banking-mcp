@@ -21,6 +21,7 @@ import express from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { createBankingServer } from './core.js';
 import { authRouter, requireAuth, PUBLIC_URL } from './auth.js';
+import { demoIdpRouter } from './demo-idp.js';
 
 const PORT = process.env.PORT || 3000;
 const REQUIRE_AUTH = process.env.MCP_REQUIRE_AUTH !== 'false';
@@ -56,6 +57,12 @@ app.use((req, res, next) => {
 // MCP_REQUIRE_AUTH=true.
 if (REQUIRE_AUTH) {
   app.use(authRouter());
+}
+
+// IdP de DEMONSTRAÇÃO embutido (/idp/*). Ligado por IDP_DEMO=true — o broker
+// (auth.js) aponta para cá automaticamente, exibindo o fluxo login+consentimento.
+if (process.env.IDP_DEMO === 'true') {
+  app.use(demoIdpRouter());
 }
 
 // Endpoint MCP — protegido por Bearer só quando REQUIRE_AUTH está ligada.
@@ -105,9 +112,17 @@ app.get('/mcp', methodNotAllowed);
 app.delete('/mcp', methodNotAllowed);
 
 app.listen(PORT, () => {
+  const demo = process.env.IDP_DEMO === 'true';
+  const idpReal = !!(process.env.IDP_AUTHORIZE_URL && process.env.IDP_TOKEN_URL && process.env.IDP_CLIENT_ID);
+  const modo = !REQUIRE_AUTH
+    ? 'DESLIGADA (MCP_REQUIRE_AUTH=false)'
+    : idpReal
+      ? 'broker → IdP real (IDP_*)'
+      : demo
+        ? 'broker → IdP de DEMONSTRAÇÃO (/idp)'
+        : 'mock (tela de consentimento demo)';
   console.log(`\n  Bradesco Banking MCP (HTTP)  →  ${PUBLIC_URL}/mcp`);
-  console.log(
-    `  OAuth: ${REQUIRE_AUTH ? '2.1 + PKCE (esqueleto, dados fictícios)' : 'DESLIGADA (MCP_REQUIRE_AUTH=false)'}`,
-  );
+  console.log(`  OAuth: ${modo}`);
+  if (REQUIRE_AUTH && demo && !idpReal) console.log(`  IdP demo: ${PUBLIC_URL}/idp/authorize`);
   console.log(`  Metadata: ${PUBLIC_URL}/.well-known/oauth-protected-resource\n`);
 });
