@@ -52,7 +52,7 @@ export const executores = {
   },
   of_get_account_transactions(i = {}) {
     if (!i.accountId) return err('accountId é obrigatório');
-    let tx = D.accountTransactions();
+    let tx = D.accountTransactions(i.accountId);
     if (i.fromBookingDate) tx = tx.filter((t) => t.transactionDateTime.slice(0, 10) >= i.fromBookingDate);
     if (i.toBookingDate) tx = tx.filter((t) => t.transactionDateTime.slice(0, 10) <= i.toBookingDate);
     if (i.creditDebitIndicator) tx = tx.filter((t) => t.creditDebitType === i.creditDebitIndicator);
@@ -69,15 +69,15 @@ export const executores = {
   },
   of_get_credit_card_limits(i = {}) {
     if (!i.creditCardAccountId) return err('creditCardAccountId é obrigatório');
-    return { data: listEnv(`/credit-cards-accounts/v2/accounts/${i.creditCardAccountId}/limits`, D.creditCardLimits(), pg(i)), meta: 'GET /credit-cards-accounts/v2/accounts/{id}/limits · 200' };
+    return { data: listEnv(`/credit-cards-accounts/v2/accounts/${i.creditCardAccountId}/limits`, D.creditCardLimits(i.creditCardAccountId), pg(i)), meta: 'GET /credit-cards-accounts/v2/accounts/{id}/limits · 200' };
   },
   of_get_credit_card_bills(i = {}) {
     if (!i.creditCardAccountId) return err('creditCardAccountId é obrigatório');
-    return { data: listEnv(`/credit-cards-accounts/v2/accounts/${i.creditCardAccountId}/bills`, D.creditCardBills(), pg(i)), meta: 'GET /credit-cards-accounts/v2/accounts/{id}/bills · 200' };
+    return { data: listEnv(`/credit-cards-accounts/v2/accounts/${i.creditCardAccountId}/bills`, D.creditCardBills(i.creditCardAccountId), pg(i)), meta: 'GET /credit-cards-accounts/v2/accounts/{id}/bills · 200' };
   },
   of_get_credit_card_bill_transactions(i = {}) {
     if (!i.creditCardAccountId || !i.billId) return err('creditCardAccountId e billId são obrigatórios');
-    const tx = D.creditCardBillTransactions(i.billId);
+    const tx = D.creditCardBillTransactions(i.creditCardAccountId, i.billId);
     return { data: listEnv(`/credit-cards-accounts/v2/accounts/${i.creditCardAccountId}/bills/${i.billId}/transactions`, tx, { ...pg(i), transactions: true }), meta: 'GET .../bills/{billId}/transactions · 200' };
   },
 
@@ -90,6 +90,17 @@ export const executores = {
   },
   of_get_personal_financial_relations() {
     return { data: singleEnv('/customers/v2/personal/financial-relations', D.PERSONAL_FINANCIAL_RELATION), meta: 'GET /customers/v2/personal/financial-relations · 200' };
+  },
+
+  // Customers (business — PJ)
+  of_get_business_identifications() {
+    return { data: listEnv('/customers/v2/business/identifications', [D.BUSINESS_IDENTIFICATION]), meta: 'GET /customers/v2/business/identifications · 200' };
+  },
+  of_get_business_qualifications() {
+    return { data: singleEnv('/customers/v2/business/qualifications', D.BUSINESS_QUALIFICATION), meta: 'GET /customers/v2/business/qualifications · 200' };
+  },
+  of_get_business_financial_relations() {
+    return { data: singleEnv('/customers/v2/business/financial-relations', D.BUSINESS_FINANCIAL_RELATION), meta: 'GET /customers/v2/business/financial-relations · 200' };
   },
 
   // Loans
@@ -131,6 +142,14 @@ export const executores = {
       VARIABLE_INCOME: '/variable-incomes/v1/investments',
     }[tipo];
     return { data: listEnv(path, arr, pg(i)), meta: `GET ${path} · 200` };
+  },
+
+  // ── Extensões (não fazem parte do padrão Open Finance) ──
+  select_account() {
+    return { data: { accounts: D.accountSelection() }, meta: 'extensão · seleção de conta PF/PJ' };
+  },
+  analytics_cross_pf_pj() {
+    return { data: D.analytics(), meta: 'extensão · cruzamento analítico PF × PJ (12 meses)' };
   },
 
   // ── Payments (PIX) — DESTRUCTIVE, simuladas com confirmação ──
@@ -214,6 +233,18 @@ export const tools = [
   T('of_get_personal_qualifications', 'Cadastro — qualificação (PF)', 'GET /customers/v2/personal/qualifications — ocupação, renda informada e patrimônio.',
     obj()),
   T('of_get_personal_financial_relations', 'Cadastro — relacionamento (PF)', 'GET /customers/v2/personal/financial-relations — produtos/serviços contratados e contas.',
+    obj()),
+
+  T('of_get_business_identifications', 'Cadastro — identificação (PJ)', 'GET /customers/v2/business/identifications — dados cadastrais da empresa (razão social, CNPJ, sócios, contatos).',
+    obj()),
+  T('of_get_business_qualifications', 'Cadastro — qualificação (PJ)', 'GET /customers/v2/business/qualifications — faturamento informado e patrimônio da empresa.',
+    obj()),
+  T('of_get_business_financial_relations', 'Cadastro — relacionamento (PJ)', 'GET /customers/v2/business/financial-relations — produtos/serviços e contas da empresa.',
+    obj()),
+
+  T('select_account', 'Selecionar conta (PF/PJ)', 'Extensão: lista as contas do cliente (PF e PJ) com titular, tipo e saldo, para o usuário ESCOLHER qual conta usar na jornada antes das demais consultas.',
+    obj()),
+  T('analytics_cross_pf_pj', 'Cruzamento analítico PF × PJ', 'Extensão: análise consolidada de 12 meses cruzando PF e PJ — saldos, fluxo de caixa mensal, entradas/saídas, dívida, fatura de cartão, além de indicadores cruzados (pró-labore PJ→PF, dependência da PF em relação à PJ, liquidez da PJ).',
     obj()),
 
   T('of_list_loans', 'Empréstimos (lista)', 'GET /loans/v2/contracts — contratos de empréstimo (productType, productSubType, ipocCode).',
