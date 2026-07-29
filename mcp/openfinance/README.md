@@ -45,6 +45,28 @@ valores dos swaggers oficiais.
 
 ⚠️ Destrutivas (fase 3): `destructiveHint`, **confirmação obrigatória** e execução **simulada**.
 
+## Cenário PF + PJ (multi-conta + cruzamento analítico)
+
+O mock simula **um cliente com duas entidades**:
+
+- **PF — Raul Sousa** (CPF): conta corrente `pf-cc-0001`, poupança `pf-poup-0001`, cartão VISA, empréstimo pessoal.
+- **PJ — Sousa Tech Ltda** (CNPJ): conta corrente `pj-cc-0001`, cartão corporativo MASTERCARD, capital de giro + financiamento.
+
+**12 meses** de extrato por conta, com transacionalidade **complexa e cruzada**:
+pró-labore/13º PJ→PF, folha de pagamento, impostos (DARF/DAS/FGTS/ISS),
+recebíveis de clientes com sazonalidade (Nov/Dez), fornecedores, aporte de
+capital de giro, gastos PF variados e investimentos.
+
+Tools adicionais (extensões, fora do padrão Open Finance):
+
+| Tool | O que faz |
+|---|---|
+| `select_account` | Lista as contas PF/PJ (titular, tipo, saldo) para a **seleção na jornada** |
+| `analytics_cross_pf_pj` | **Cruzamento analítico** 12m: saldos, fluxo de caixa mensal, entradas/saídas, dívida, indicadores (pró-labore PJ→PF, dependência PF, liquidez PJ) |
+
+E os endpoints **business** (PJ): `of_get_business_identifications`,
+`of_get_business_qualifications`, `of_get_business_financial_relations`.
+
 ## Arquivos
 
 - `of-helpers.js` — envelope (`listEnv`/`singleEnv`), formato de valores (`amt`), timestamps.
