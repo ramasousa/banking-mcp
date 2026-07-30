@@ -52,6 +52,14 @@
   .lanc .v{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}.v.pos{color:var(--live)}
   .sumline{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-top:8px;padding-top:8px;border-top:1px solid var(--card-line)}
   .lock{font-size:11px;color:var(--ink-2);margin-top:6px}
+  .ccard{border-radius:12px;padding:14px;color:#fff;background:linear-gradient(135deg,#3a4a7a,#1b2340);margin:2px 0 10px;position:relative;overflow:hidden;min-height:96px}
+  .ccard.pj{background:linear-gradient(135deg,#7a1327,#2a0910)}
+  .ccard .brand{position:absolute;top:12px;right:14px;font-weight:800;font-size:13px;letter-spacing:.05em;opacity:.95}
+  .ccard .num{font-size:16px;letter-spacing:.14em;margin-top:26px;font-variant-numeric:tabular-nums}
+  .ccard .holder{font-size:11px;opacity:.85;margin-top:8px;text-transform:uppercase;letter-spacing:.05em}
+  .kv{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-top:8px}
+  .bar{height:8px;border-radius:6px;background:var(--card-line);overflow:hidden;margin-top:5px}
+  .bar>i{display:block;height:100%;background:var(--live)}
   .composer{background:var(--chat);padding:8px 10px 12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid rgba(0,0,0,.05)}
   .qr{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}.qr.list{flex-direction:column}
   .qbtn{background:var(--qr);color:var(--qr-ink);border:1px solid var(--qr-border);border-radius:18px;padding:9px 14px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;box-shadow:0 1px 1px rgba(0,0,0,.06)}
@@ -78,7 +86,7 @@
 <script>
 const chat=document.getElementById('chat'),qrBox=document.getElementById('qr'),statusEl=document.getElementById('status');
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-let msgCount=0,lock=false; const state={accountId:null,period:'30d',rotulo:''};
+let msgCount=0,lock=false; const state={accountId:null,period:'30d',rotulo:'',cardId:null,billId:null,cardName:''};
 const now=()=>'10:'+String(12+(msgCount%40)).padStart(2,'0');
 const scroll=()=>chat.scrollTop=chat.scrollHeight;
 const wait=ms=>new Promise(r=>setTimeout(r,reduce?60:ms));
@@ -112,7 +120,43 @@ const STEPS={
     setOptions([{label:'✅ Autorizar compartilhamento',say:'Autorizar',next:'redirect'},{label:'Cancelar',next:'decline'}],true);}},
   redirect:{async render(){statusEl.textContent='digitando…';typing();await wait(550);untype();
     addBot('<div class="ttl">Redirecionando para o Open Finance…</div><div class="sub">Autenticando no banco detentor 🔄</div>',true);
-    await wait(1000);await botSeq([{html:'✅ <b>Consentimento autorizado.</b> Tudo pronto!'}]);go('select');}},
+    await wait(1000);await botSeq([{html:'✅ <b>Consentimento autorizado.</b> Tudo pronto!'}]);go('menu');}},
+  menu:{async render(){
+    await botSeq([{html:'O que você quer ver hoje? 👇'}]);
+    setOptions([{label:'🧾 Extrato',next:'select'},{label:'💳 Cartões',next:'cartoes'}],true);}},
+
+  cartoes:{async render(){
+    await botSeq([{html:'Qual cartão?'}]);
+    const cs=await fetchJSON('/api/cartoes');
+    if(cs.__erro||!Array.isArray(cs)){await botSeq([{html:'⚠️ Não consegui carregar os cartões.'}]);return setOptions([{label:'🔄 Tentar de novo',next:'cartoes'},{label:'🏠 Menu',next:'menu'}]);}
+    setOptions(cs.map(c=>({label:`${c.emoji} ${c.nome} <span class="mut">— ${c.bandeira}</span>`,say:c.nome,next:'card:'+c.cardId})).concat([{label:'🏠 Menu',next:'menu'}]),true);}},
+  cartao:{async render(){
+    const c=await fetchJSON('/api/cartao?cardId='+encodeURIComponent(state.cardId));
+    if(c.__erro){await botSeq([{html:'⚠️ '+c.__erro}]);return setOptions([{label:'🔁 Trocar cartão',next:'cartoes'}]);}
+    state.billId=c.fatura?c.fatura.billId:null; state.cardName=c.nome;
+    const pj=c.ownerType==='PESSOA_JURIDICA';
+    let html=`<div class="ccard ${pj?'pj':''}"><span class="brand">${c.bandeira}</span><div class="num">•••• •••• •••• ${c.last4}</div><div class="holder">${pj?'Sousa Tech Ltda':'Raul Sousa'}</div></div>`;
+    html+=`<div class="ttl">${c.nome}</div>`;
+    html+=`<div class="kv"><span>Limite usado</span><span>${c.usadoFmt} de ${c.limiteFmt}</span></div><div class="bar"><i style="width:${c.usoPct}%"></i></div>`;
+    html+=`<div class="kv"><span>Disponível</span><span style="color:var(--live);font-weight:700">${c.disponivelFmt}</span></div>`;
+    if(c.fatura){html+=`<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--card-line)"><div class="ttl">Fatura ${c.fatura.competencia} · ${c.fatura.status}</div><div class="saldo" style="font-size:18px">${c.fatura.totalFmt}</div><div class="sub">Vence ${c.fatura.vencimento} · mínimo ${c.fatura.minimoFmt}</div></div>`;}
+    await botSeq([{card:true,d:300,html}]);
+    const opts=[{label:'🔁 Trocar cartão',next:'cartoes'},{label:'📄 Faturas anteriores',next:'faturas'},{label:'🏠 Menu',next:'menu'}];
+    if(state.billId) opts.unshift({label:'🧾 Lançamentos da fatura',next:'faturaLanc'});
+    setOptions(opts);}},
+  faturaLanc:{async render(){
+    if(!state.billId){await botSeq([{html:'Selecione uma fatura primeiro.'}]);return setOptions([{label:'📄 Faturas',next:'faturas'}]);}
+    const f=await fetchJSON(`/api/fatura?cardId=${encodeURIComponent(state.cardId)}&billId=${encodeURIComponent(state.billId)}`);
+    if(f.__erro){await botSeq([{html:'⚠️ '+f.__erro}]);return setOptions([{label:'⬅️ Voltar',next:'cartao'}]);}
+    let html=`<div class="ttl">🧾 Fatura ${f.competencia} · total ${f.totalFmt}</div><div class="sub">${f.qtd} lançamentos</div>`;
+    f.lancamentos.forEach(l=>{html+=`<div class="lanc"><span><div>${l.desc}</div><div class="d">${l.sub}</div></span><span class="v">${l.valorFmt}</span></div>`;});
+    await botSeq([{card:true,d:300,html}]);
+    setOptions([{label:'⬅️ Voltar ao cartão',next:'cartao'},{label:'📄 Outras faturas',next:'faturas'},{label:'🏠 Menu',next:'menu'}]);}},
+  faturas:{async render(){
+    const fs=await fetchJSON('/api/faturas?cardId='+encodeURIComponent(state.cardId));
+    if(fs.__erro||!Array.isArray(fs)){await botSeq([{html:'⚠️ Não consegui carregar as faturas.'}]);return setOptions([{label:'⬅️ Voltar',next:'cartao'}]);}
+    await botSeq([{html:'Escolha uma fatura:'}]);
+    setOptions(fs.map(f=>({label:`${f.competencia} <span class="mut">— ${f.totalFmt} · ${f.status}</span>`,say:'Fatura '+f.competencia,next:'bill:'+state.cardId+'|'+f.billId})).concat([{label:'⬅️ Voltar ao cartão',next:'cartao'}]),true);}},
   select:{async render(){
     await botSeq([{html:'De qual conta você quer ver o extrato?'}]);
     const accs=await fetchJSON('/api/accounts');
@@ -126,7 +170,7 @@ const STEPS={
     e.lancamentos.forEach(l=>{html+=`<div class="lanc"><span><div>${l.desc}</div><div class="d">${l.sub}</div></span><span class="v ${l.pos?'pos':''}">${l.valorFmt}</span></div>`;});
     html+=`<div class="sumline"><span>Entradas ${e.entradasFmt}</span><span>Saídas ${e.saidasFmt}</span></div>`;
     await botSeq([{card:true,d:300,html}]);
-    setOptions([{label:'📅 Filtrar período',next:'periodo'},{label:'📊 Ver por categoria',next:'categorias'},{label:'📄 Baixar PDF',next:'pdf'},{label:'🔁 Trocar conta',next:'select'}]);}},
+    setOptions([{label:'📅 Filtrar período',next:'periodo'},{label:'📊 Ver por categoria',next:'categorias'},{label:'🔁 Trocar conta',next:'select'},{label:'🏠 Menu',next:'menu'}]);}},
   periodo:{async render(){await botSeq([{html:'Qual período?'}]);
     setOptions([{label:'Últimos 7 dias',say:'7 dias',next:'per:7d'},{label:'Últimos 30 dias',say:'30 dias',next:'per:30d'},{label:'Últimos 90 dias',say:'90 dias',next:'per:90d'}]);}},
   categorias:{async render(){
@@ -145,6 +189,8 @@ const STEPS={
 function go(id){
   if(id.startsWith('ext:')){const[,rest]=id.split('ext:');const[acc,rot]=rest.split('|');state.accountId=acc;state.rotulo=decodeURIComponent(rot||'');state.period='30d';return STEPS.extrato.render();}
   if(id.startsWith('per:')){state.period=id.split(':')[1];return STEPS.extrato.render();}
+  if(id.startsWith('card:')){state.cardId=id.slice(5);state.billId=null;return STEPS.cartao.render();}
+  if(id.startsWith('bill:')){const[,rest]=id.split('bill:');const[cid,bid]=rest.split('|');state.cardId=cid;state.billId=bid;return STEPS.faturaLanc.render();}
   const s=STEPS[id];if(s)s.render();
 }
 function hardReset(){chat.innerHTML='<div class="daychip">HOJE · 23 jul 2026</div>';qrBox.innerHTML='';msgCount=0;state.accountId=null;state.period='30d';go('start');}
