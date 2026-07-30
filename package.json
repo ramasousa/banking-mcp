@@ -9,7 +9,8 @@
     "mcp:stdio": "node mcp/stdio.js",
     "mcp:http": "node mcp/http.js",
     "sap:stdio": "node sap-odata/stdio.js",
-    "sap:http": "node sap-odata/http.js"
+    "sap:http": "node sap-odata/http.js",
+    "proto": "node proto/server.js"
   },
   "engines": {
     "node": ">=18"

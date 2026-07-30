@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<title>Protótipo VIVO · Extrato no WhatsApp</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    color-scheme: light dark;
+    --page:#d7dbe0; --frame:#111b21; --hdr:#008069; --hdr-ink:#fff;
+    --chat:#efeae2; --chat-pattern:rgba(0,0,0,.03);
+    --in:#fff; --out:#d9fdd3; --ink:#111b21; --ink-2:#54656f; --tick:#53bdeb;
+    --qr:#fff; --qr-ink:#008069; --qr-border:#e4e4e4;
+    --ribbon:#8a6d00; --ribbon-bg:#ffe9a8; --card-line:#eceff1; --live:#1fa855;
+  }
+  @media (prefers-color-scheme: dark){:root:where(:not([data-theme="light"])){
+    --page:#0a0f13; --frame:#000; --hdr:#202c33; --hdr-ink:#e9edef;
+    --chat:#0b141a; --chat-pattern:rgba(255,255,255,.02);
+    --in:#202c33; --out:#005c4b; --ink:#e9edef; --ink-2:#8696a0;
+    --qr:#202c33; --qr-ink:#00a884; --qr-border:#2a3942; --ribbon:#ffe08a; --ribbon-bg:#3a2f00; --card-line:#2a3942; --live:#39c46e;
+  }}
+  :root[data-theme="dark"]{--page:#0a0f13;--frame:#000;--hdr:#202c33;--hdr-ink:#e9edef;--chat:#0b141a;--chat-pattern:rgba(255,255,255,.02);--in:#202c33;--out:#005c4b;--ink:#e9edef;--ink-2:#8696a0;--qr:#202c33;--qr-ink:#00a884;--qr-border:#2a3942;--ribbon:#ffe08a;--ribbon-bg:#3a2f00;--card-line:#2a3942;--live:#39c46e}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);min-height:100vh;display:flex;flex-direction:column;align-items:center;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:12px;gap:8px}
+  .ribbon{max-width:440px;width:100%;background:var(--ribbon-bg);color:var(--ribbon);border-radius:10px;font-size:11.5px;font-weight:700;text-align:center;padding:7px 10px}
+  .ribbon .live{color:var(--live)}
+  .phone{width:100%;max-width:440px;height:min(86vh,820px);background:var(--frame);border-radius:26px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+  .hdr{background:var(--hdr);color:var(--hdr-ink);display:flex;align-items:center;gap:10px;padding:12px}
+  .back{font-size:20px;opacity:.9}
+  .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#00a884,#008069);display:grid;place-items:center;color:#fff;font-weight:800;font-size:16px}
+  .who{flex:1;min-width:0}.who .n{font-weight:600;font-size:15px;display:flex;align-items:center;gap:6px}
+  .who .n .tag{font-size:9px;font-weight:800;background:rgba(255,255,255,.2);padding:1px 6px;border-radius:6px}
+  .who .s{font-size:12px;opacity:.85}
+  .theme{background:transparent;border:0;color:inherit;cursor:pointer;font-size:16px}
+  .restart{background:rgba(255,255,255,.16);color:var(--hdr-ink);border:0;border-radius:8px;font:inherit;font-size:12px;font-weight:600;padding:6px 10px;cursor:pointer}
+  .chat{flex:1;overflow-y:auto;background:var(--chat);background-image:radial-gradient(var(--chat-pattern) 1px,transparent 1px);background-size:22px 22px;padding:12px 10px 6px;display:flex;flex-direction:column;gap:4px;scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){.chat{scroll-behavior:auto}}
+  .daychip{align-self:center;background:var(--in);color:var(--ink-2);font-size:11px;font-weight:600;padding:4px 10px;border-radius:8px;margin:6px 0;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+  .row{display:flex;max-width:100%}.row.in{justify-content:flex-start}.row.out{justify-content:flex-end}
+  .bub{max-width:82%;padding:7px 9px 5px;border-radius:10px;font-size:14px;line-height:1.4;color:var(--ink);box-shadow:0 1px 1px rgba(0,0,0,.08);white-space:pre-wrap;word-wrap:break-word;animation:pop .18s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.bub{animation:none}}
+  .in .bub{background:var(--in);border-top-left-radius:2px}.out .bub{background:var(--out);border-top-right-radius:2px}
+  .bub .time{font-size:10px;color:var(--ink-2);float:right;margin:6px 0 -2px 8px}
+  .out .bub .time::after{content:" ✓✓";color:var(--tick)}
+  .typing{display:inline-flex;gap:3px;padding:10px 12px}
+  .typing i{width:7px;height:7px;border-radius:50%;background:var(--ink-2);opacity:.5;animation:blink 1s infinite}
+  .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:.9;transform:translateY(-2px)}}
+  .card .ttl{font-weight:700;font-size:13.5px;margin-bottom:2px}.card .sub{font-size:12px;color:var(--ink-2);margin-bottom:8px}
+  .saldo{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+  .lanc{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--card-line);font-size:13px}
+  .lanc:last-child{border-bottom:0}.lanc .d{color:var(--ink-2);font-size:11px}
+  .lanc .v{font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}.v.pos{color:var(--live)}
+  .sumline{display:flex;justify-content:space-between;font-size:12px;color:var(--ink-2);margin-top:8px;padding-top:8px;border-top:1px solid var(--card-line)}
+  .lock{font-size:11px;color:var(--ink-2);margin-top:6px}
+  .composer{background:var(--chat);padding:8px 10px 12px;display:flex;flex-direction:column;gap:6px;border-top:1px solid rgba(0,0,0,.05)}
+  .qr{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}.qr.list{flex-direction:column}
+  .qbtn{background:var(--qr);color:var(--qr-ink);border:1px solid var(--qr-border);border-radius:18px;padding:9px 14px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;box-shadow:0 1px 1px rgba(0,0,0,.06)}
+  .qr.list .qbtn{border-radius:10px;text-align:left;width:100%}
+  .qbtn:active{transform:scale(.98)}.qbtn .mut{color:var(--ink-2);font-weight:500}
+  .fakeinput{display:flex;align-items:center;gap:8px;background:var(--in);border-radius:22px;padding:9px 14px;color:var(--ink-2);font-size:13px}
+  .fakeinput .send{margin-left:auto;width:30px;height:30px;border-radius:50%;background:var(--hdr);display:grid;place-items:center;color:#fff}
+</style></head><body>
+
+<div class="ribbon"><span class="live">● VIVO</span> · dados reais das tools <b>of_*</b> via backend · PROTÓTIPO · simulação</div>
+
+<div class="phone">
+  <div class="hdr">
+    <span class="back">‹</span><div class="av">B</div>
+    <div class="who"><div class="n">Bradesco <span class="tag">PROTÓTIPO</span></div><div class="s" id="status">online</div></div>
+    <button class="theme" id="themeBtn">◐</button>
+    <button class="restart" id="restart">Recomeçar</button>
+  </div>
+  <div class="chat" id="chat"><div class="daychip">HOJE · 23 jul 2026</div></div>
+  <div class="composer"><div class="qr" id="qr"></div>
+    <div class="fakeinput">Mensagem (protótipo) <span class="send">➤</span></div></div>
+</div>
+
+<script>
+const chat=document.getElementById('chat'),qrBox=document.getElementById('qr'),statusEl=document.getElementById('status');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let msgCount=0,lock=false; const state={accountId:null,period:'30d',rotulo:''};
+const now=()=>'10:'+String(12+(msgCount%40)).padStart(2,'0');
+const scroll=()=>chat.scrollTop=chat.scrollHeight;
+const wait=ms=>new Promise(r=>setTimeout(r,reduce?60:ms));
+function addUser(t){msgCount++;const r=document.createElement('div');r.className='row out';r.innerHTML=`<div class="bub">${t}<span class="time">${now()}</span></div>`;chat.appendChild(r);scroll();}
+function addBot(h,card){msgCount++;const r=document.createElement('div');r.className='row in';r.innerHTML=`<div class="bub${card?' card':''}">${h}<span class="time">${now()}</span></div>`;chat.appendChild(r);scroll();}
+function typing(){const r=document.createElement('div');r.className='row in';r.id='typing';r.innerHTML=`<div class="bub"><span class="typing"><i></i><i></i><i></i></span></div>`;chat.appendChild(r);scroll();}
+function untype(){const t=document.getElementById('typing');if(t)t.remove();}
+function setOptions(opts,list){qrBox.className='qr'+(list?' list':'');qrBox.innerHTML='';opts.forEach(o=>{const b=document.createElement('button');b.className='qbtn';b.innerHTML=o.label;b.onclick=()=>{if(lock)return;qrBox.innerHTML='';addUser(o.say||o.label.replace(/<[^>]+>/g,''));go(o.next);};qrBox.appendChild(b);});}
+async function botSeq(msgs){lock=true;statusEl.textContent='digitando…';for(const m of msgs){typing();await wait(m.d||650);untype();addBot(m.html,m.card);await wait(160);}statusEl.textContent='online';lock=false;}
+async function fetchJSON(url){typing();statusEl.textContent='consultando…';try{const r=await fetch(url);const j=await r.json();untype();statusEl.textContent='online';return j;}catch(e){untype();statusEl.textContent='online';return {__erro:e.message||'falha'};}}
+
+const STEPS={
+  start:{render(){setOptions([{label:'Oi 👋',say:'Oi',next:'greet'}]);}},
+  greet:{async render(){await botSeq([
+    {html:'👋 Olá! Sou o assistente do <b>Bradesco</b> no WhatsApp <i>(protótipo)</i>. Posso te ajudar com saldo, extrato, cartões e pagamentos.'},
+    {html:'Para começar, você autoriza receber mensagens por aqui?'}]);
+    setOptions([{label:'✅ Autorizo',next:'auth'},{label:'Agora não',next:'decline'}]);}},
+  auth:{async render(){await botSeq([
+    {html:'Perfeito! Antes de acessar seus dados, preciso confirmar que é você. 🔐'},
+    {card:true,html:'<div class="ttl">Autenticação · simulação</div><div class="sub">Confirme com a biometria do app Bradesco.</div><div class="lock">🔒 Neste protótipo, nada real é acessado.</div>'}]);
+    setOptions([{label:'🔓 Autenticar (simulação)',say:'Autenticar',next:'authok'}]);}},
+  authok:{async render(){await botSeq([{html:'✅ Identidade confirmada, <b>Raul</b>.'}]);go('consent');}},
+  consent:{async render(){
+    const c=await fetchJSON('/api/consent');
+    const permTxt=c && !c.__erro ? `Status do consentimento: <b>${c.status}</b> · ${c.permissions} permissões.` : 'Vamos criar seu consentimento.';
+    await botSeq([
+      {html:'Para mostrar seu extrato, preciso da sua <b>autorização no Open Finance</b> — você no controle. 🔒'},
+      {card:true,d:800,html:'<div class="ttl">Compartilhamento de dados · Open Finance</div><div class="sub">O Bradesco vai poder ler, em seu nome:</div>'+
+        '<div class="lanc"><span>• Saldo das contas</span></div><div class="lanc"><span>• Extrato e lançamentos</span></div><div class="lanc"><span>• Cartões e limites</span></div>'+
+        `<div class="lock" style="margin-top:8px">${permTxt}</div>`}]);
+    setOptions([{label:'✅ Autorizar compartilhamento',say:'Autorizar',next:'redirect'},{label:'Cancelar',next:'decline'}],true);}},
+  redirect:{async render(){statusEl.textContent='digitando…';typing();await wait(550);untype();
+    addBot('<div class="ttl">Redirecionando para o Open Finance…</div><div class="sub">Autenticando no banco detentor 🔄</div>',true);
+    await wait(1000);await botSeq([{html:'✅ <b>Consentimento autorizado.</b> Tudo pronto!'}]);go('select');}},
+  select:{async render(){
+    await botSeq([{html:'De qual conta você quer ver o extrato?'}]);
+    const accs=await fetchJSON('/api/accounts');
+    if(accs.__erro||!Array.isArray(accs)){await botSeq([{html:'⚠️ Não consegui carregar as contas agora.'}]);return setOptions([{label:'🔄 Tentar de novo',next:'select'}]);}
+    setOptions(accs.map(a=>({label:`${a.emoji} ${a.rotulo} <span class="mut">— ${a.saldoFmt}</span>`,say:a.rotulo,next:'ext:'+a.accountId+'|'+encodeURIComponent(a.rotulo)})),true);}},
+  extrato:{async render(){
+    const e=await fetchJSON(`/api/extrato?accountId=${encodeURIComponent(state.accountId)}&period=${state.period}`);
+    if(e.__erro){await botSeq([{html:'⚠️ Não consegui carregar o extrato. '+e.__erro}]);return setOptions([{label:'🔁 Trocar conta',next:'select'}]);}
+    let html=`<div class="ttl">${e.titulo}</div><div class="sub">Saldo disponível</div><div class="saldo">${e.saldoFmt}</div>`+
+      `<div style="margin-top:10px;font-weight:700;font-size:12.5px">Últimos lançamentos · ${e.period}</div>`;
+    e.lancamentos.forEach(l=>{html+=`<div class="lanc"><span><div>${l.desc}</div><div class="d">${l.sub}</div></span><span class="v ${l.pos?'pos':''}">${l.valorFmt}</span></div>`;});
+    html+=`<div class="sumline"><span>Entradas ${e.entradasFmt}</span><span>Saídas ${e.saidasFmt}</span></div>`;
+    await botSeq([{card:true,d:300,html}]);
+    setOptions([{label:'📅 Filtrar período',next:'periodo'},{label:'📊 Ver por categoria',next:'categorias'},{label:'📄 Baixar PDF',next:'pdf'},{label:'🔁 Trocar conta',next:'select'}]);}},
+  periodo:{async render(){await botSeq([{html:'Qual período?'}]);
+    setOptions([{label:'Últimos 7 dias',say:'7 dias',next:'per:7d'},{label:'Últimos 30 dias',say:'30 dias',next:'per:30d'},{label:'Últimos 90 dias',say:'90 dias',next:'per:90d'}]);}},
+  categorias:{async render(){
+    const c=await fetchJSON(`/api/categorias?accountId=${encodeURIComponent(state.accountId)}&period=${state.period}`);
+    if(c.__erro){await botSeq([{html:'⚠️ '+c.__erro}]);return setOptions([{label:'⬅️ Voltar',next:'extrato'}]);}
+    let html=`<div class="ttl">📊 Saídas por categoria · ${state.period}</div>`;
+    c.itens.forEach(i=>{html+=`<div class="lanc"><span>${i.cat}</span><span class="v">${i.valorFmt}</span></div>`;});
+    await botSeq([{card:true,d:300,html}]);
+    setOptions([{label:'⬅️ Voltar ao extrato',next:'extrato'},{label:'🔁 Trocar conta',next:'select'}]);}},
+  pdf:{async render(){await botSeq([{html:'📄 Gerei seu extrato em PDF. <i>(No protótipo, seria enviado aqui como arquivo.)</i>'},{html:'Mais alguma coisa?'}]);
+    setOptions([{label:'Ver outro extrato',next:'select'},{label:'Encerrar',next:'bye'}]);}},
+  decline:{async render(){await botSeq([{html:'Sem problema! Quando quiser, é só chamar. 👋'}]);setOptions([{label:'🔄 Recomeçar',say:'Recomeçar',next:'reset'}]);}},
+  bye:{async render(){await botSeq([{html:'Combinado! Estou por aqui sempre que precisar. 👋'}]);setOptions([{label:'🔄 Recomeçar',say:'Recomeçar',next:'reset'}]);}},
+  reset:{render(){hardReset();}},
+};
+function go(id){
+  if(id.startsWith('ext:')){const[,rest]=id.split('ext:');const[acc,rot]=rest.split('|');state.accountId=acc;state.rotulo=decodeURIComponent(rot||'');state.period='30d';return STEPS.extrato.render();}
+  if(id.startsWith('per:')){state.period=id.split(':')[1];return STEPS.extrato.render();}
+  const s=STEPS[id];if(s)s.render();
+}
+function hardReset(){chat.innerHTML='<div class="daychip">HOJE · 23 jul 2026</div>';qrBox.innerHTML='';msgCount=0;state.accountId=null;state.period='30d';go('start');}
+document.getElementById('restart').onclick=hardReset;
+document.getElementById('themeBtn').onclick=()=>{const cur=document.documentElement.getAttribute('data-theme');const dark=cur?cur==='dark':matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.setAttribute('data-theme',dark?'light':'dark');};
+go('start');
+</script>
+</body></html>
