@@ -121,6 +121,66 @@ app.get('/api/categorias', async (req, res) => {
   res.json({ itens });
 });
 
+// ── Cartões ──────────────────────────────────────────────────
+const MESNOME = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const compFromBill = (billId) => (String(billId).match(/(\d{4})-(\d{2})$/) || [null, '', '']).slice(1);
+const compLabel = (billId) => { const [y, m] = compFromBill(billId); return m ? `${MESNOME[+m - 1]}/${y}` : ''; };
+const statusFatura = (b) => (b.payments && b.payments.length ? 'paga' : 'em aberto');
+
+app.get('/api/cartoes', async (_req, res) => {
+  const r = await call('of_list_credit_cards');
+  res.json(r.data.map((c) => ({
+    cardId: c.creditCardAccountId, nome: c.name, bandeira: c.creditCardNetwork,
+    ownerType: c.ownerType, emoji: c.ownerType === 'PESSOA_JURIDICA' ? '🏢' : '👤',
+  })));
+});
+
+app.get('/api/cartao', async (req, res) => {
+  const { cardId } = req.query;
+  if (!cardId) return res.status(400).json({ erro: 'cardId obrigatório' });
+  try {
+    const lim = (await call('of_get_credit_card_limits', { creditCardAccountId: cardId })).data[0] || {};
+    const bills = (await call('of_get_credit_card_bills', { creditCardAccountId: cardId })).data || [];
+    const c = (await call('of_list_credit_cards')).data.find((x) => x.creditCardAccountId === cardId) || {};
+    const atual = bills[0] || {};
+    const limite = Number(lim.limitAmount || 0), usado = Number(lim.usedAmount || 0);
+    res.json({
+      nome: c.name, bandeira: c.creditCardNetwork, ownerType: c.ownerType,
+      last4: c.ownerType === 'PESSOA_JURIDICA' ? '5678' : '1234',
+      limiteFmt: brl(limite), usadoFmt: brl(usado), disponivelFmt: brl(lim.availableAmount || 0),
+      usoPct: limite ? Math.min(100, Math.round((usado / limite) * 100)) : 0,
+      fatura: atual.billId ? {
+        billId: atual.billId, competencia: compLabel(atual.billId),
+        totalFmt: brl(atual.billTotalAmount), minimoFmt: brl(atual.billMinimumAmount),
+        vencimento: atual.dueDate, status: statusFatura(atual),
+      } : null,
+    });
+  } catch (e) { res.status(500).json({ erro: e?.message || 'falha' }); }
+});
+
+app.get('/api/faturas', async (req, res) => {
+  const { cardId } = req.query;
+  if (!cardId) return res.status(400).json({ erro: 'cardId obrigatório' });
+  const bills = (await call('of_get_credit_card_bills', { creditCardAccountId: cardId })).data || [];
+  res.json(bills.slice(0, 6).map((b) => ({
+    billId: b.billId, competencia: compLabel(b.billId), totalFmt: brl(b.billTotalAmount),
+    vencimento: b.dueDate, status: statusFatura(b),
+  })));
+});
+
+app.get('/api/fatura', async (req, res) => {
+  const { cardId, billId } = req.query;
+  if (!cardId || !billId) return res.status(400).json({ erro: 'cardId e billId obrigatórios' });
+  // pageSize alto para somar a fatura inteira (o endpoint pagina em 25 por padrão).
+  const tx = (await call('of_get_credit_card_bill_transactions', { creditCardAccountId: cardId, billId, pageSize: 300 })).data || [];
+  const total = tx.reduce((s, t) => s + Number(t.amount), 0);
+  const lancamentos = tx.slice(0, 8).map((t) => {
+    const d = String(t.billPostDate || t.transactionDateTime);
+    return { desc: t.transactionName, sub: `${t.transactionalAdditionalInfo || t.transactionType} · ${d.slice(8, 10)}/${d.slice(5, 7)}`, valorFmt: '− ' + brl(t.amount) };
+  });
+  res.json({ competencia: compLabel(billId), totalFmt: brl(total), qtd: tx.length, lancamentos });
+});
+
 app.listen(PORT, async () => {
   const t = await mcp.listTools();
   console.log(`\n  Protótipo "vivo" de extrato  →  http://localhost:${PORT}`);
