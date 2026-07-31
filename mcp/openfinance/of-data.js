@@ -15,7 +15,11 @@
 // canais que não passam perfil (connector do Claude, protótipo web).
 // ─────────────────────────────────────────────────────────────
 
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { amt, amtStr, rate, REQ_DT, CNPJ_BRADESCO, BRAND } from './of-helpers.js';
+import { expandSpec } from './profile-spec.js';
 
 const HOJE = { y: 2026, m: 7, d: 23 };
 
@@ -73,28 +77,50 @@ function loanListItem(c) { return { contractId: c.contractId, brandName: BRAND, 
 function loanPayments(c) { return { paidInstalments: c._payments.paidInstalments, contractOutstandingBalance: c._payments.contractOutstandingBalance, releases: [{ paymentId: `pay-${c.contractId}-1`, isOverParcelPayment: false, instalmentId: '1', paidDate: '2024-10-10', currency: 'BRL', paidAmount: c._instalments.proxima.valor.toFixed(2) }] }; }
 function loanInstalments(c) { return { typeNumberOfInstalments: 'MES', totalNumberOfInstalments: c._instalments.totalNumberOfInstalments, typeContractRemaining: 'MES', contractRemainingNumber: c._instalments.dueInstalments, paidInstalments: c._instalments.paidInstalments, dueInstalments: c._instalments.dueInstalments, pastDueInstalments: c._instalments.pastDueInstalments, balloonPayments: [] }; }
 
+// Deriva o conjunto de contas/produtos quando o cfg não traz `contas` explícito
+// (preserva o comportamento dos perfis internos).
+function deriveContas(cfg) {
+  const c = ['pf-cc'];
+  if (cfg.poupanca !== false) c.push('pf-poup');
+  c.push('pf-card', 'pf-loan', 'pf-invest');
+  if (cfg.hasPJ) { c.push('pj-cc', 'pj-card', 'pj-loan'); if (cfg.finPJ) c.push('pj-fin'); }
+  return c;
+}
+
 // ═════════════════════════════════════════════════════════════
 // FÁBRICA DE PERFIL — recebe a config e devolve o "bundle" de dados D.
+// `cfg.contas` (opcional) controla QUAIS contas/produtos existem:
+//   pf-cc, pf-poup, pf-card, pf-loan, pf-invest, pj-cc, pj-card, pj-loan, pj-fin
 // ═════════════════════════════════════════════════════════════
 function buildProfile(cfg) {
-  const hasPJ = !!cfg.hasPJ;
+  const contas = new Set(cfg.contas && cfg.contas.length ? cfg.contas : deriveContas(cfg));
+  const has = (t) => contas.has(t);
+  const hasPJ = has('pj-cc');
 
   // ── Entidades / contas ──
   const ENTITIES = {
-    PF: { personType: 'PESSOA_NATURAL', name: cfg.nome, document: cfg.cpf, accounts: ['pf-cc-0001', 'pf-poup-0001'], cards: ['pf-card-0001'], loans: ['pf-loan-0001'], financings: [] },
+    PF: {
+      personType: 'PESSOA_NATURAL', name: cfg.nome, document: cfg.cpf,
+      accounts: ['pf-cc-0001', ...(has('pf-poup') ? ['pf-poup-0001'] : [])],
+      cards: has('pf-card') ? ['pf-card-0001'] : [], loans: has('pf-loan') ? ['pf-loan-0001'] : [], financings: [],
+    },
   };
-  if (hasPJ) ENTITIES.PJ = { personType: 'PESSOA_JURIDICA', name: cfg.empresa, document: cfg.cnpj, accounts: ['pj-cc-0001'], cards: ['pj-card-0001'], loans: ['pj-loan-0001'], financings: cfg.finPJ ? ['pj-fin-0001'] : [] };
+  if (hasPJ) ENTITIES.PJ = {
+    personType: 'PESSOA_JURIDICA', name: cfg.empresa, document: cfg.cnpj,
+    accounts: ['pj-cc-0001'], cards: has('pj-card') ? ['pj-card-0001'] : [],
+    loans: has('pj-loan') ? ['pj-loan-0001'] : [], financings: has('pj-fin') ? ['pj-fin-0001'] : [],
+  };
 
   const ACCOUNTS = [
     { accountId: 'pf-cc-0001', ownerType: 'PESSOA_NATURAL', brandName: BRAND, companyCnpj: CNPJ_BRADESCO, type: 'CONTA_DEPOSITO_A_VISTA', compeCode: '237', branchCode: '1234', number: '567890', checkDigit: '0', currency: 'BRL' },
-    { accountId: 'pf-poup-0001', ownerType: 'PESSOA_NATURAL', brandName: BRAND, companyCnpj: CNPJ_BRADESCO, type: 'CONTA_POUPANCA', compeCode: '237', branchCode: '1234', number: '112233', checkDigit: '2', currency: 'BRL' },
   ];
+  if (has('pf-poup')) ACCOUNTS.push({ accountId: 'pf-poup-0001', ownerType: 'PESSOA_NATURAL', brandName: BRAND, companyCnpj: CNPJ_BRADESCO, type: 'CONTA_POUPANCA', compeCode: '237', branchCode: '1234', number: '112233', checkDigit: '2', currency: 'BRL' });
   if (hasPJ) ACCOUNTS.push({ accountId: 'pj-cc-0001', ownerType: 'PESSOA_JURIDICA', brandName: BRAND, companyCnpj: CNPJ_BRADESCO, type: 'CONTA_DEPOSITO_A_VISTA', compeCode: '237', branchCode: '1234', number: '998877', checkDigit: '5', currency: 'BRL' });
 
   const SALDO = {
     'pf-cc-0001': { availableAmount: cfg.saldoCC, blockedAmount: cfg.ccBlocked || 0, automaticallyInvestedAmount: 0 },
-    'pf-poup-0001': { availableAmount: cfg.saldoPoup, blockedAmount: 0, automaticallyInvestedAmount: 0 },
   };
+  if (has('pf-poup')) SALDO['pf-poup-0001'] = { availableAmount: cfg.saldoPoup, blockedAmount: 0, automaticallyInvestedAmount: 0 };
   if (hasPJ) SALDO['pj-cc-0001'] = { availableAmount: cfg.saldoPJ, blockedAmount: cfg.pjBlocked || 0, automaticallyInvestedAmount: cfg.pjInvested || 0 };
 
   function accountBalances(accountId) {
@@ -180,28 +206,26 @@ function buildProfile(cfg) {
     return tx.reverse();
   }
 
-  const TX = {
-    'pf-cc-0001': gerarPF(),
-    'pf-poup-0001': (() => {
-      const rng = rngFrom(cfg.seed.poup), tx = [];
-      MESES.forEach(({ y, m }) => {
-        let i = 0;
-        tx.push({ transactionId: tId('PP', y, m, i++), completedAuthorisedPaymentType: 'TRANSACAO_EFETIVADA', creditDebitType: 'CREDITO', transactionName: 'RENDIMENTO POUPANCA', type: 'RENDIMENTO_APLIC_FINANCEIRA', transactionAmount: amt(val(rng, 300, 520)), transactionDateTime: dt(y, m, 1) });
-        if (rng() > 0.5) tx.push({ transactionId: tId('PP', y, m, i++), completedAuthorisedPaymentType: 'TRANSACAO_EFETIVADA', creditDebitType: 'CREDITO', transactionName: 'DEPOSITO POUPANCA', type: 'DEPOSITO', transactionAmount: amt(val(rng, 1000, 4000)), transactionDateTime: dt(y, m, 6) });
-      });
-      return tx.reverse();
-    })(),
-  };
+  const TX = { 'pf-cc-0001': gerarPF() };
+  if (has('pf-poup')) TX['pf-poup-0001'] = (() => {
+    const rng = rngFrom(cfg.seed.poup), tx = [];
+    MESES.forEach(({ y, m }) => {
+      let i = 0;
+      tx.push({ transactionId: tId('PP', y, m, i++), completedAuthorisedPaymentType: 'TRANSACAO_EFETIVADA', creditDebitType: 'CREDITO', transactionName: 'RENDIMENTO POUPANCA', type: 'RENDIMENTO_APLIC_FINANCEIRA', transactionAmount: amt(val(rng, 300, 520)), transactionDateTime: dt(y, m, 1) });
+      if (rng() > 0.5) tx.push({ transactionId: tId('PP', y, m, i++), completedAuthorisedPaymentType: 'TRANSACAO_EFETIVADA', creditDebitType: 'CREDITO', transactionName: 'DEPOSITO POUPANCA', type: 'DEPOSITO', transactionAmount: amt(val(rng, 1000, 4000)), transactionDateTime: dt(y, m, 6) });
+    });
+    return tx.reverse();
+  })();
   if (hasPJ) TX['pj-cc-0001'] = gerarPJ();
   function accountTransactions(accountId) { return TX[accountId] || []; }
 
   // ── Cartões ──
-  const CREDIT_CARDS = [
-    { creditCardAccountId: 'pf-card-0001', ownerType: 'PESSOA_NATURAL', brandName: BRAND, companyCnpj: CNPJ_BRADESCO, name: cfg.cardPFName, productType: cfg.cardPFProd, productAdditionalInfo: null, creditCardNetwork: cfg.cardPFNet, networkAdditionalInfo: null },
-  ];
-  if (hasPJ) CREDIT_CARDS.push({ creditCardAccountId: 'pj-card-0001', ownerType: 'PESSOA_JURIDICA', brandName: BRAND, companyCnpj: CNPJ_BRADESCO, name: cfg.cardPJName, productType: 'BLACK', productAdditionalInfo: 'Cartão corporativo', creditCardNetwork: cfg.cardPJNet, networkAdditionalInfo: null });
-  const CARD_LIMIT = { 'pf-card-0001': cfg.cardLimitPF };
-  if (hasPJ) CARD_LIMIT['pj-card-0001'] = cfg.cardLimitPJ;
+  const CREDIT_CARDS = [];
+  if (has('pf-card')) CREDIT_CARDS.push({ creditCardAccountId: 'pf-card-0001', ownerType: 'PESSOA_NATURAL', brandName: BRAND, companyCnpj: CNPJ_BRADESCO, name: cfg.cardPFName, productType: cfg.cardPFProd, productAdditionalInfo: null, creditCardNetwork: cfg.cardPFNet, networkAdditionalInfo: null });
+  if (has('pj-card')) CREDIT_CARDS.push({ creditCardAccountId: 'pj-card-0001', ownerType: 'PESSOA_JURIDICA', brandName: BRAND, companyCnpj: CNPJ_BRADESCO, name: cfg.cardPJName, productType: 'BLACK', productAdditionalInfo: 'Cartão corporativo', creditCardNetwork: cfg.cardPJNet, networkAdditionalInfo: null });
+  const CARD_LIMIT = {};
+  if (has('pf-card')) CARD_LIMIT['pf-card-0001'] = cfg.cardLimitPF;
+  if (has('pj-card')) CARD_LIMIT['pj-card-0001'] = cfg.cardLimitPJ;
 
   function faturasDoCartao(cardId) {
     const isPJ = cardId === 'pj-card-0001';
@@ -219,8 +243,9 @@ function buildProfile(cfg) {
       return { billId: `bill-${cardId}-${y}-${dd(m)}`, competencia: `${y}-${dd(m)}`, dueDate: iso(mVenc === 1 ? y + 1 : y, mVenc, 7), status, total, lanc };
     }).reverse();
   }
-  const FATURAS = { 'pf-card-0001': faturasDoCartao('pf-card-0001') };
-  if (hasPJ) FATURAS['pj-card-0001'] = faturasDoCartao('pj-card-0001');
+  const FATURAS = {};
+  if (has('pf-card')) FATURAS['pf-card-0001'] = faturasDoCartao('pf-card-0001');
+  if (has('pj-card')) FATURAS['pj-card-0001'] = faturasDoCartao('pj-card-0001');
 
   function creditCardLimits(cardId) {
     const limite = CARD_LIMIT[cardId] || cfg.cardLimitPF;
@@ -242,12 +267,11 @@ function buildProfile(cfg) {
   }
 
   // ── Empréstimos / Financiamentos ──
-  const LOANS = [
-    loanContract({ id: 'pf-loan-0001', num: 'CTR-PF-2025-004417', productType: 'EMPRESTIMOS', subtype: 'CREDITO_PESSOAL_SEM_CONSIGNACAO', amount: cfg.loanPF.amount, outstanding: cfg.loanPF.outstanding, total: cfg.loanPF.total, paid: cfg.loanPF.paid, taxAM: cfg.loanPF.taxAM, prox: { valor: cfg.loanPF.prox, venc: '2026-08-10' } }),
-  ];
-  if (hasPJ) LOANS.push(loanContract({ id: 'pj-loan-0001', num: 'CTR-PJ-2026-000210', productType: 'EMPRESTIMOS', subtype: 'CAPITAL_GIRO_PRAZO_VENCIMENTO_SUPERIOR_365_DIAS', amount: cfg.loanPJ.amount, outstanding: cfg.loanPJ.outstanding, total: cfg.loanPJ.total, paid: cfg.loanPJ.paid, taxAM: cfg.loanPJ.taxAM, prox: { valor: cfg.loanPJ.prox, venc: '2026-08-10' } }));
+  const LOANS = [];
+  if (has('pf-loan')) LOANS.push(loanContract({ id: 'pf-loan-0001', num: 'CTR-PF-2025-004417', productType: 'EMPRESTIMOS', subtype: 'CREDITO_PESSOAL_SEM_CONSIGNACAO', amount: cfg.loanPF.amount, outstanding: cfg.loanPF.outstanding, total: cfg.loanPF.total, paid: cfg.loanPF.paid, taxAM: cfg.loanPF.taxAM, prox: { valor: cfg.loanPF.prox, venc: '2026-08-10' } }));
+  if (has('pj-loan')) LOANS.push(loanContract({ id: 'pj-loan-0001', num: 'CTR-PJ-2026-000210', productType: 'EMPRESTIMOS', subtype: 'CAPITAL_GIRO_PRAZO_VENCIMENTO_SUPERIOR_365_DIAS', amount: cfg.loanPJ.amount, outstanding: cfg.loanPJ.outstanding, total: cfg.loanPJ.total, paid: cfg.loanPJ.paid, taxAM: cfg.loanPJ.taxAM, prox: { valor: cfg.loanPJ.prox, venc: '2026-08-10' } }));
   const FINANCINGS = [];
-  if (hasPJ && cfg.finPJ) FINANCINGS.push(loanContract({ id: 'pj-fin-0001', num: 'CTR-PJ-2024-118820', productType: 'FINANCIAMENTOS', subtype: 'AQUISICAO_BENS_VEICULOS_AUTOMOTORES', amount: cfg.finPJ.amount, outstanding: cfg.finPJ.outstanding, total: cfg.finPJ.total, paid: cfg.finPJ.paid, taxAM: cfg.finPJ.taxAM, prox: { valor: cfg.finPJ.prox, venc: '2026-08-05' } }));
+  if (has('pj-fin') && cfg.finPJ) FINANCINGS.push(loanContract({ id: 'pj-fin-0001', num: 'CTR-PJ-2024-118820', productType: 'FINANCIAMENTOS', subtype: 'AQUISICAO_BENS_VEICULOS_AUTOMOTORES', amount: cfg.finPJ.amount, outstanding: cfg.finPJ.outstanding, total: cfg.finPJ.total, paid: cfg.finPJ.paid, taxAM: cfg.finPJ.taxAM, prox: { valor: cfg.finPJ.prox, venc: '2026-08-05' } }));
 
   // ── Consent ──
   const basePerms = ['ACCOUNTS_READ', 'ACCOUNTS_BALANCES_READ', 'ACCOUNTS_TRANSACTIONS_READ', 'ACCOUNTS_OVERDRAFT_LIMITS_READ', 'CREDIT_CARDS_ACCOUNTS_READ', 'CREDIT_CARDS_ACCOUNTS_LIMITS_READ', 'CREDIT_CARDS_ACCOUNTS_BILLS_READ', 'CREDIT_CARDS_ACCOUNTS_TRANSACTIONS_READ', 'CUSTOMERS_PERSONAL_IDENTIFICATIONS_READ', 'CUSTOMERS_PERSONAL_ADITTIONALINFO_READ', 'LOANS_READ', 'LOANS_PAYMENTS_READ', 'LOANS_SCHEDULED_INSTALMENTS_READ', 'RESOURCES_READ'];
@@ -273,7 +297,7 @@ function buildProfile(cfg) {
 
   // ── Investimentos (atrelados à PF, escalados por investFactor) ──
   const inv = (v) => amtStr(Number((v * (cfg.investFactor ?? 1)).toFixed(2)));
-  const INVESTMENTS = {
+  const INVESTMENTS = !has('pf-invest') ? { BANK_FIXED_INCOME: [], CREDIT_FIXED_INCOME: [], TREASURE_TITLE: [], FUND: [], VARIABLE_INCOME: [] } : {
     BANK_FIXED_INCOME: [{ investmentId: 'bfi-0001', brandName: BRAND, companyCnpj: CNPJ_BRADESCO, investmentType: 'CDB', updatedValue: { amount: inv(80000), currency: 'BRL' }, grossAmount: { amount: inv(80000), currency: 'BRL' }, netAmount: { amount: inv(78600), currency: 'BRL' }, dueDate: '2029-01-15' }],
     CREDIT_FIXED_INCOME: [{ investmentId: 'cfi-0001', brandName: BRAND, companyCnpj: CNPJ_BRADESCO, investmentType: 'LCI', updatedValue: { amount: inv(30000), currency: 'BRL' }, grossAmount: { amount: inv(30000), currency: 'BRL' }, netAmount: { amount: inv(30000), currency: 'BRL' }, dueDate: '2027-06-01' }],
     TREASURE_TITLE: [{ investmentId: 'tt-0001', brandName: BRAND, companyCnpj: CNPJ_BRADESCO, investmentType: 'TESOURO_SELIC', isinCode: 'BRSTNCLF1RA5', updatedValue: { amount: inv(52500), currency: 'BRL' }, grossAmount: { amount: inv(52500), currency: 'BRL' }, netAmount: { amount: inv(51800), currency: 'BRL' }, dueDate: '2029-03-01' }],
@@ -417,12 +441,37 @@ const PROFILE_CFGS = [
 ];
 
 export const DEFAULT_PROFILE = 'raul';
-const PROFILES = Object.fromEntries(PROFILE_CFGS.map((c) => [c.id, buildProfile(c)]));
+
+// ── Perfis extras carregados dinamicamente (sem editar código) ──
+//   1) arquivo mcp/openfinance/profiles.extra.json  (array de specs)
+//   2) env EXTRA_PROFILES  (array de specs em JSON) — ideal p/ Render
+// Cada spec é expandido (expandSpec) → massa determinística por id.
+function loadExtraSpecs() {
+  const specs = [];
+  try {
+    const __dir = dirname(fileURLToPath(import.meta.url));
+    const arr = JSON.parse(readFileSync(join(__dir, 'profiles.extra.json'), 'utf8'));
+    if (Array.isArray(arr)) specs.push(...arr);
+  } catch { /* arquivo é opcional */ }
+  try {
+    const arr = JSON.parse(process.env.EXTRA_PROFILES || '[]');
+    if (Array.isArray(arr)) specs.push(...arr);
+  } catch (e) { console.error('EXTRA_PROFILES inválido (ignorado):', e.message); }
+  return specs;
+}
+const EXTRA_CFGS = loadExtraSpecs()
+  .map((s) => { try { return expandSpec(s); } catch (e) { console.error('perfil extra ignorado:', e.message); return null; } })
+  .filter(Boolean);
+
+// Perfis internos + extras. Em caso de id repetido, o extra sobrescreve.
+const ALL_CFGS = [...PROFILE_CFGS, ...EXTRA_CFGS];
+const PROFILES = Object.fromEntries(ALL_CFGS.map((c) => [c.id, buildProfile(c)]));
 
 /** Devolve o bundle de dados do perfil (ou o default se id inválido/ausente). */
 export function getProfile(id) { return PROFILES[id] || PROFILES[DEFAULT_PROFILE]; }
 
-/** Metadados dos perfis (para o seletor no WhatsApp). */
+/** Metadados dos perfis (para o seletor no WhatsApp). Id repetido → último vence. */
 export function listProfiles() {
-  return PROFILE_CFGS.map((c) => ({ id: c.id, primeiro: c.primeiro, nome: c.nome, tipo: c.hasPJ ? 'PF + PJ' : 'PF', empresa: c.hasPJ ? c.empresa : null }));
+  const byId = new Map(ALL_CFGS.map((c) => [c.id, { id: c.id, primeiro: c.primeiro, nome: c.nome, tipo: c.hasPJ ? 'PF + PJ' : 'PF', empresa: c.hasPJ ? c.empresa : null }]));
+  return [...byId.values()];
 }

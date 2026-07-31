@@ -65,6 +65,37 @@ no seu perfil, sem precisar escolher.
 > Os demais canais (connector do Claude, protótipo web) continuam no perfil
 > padrão (`raul`) — o perfil só é selecionado nos webhooks do WhatsApp.
 
+### Gerar novos perfis (sem editar código)
+
+Um **gerador** cria a massa a partir do essencial (nome + quais contas); saldos,
+seeds/"offset", limites, empréstimos e cadastro são derivados de forma
+determinística (mesmo id → mesma massa).
+
+```bash
+# prévia (imprime o spec + o snippet para o Render)
+npm run gerar:perfil -- --primeiro João --tipo pfpj
+npm run gerar:perfil -- --primeiro Marina --contas pf-cc,pf-card,pf-loan
+npm run gerar:perfil -- --list          # lista os perfis atuais
+
+# salvar no arquivo (carregado automaticamente)
+npm run gerar:perfil -- --primeiro Bruno --tipo pfpj --saldo-cc 15000 --write
+```
+
+**Contas válidas:** `pf-cc pf-poup pf-card pf-loan pf-invest pj-cc pj-card pj-loan pj-fin`
+(`pj-cc` implica PJ; `--tipo pf|pfpj` é atalho para o conjunto padrão).
+**Overrides opcionais:** `--saldo-cc --saldo-poup --saldo-pj --pro-labore
+--renda-mensal --card-limite-pf --card-limite-pj --empresa --cnpj --cpf --cidade --uf`.
+
+Os perfis extras são carregados de duas formas (id repetido → o extra vence):
+1. **arquivo** `mcp/openfinance/profiles.extra.json` (array de specs — veja o
+   `.example.json`) — ideal se você commita;
+2. **env** `EXTRA_PROFILES` (o mesmo array em JSON) — ideal no Render, sem
+   alterar código.
+
+> **iPad, sem terminal?** Peça ao assistente para rodar o gerador, ou defina a
+> env `EXTRA_PROFILES` direto no Render com um array de specs, ex.:
+> `[{"primeiro":"João","tipo":"pfpj"},{"primeiro":"Marina","contas":["pf-cc","pf-card"]}]`
+
 ## Limitações honestas (WhatsApp real)
 
 - Sem UI rica: menus são **texto numerado** (o Sandbox restringe botões/listas).

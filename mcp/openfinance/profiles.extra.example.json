@@ -1,0 +1,5 @@
+[
+  { "primeiro": "João", "tipo": "pfpj" },
+  { "primeiro": "Marina", "contas": ["pf-cc", "pf-card", "pf-loan"] },
+  { "primeiro": "Bruno", "tipo": "pfpj", "saldoCC": 15000, "empresa": "BRUNO TECH LTDA" }
+]
