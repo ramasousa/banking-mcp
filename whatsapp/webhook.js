@@ -14,19 +14,12 @@
 // ─────────────────────────────────────────────────────────────
 
 import express from 'express';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { createBankingServer } from '../mcp/core.js';
+import { callFor, profiles, profileFor, setProfile, parseProfileCommand, pickerText, profileByIndex, profileMeta } from './multi.js';
 
 const PORT = process.env.PORT || 3300;
 
-// ── MCP em processo ──
-const [ct, st] = InMemoryTransport.createLinkedPair();
-const srv = createBankingServer(() => ({}));
-await srv.connect(st);
-const mcp = new Client({ name: 'wa-proto', version: '1.0.0' }, { capabilities: {} });
-await mcp.connect(ct);
-const call = async (n, a = {}) => JSON.parse((await mcp.callTool({ name: n, arguments: a })).content[0].text);
+// Chamada de tool amarrada ao perfil da sessão (cada pessoa vê os seus dados).
+const call = (s, n, a = {}) => callFor(s.profile, n, a);
 
 // ── Helpers ──
 const nf = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -43,14 +36,17 @@ const twiml = (msgs) => `<?xml version="1.0" encoding="UTF-8"?><Response>${[].co
 const sessions = new Map(); // from -> { step, ... }
 const RIBBON = 'PROTÓTIPO · dados fictícios';
 
-const greet = () => [
-  `👋 Olá! Sou o assistente do *Bradesco* no WhatsApp _(protótipo)_.\n\nPara começar, você autoriza receber mensagens por aqui?\n\nResponda *SIM*.`,
-];
+const greet = (s) => {
+  const nome = s?.profile ? profileMeta(s.profile).primeiro : '';
+  return [
+    `👋 Olá! Sou o assistente do *Bradesco* no WhatsApp _(protótipo)_.\n\n_Você está vendo a massa de teste de *${nome}*. Envie *sou <nome>* para trocar de perfil._\n\nPara começar, você autoriza receber mensagens por aqui?\n\nResponda *SIM*.`,
+  ];
+};
 const menuText = () => `O que você quer ver? 👇\n\n*1)* 🧾 Extrato\n*2)* 💳 Cartões\n\nResponda com o número. (digite *menu* a qualquer momento; *recomeçar* para reiniciar)`;
 
 // ── Extrato ──
 async function listAccounts(s) {
-  s.accounts = (await call('select_account')).accounts;
+  s.accounts = (await call(s, 'select_account')).accounts;
   s.step = 'selConta';
   let t = 'De qual conta você quer ver o extrato?\n\n';
   s.accounts.forEach((a, i) => { t += `*${i + 1})* ${a.rotulo} — ${brl(a.saldo_disponivel.amount)}\n`; });
@@ -58,8 +54,8 @@ async function listAccounts(s) {
 }
 async function extratoView(s) {
   const acc = s.accounts.find((a) => a.accountId === s.accountId) || {};
-  const bal = await call('of_get_account_balances', { accountId: s.accountId });
-  const tx = (await call('of_get_account_transactions', { accountId: s.accountId, fromBookingDate: fromBooking(s.period), pageSize: 1000 })).data || [];
+  const bal = await call(s, 'of_get_account_balances', { accountId: s.accountId });
+  const tx = (await call(s, 'of_get_account_transactions', { accountId: s.accountId, fromBookingDate: fromBooking(s.period), pageSize: 1000 })).data || [];
   let ent = 0, sai = 0;
   tx.forEach((t) => { const v = +t.transactionAmount.amount; if (t.creditDebitType === 'CREDITO') ent += v; else sai += v; });
   const rec = [...tx].sort((a, b) => b.transactionDateTime.localeCompare(a.transactionDateTime)).slice(0, 5);
@@ -70,7 +66,7 @@ async function extratoView(s) {
   return t;
 }
 async function categorias(s) {
-  const tx = (await call('of_get_account_transactions', { accountId: s.accountId, fromBookingDate: fromBooking(s.period), creditDebitIndicator: 'DEBITO', pageSize: 1000 })).data || [];
+  const tx = (await call(s, 'of_get_account_transactions', { accountId: s.accountId, fromBookingDate: fromBooking(s.period), creditDebitIndicator: 'DEBITO', pageSize: 1000 })).data || [];
   const m = {}; tx.forEach((t) => { m[t.type] = (m[t.type] || 0) + +t.transactionAmount.amount; });
   const top = Object.entries(m).sort((a, b) => b[1] - a[1]).slice(0, 6);
   let t = `📊 Saídas por categoria · ${s.period}\n\n`;
@@ -81,15 +77,15 @@ async function categorias(s) {
 
 // ── Cartões ──
 async function listCards(s) {
-  s.cards = (await call('of_list_credit_cards')).data;
+  s.cards = (await call(s, 'of_list_credit_cards')).data;
   s.step = 'selCartao';
   let t = 'Qual cartão?\n\n';
   s.cards.forEach((c, i) => { t += `*${i + 1})* ${c.ownerType === 'PESSOA_JURIDICA' ? '🏢' : '👤'} ${c.name} — ${c.creditCardNetwork}\n`; });
   return t + '\nResponda com o número.';
 }
 async function cartaoView(s) {
-  const lim = (await call('of_get_credit_card_limits', { creditCardAccountId: s.cardId })).data[0] || {};
-  const bills = (await call('of_get_credit_card_bills', { creditCardAccountId: s.cardId })).data || [];
+  const lim = (await call(s, 'of_get_credit_card_limits', { creditCardAccountId: s.cardId })).data[0] || {};
+  const bills = (await call(s, 'of_get_credit_card_bills', { creditCardAccountId: s.cardId })).data || [];
   const c = s.cards.find((x) => x.creditCardAccountId === s.cardId) || {};
   const b = bills[0] || {};
   s.billId = b.billId || null; s.bills = bills;
@@ -102,7 +98,7 @@ async function cartaoView(s) {
   return t;
 }
 async function faturaView(s) {
-  const tx = (await call('of_get_credit_card_bill_transactions', { creditCardAccountId: s.cardId, billId: s.billId, pageSize: 300 })).data || [];
+  const tx = (await call(s, 'of_get_credit_card_bill_transactions', { creditCardAccountId: s.cardId, billId: s.billId, pageSize: 300 })).data || [];
   const total = tx.reduce((a, t) => a + Number(t.amount), 0);
   const top = tx.slice(0, 8);
   let t = `🧾 Fatura *${compLabel(s.billId)}* · total ${brl(total)} (${tx.length} lançamentos)\n\n`;
@@ -111,7 +107,7 @@ async function faturaView(s) {
   return t + '\n*1)* Voltar ao cartão  *0)* Menu';
 }
 async function listFaturas(s) {
-  const bills = s.bills || (await call('of_get_credit_card_bills', { creditCardAccountId: s.cardId })).data;
+  const bills = s.bills || (await call(s, 'of_get_credit_card_bills', { creditCardAccountId: s.cardId })).data;
   s.bills = bills; s.step = 'faturasMenu';
   let t = 'Escolha uma fatura:\n\n';
   bills.slice(0, 6).forEach((b, i) => { t += `*${i + 1})* ${compLabel(b.billId)} — ${brl(b.billTotalAmount)} · ${b.payments && b.payments.length ? 'paga' : 'em aberto'}\n`; });
@@ -126,8 +122,33 @@ async function handle(from, raw) {
   const low = body.toLowerCase();
   let s = sessions.get(from);
 
-  if (/^(recome[çc]ar|reiniciar|reset|sair)$/.test(low) || !s || /^(oi|ol[áa]|come[çc]ar|start|in[íi]cio)$/.test(low)) {
-    s = { step: 'optin' }; sessions.set(from, s); return greet();
+  // ── Comando global de perfil (troca a qualquer momento) ──
+  const pc = parseProfileCommand(body);
+  if (pc === '__list__') {
+    const cur = s?.profile ? profileMeta(s.profile).primeiro : '—';
+    return `Perfil atual: *${cur}*.\n\n` + pickerText();
+  }
+  if (pc && pc !== '__unknown__') {
+    setProfile(from, pc); s = { step: 'optin', profile: pc }; sessions.set(from, s);
+    return [`✅ Pronto! Agora você vê a massa de teste de *${profileMeta(pc).primeiro}* _(dados fictícios)_.`, ...greet(s)];
+  }
+  if (pc === '__unknown__') return 'Não reconheci esse nome. ' + pickerText();
+
+  // ── Seleção de perfil obrigatória antes de tudo ──
+  if (!s || !s.profile) {
+    const known = profileFor(from);
+    if (known) { s = { step: 'optin', profile: known }; sessions.set(from, s); return greet(s); }
+    const byIdx = profileByIndex(numOf(low));
+    if (byIdx) {
+      setProfile(from, byIdx); s = { step: 'optin', profile: byIdx }; sessions.set(from, s);
+      return [`✅ Pronto! Você vê a massa de teste de *${profileMeta(byIdx).primeiro}* _(dados fictícios)_.`, ...greet(s)];
+    }
+    return pickerText(); // primeira mensagem → "quem é você?"
+  }
+
+  // Reset / saudação (mantém o perfil já escolhido)
+  if (/^(recome[çc]ar|reiniciar|reset|sair)$/.test(low) || /^(oi|ol[áa]|come[çc]ar|start|in[íi]cio)$/.test(low)) {
+    s = { step: 'optin', profile: s.profile }; sessions.set(from, s); return greet(s);
   }
   if (low === 'menu') { s.step = 'menu'; return menuText(); }
   const n = numOf(low);
@@ -137,7 +158,7 @@ async function handle(from, raw) {
       if (/(sim|autorizo)/.test(low) || n === 1) { s.step = 'auth'; return 'Perfeito! Antes de acessar seus dados, confirme sua identidade _(simulação)_.\n\nResponda *OK* para autenticar.'; }
       return 'Para continuar, responda *SIM*.';
     case 'auth':
-      if (/(ok|autenticar)/.test(low)) { s.step = 'consent'; const c = await call('of_get_consent'); return `✅ Identidade confirmada, *Raul*.\n\nPreciso da sua autorização no *Open Finance* para ler *saldo, extrato e cartões* _(consentimento: ${c.data.status})_.\n\nResponda *AUTORIZAR*.`; }
+      if (/(ok|autenticar)/.test(low)) { s.step = 'consent'; const c = await call(s, 'of_get_consent'); return `✅ Identidade confirmada, *${profileMeta(s.profile).primeiro}*.\n\nPreciso da sua autorização no *Open Finance* para ler *saldo, extrato e cartões* _(consentimento: ${c.data.status})_.\n\nResponda *AUTORIZAR*.`; }
       return 'Responda *OK* para autenticar.';
     case 'consent':
       if (/(autorizar|autorizo|sim)/.test(low)) { s.step = 'menu'; return ['✅ *Consentimento autorizado.* Tudo pronto!', menuText()]; }
@@ -196,8 +217,7 @@ app.post('/whatsapp', async (req, res) => {
     res.type('text/xml').send(twiml('Ops, tive um problema no protótipo. Digite *recomeçar*.'));
   }
 });
-app.listen(PORT, async () => {
-  const t = await mcp.listTools();
+app.listen(PORT, () => {
   console.log(`\n  WhatsApp webhook (Twilio Sandbox)  →  http://localhost:${PORT}/whatsapp`);
-  console.log(`  Roteiro fixo · ${t.tools.length} tools of_* em processo · dados fictícios\n`);
+  console.log(`  Roteiro fixo · multi-perfil (${profiles.map((p) => p.id).join(', ')}) · dados fictícios\n`);
 });

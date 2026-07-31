@@ -42,6 +42,29 @@ Anote a URL pública (ex.: `https://banking-wa.onrender.com`).
 `oi` → *SIM* → *OK* → *AUTORIZAR* → **1) Extrato** ou **2) Cartões**.
 Comandos globais: `menu`, `recomeçar`.
 
+## Massa de teste multi-perfil (cada pessoa vê os "seus" dados)
+
+Vários testadores podem usar o mesmo Sandbox e cada número vê uma massa
+**diferente e determinística**. Perfis disponíveis:
+
+| Perfil | Tipo | Cenário |
+|---|---|---|
+| **raul** | PF + PJ | Empresário de tecnologia (Sousa Tech) — o cenário original |
+| **heitor** | PF + PJ | Comércio/varejo (Almeida Alimentos) — sazonal, folha maior |
+| **cadimo** | PF + PJ | Serviços/consultoria (Pereira Consultoria) — volume menor |
+| **patz** | PF | CLT/freelancer, **sem PJ** → exercita "sugerir abertura de PJ" |
+
+**Como escolher (no WhatsApp):** na primeira mensagem o bot pergunta *"Quem é
+você?"*. Responda com o nome (`sou heitor`) ou o número. Troca a qualquer
+momento com `sou <nome>`; `perfil` mostra o atual + a lista.
+
+**Atribuição fixa por número (opcional):** defina a env `WA_PROFILE_MAP` com um
+JSON `{ "whatsapp:+55…": "heitor", … }` no Render — assim cada número já entra
+no seu perfil, sem precisar escolher.
+
+> Os demais canais (connector do Claude, protótipo web) continuam no perfil
+> padrão (`raul`) — o perfil só é selecionado nos webhooks do WhatsApp.
+
 ## Limitações honestas (WhatsApp real)
 
 - Sem UI rica: menus são **texto numerado** (o Sandbox restringe botões/listas).
@@ -88,6 +111,7 @@ A rota continua sendo `/whatsapp` (mesma URL no Twilio Sandbox).
 | `TWILIO_AUTH_TOKEN` | sim* | idem |
 | `TWILIO_WHATSAPP_FROM` | não | default `whatsapp:+14155238886` (nº do sandbox) |
 | `ANTHROPIC_MODEL` | não | default `claude-haiku-4-5-20251001` |
+| `WA_PROFILE_MAP` | não | JSON `{ "whatsapp:+55…": "heitor" }` p/ fixar perfil por número |
 
 > \* Sem as credenciais Twilio, o webhook cai em **modo síncrono** (útil só para
 > teste local; pode estourar o timeout do Twilio em produção).

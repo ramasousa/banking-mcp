@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import { listEnv, singleEnv, amtStr, REQ_DT, OF_BASE, CNPJ_BRADESCO } from './of-helpers.js';
-import * as D from './of-data.js';
+import { getProfile } from './of-data.js';
 
 const RO = { readOnlyHint: true, openWorldHint: false };
 const DESTR = { readOnlyHint: false, destructiveHint: true, openWorldHint: false };
@@ -13,8 +13,8 @@ const obj = (properties = {}, required = []) => ({ type: 'object', properties, .
 const stripInternal = (o) => Object.fromEntries(Object.entries(o).filter(([k]) => !k.startsWith('_')));
 const pg = (i) => ({ page: i.page ?? 1, pageSize: i.pageSize ?? 25 });
 
-// Resources agregados a partir de todos os recursos disponíveis.
-function buildResources() {
+// Resources agregados a partir de todos os recursos disponíveis do perfil.
+function buildResources(D) {
   const r = [];
   D.ACCOUNTS.forEach((a) => r.push({ resourceId: a.accountId, type: 'ACCOUNT', status: 'AVAILABLE' }));
   D.CREDIT_CARDS.forEach((c) => r.push({ resourceId: c.creditCardAccountId, type: 'CREDIT_CARD_ACCOUNT', status: 'AVAILABLE' }));
@@ -24,33 +24,39 @@ function buildResources() {
   return r;
 }
 
-const findLoan = (id) => D.LOANS.find((c) => c.contractId === id) || D.FINANCINGS.find((c) => c.contractId === id);
+const findLoan = (D, id) => D.LOANS.find((c) => c.contractId === id) || D.FINANCINGS.find((c) => c.contractId === id);
 
 export const executores = {
   // Consents / Resources
-  of_get_consent(i = {}) {
+  of_get_consent(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     const c = { ...D.CONSENT };
     if (i.consentId) c.consentId = i.consentId;
     return { data: singleEnv(`/consents/v3/consents/${c.consentId}`, c), meta: 'GET /consents/v3/consents/{consentId} · 200' };
   },
-  of_list_resources(i = {}) {
-    return { data: listEnv('/resources/v3/resources', buildResources(), pg(i)), meta: 'GET /resources/v3/resources · 200' };
+  of_list_resources(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
+    return { data: listEnv('/resources/v3/resources', buildResources(D), pg(i)), meta: 'GET /resources/v3/resources · 200' };
   },
 
   // Accounts
-  of_list_accounts(i = {}) {
+  of_list_accounts(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     return { data: listEnv('/accounts/v2/accounts', D.ACCOUNTS, pg(i)), meta: 'GET /accounts/v2/accounts · 200' };
   },
-  of_get_account(i = {}) {
+  of_get_account(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     const a = D.ACCOUNTS.find((x) => x.accountId === i.accountId);
     if (!a) return err('accountId não encontrado');
     return { data: singleEnv(`/accounts/v2/accounts/${a.accountId}`, a), meta: 'GET /accounts/v2/accounts/{accountId} · 200' };
   },
-  of_get_account_balances(i = {}) {
+  of_get_account_balances(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     if (!i.accountId) return err('accountId é obrigatório');
     return { data: singleEnv(`/accounts/v2/accounts/${i.accountId}/balances`, D.accountBalances(i.accountId)), meta: 'GET /accounts/v2/accounts/{accountId}/balances · 200' };
   },
-  of_get_account_transactions(i = {}) {
+  of_get_account_transactions(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     if (!i.accountId) return err('accountId é obrigatório');
     let tx = D.accountTransactions(i.accountId);
     if (i.fromBookingDate) tx = tx.filter((t) => t.transactionDateTime.slice(0, 10) >= i.fromBookingDate);
@@ -58,79 +64,99 @@ export const executores = {
     if (i.creditDebitIndicator) tx = tx.filter((t) => t.creditDebitType === i.creditDebitIndicator);
     return { data: listEnv(`/accounts/v2/accounts/${i.accountId}/transactions`, tx, { ...pg(i), transactions: true }), meta: 'GET /accounts/v2/accounts/{accountId}/transactions · 200' };
   },
-  of_get_account_overdraft_limits(i = {}) {
+  of_get_account_overdraft_limits(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     if (!i.accountId) return err('accountId é obrigatório');
     return { data: singleEnv(`/accounts/v2/accounts/${i.accountId}/overdraft-limits`, D.accountOverdraftLimits()), meta: 'GET /accounts/v2/accounts/{accountId}/overdraft-limits · 200' };
   },
 
   // Credit cards
-  of_list_credit_cards(i = {}) {
+  of_list_credit_cards(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     return { data: listEnv('/credit-cards-accounts/v2/accounts', D.CREDIT_CARDS, pg(i)), meta: 'GET /credit-cards-accounts/v2/accounts · 200' };
   },
-  of_get_credit_card_limits(i = {}) {
+  of_get_credit_card_limits(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     if (!i.creditCardAccountId) return err('creditCardAccountId é obrigatório');
     return { data: listEnv(`/credit-cards-accounts/v2/accounts/${i.creditCardAccountId}/limits`, D.creditCardLimits(i.creditCardAccountId), pg(i)), meta: 'GET /credit-cards-accounts/v2/accounts/{id}/limits · 200' };
   },
-  of_get_credit_card_bills(i = {}) {
+  of_get_credit_card_bills(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     if (!i.creditCardAccountId) return err('creditCardAccountId é obrigatório');
     return { data: listEnv(`/credit-cards-accounts/v2/accounts/${i.creditCardAccountId}/bills`, D.creditCardBills(i.creditCardAccountId), pg(i)), meta: 'GET /credit-cards-accounts/v2/accounts/{id}/bills · 200' };
   },
-  of_get_credit_card_bill_transactions(i = {}) {
+  of_get_credit_card_bill_transactions(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     if (!i.creditCardAccountId || !i.billId) return err('creditCardAccountId e billId são obrigatórios');
     const tx = D.creditCardBillTransactions(i.creditCardAccountId, i.billId);
     return { data: listEnv(`/credit-cards-accounts/v2/accounts/${i.creditCardAccountId}/bills/${i.billId}/transactions`, tx, { ...pg(i), transactions: true }), meta: 'GET .../bills/{billId}/transactions · 200' };
   },
 
   // Customers (personal)
-  of_get_personal_identifications() {
+  of_get_personal_identifications(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     return { data: listEnv('/customers/v2/personal/identifications', [D.PERSONAL_IDENTIFICATION]), meta: 'GET /customers/v2/personal/identifications · 200' };
   },
-  of_get_personal_qualifications() {
+  of_get_personal_qualifications(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     return { data: singleEnv('/customers/v2/personal/qualifications', D.PERSONAL_QUALIFICATION), meta: 'GET /customers/v2/personal/qualifications · 200' };
   },
-  of_get_personal_financial_relations() {
+  of_get_personal_financial_relations(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     return { data: singleEnv('/customers/v2/personal/financial-relations', D.PERSONAL_FINANCIAL_RELATION), meta: 'GET /customers/v2/personal/financial-relations · 200' };
   },
 
-  // Customers (business — PJ)
-  of_get_business_identifications() {
-    return { data: listEnv('/customers/v2/business/identifications', [D.BUSINESS_IDENTIFICATION]), meta: 'GET /customers/v2/business/identifications · 200' };
+  // Customers (business — PJ). Quando o perfil não tem PJ, retorna vazio.
+  of_get_business_identifications(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
+    const arr = D.BUSINESS_IDENTIFICATION ? [D.BUSINESS_IDENTIFICATION] : [];
+    return { data: listEnv('/customers/v2/business/identifications', arr), meta: 'GET /customers/v2/business/identifications · 200' };
   },
-  of_get_business_qualifications() {
+  of_get_business_qualifications(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
+    if (!D.BUSINESS_QUALIFICATION) return { data: { data: {}, meta: { requestDateTime: REQ_DT }, _aviso: 'Cliente sem PJ.' }, meta: 'GET /customers/v2/business/qualifications · 200 (sem PJ)' };
     return { data: singleEnv('/customers/v2/business/qualifications', D.BUSINESS_QUALIFICATION), meta: 'GET /customers/v2/business/qualifications · 200' };
   },
-  of_get_business_financial_relations() {
+  of_get_business_financial_relations(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
+    if (!D.BUSINESS_FINANCIAL_RELATION) return { data: { data: {}, meta: { requestDateTime: REQ_DT }, _aviso: 'Cliente sem PJ.' }, meta: 'GET /customers/v2/business/financial-relations · 200 (sem PJ)' };
     return { data: singleEnv('/customers/v2/business/financial-relations', D.BUSINESS_FINANCIAL_RELATION), meta: 'GET /customers/v2/business/financial-relations · 200' };
   },
 
   // Loans
-  of_list_loans(i = {}) {
+  of_list_loans(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     return { data: listEnv('/loans/v2/contracts', D.LOANS.map(D.loanListItem), pg(i)), meta: 'GET /loans/v2/contracts · 200' };
   },
-  of_get_loan_contract(i = {}) {
-    const c = findLoan(i.contractId);
+  of_get_loan_contract(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
+    const c = findLoan(D, i.contractId);
     if (!c) return err('contractId não encontrado');
     return { data: singleEnv(`/loans/v2/contracts/${c.contractId}`, stripInternal(c)), meta: 'GET /loans/v2/contracts/{contractId} · 200' };
   },
-  of_get_loan_payments(i = {}) {
-    const c = findLoan(i.contractId);
+  of_get_loan_payments(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
+    const c = findLoan(D, i.contractId);
     if (!c) return err('contractId não encontrado');
     return { data: singleEnv(`/loans/v2/contracts/${c.contractId}/payments`, D.loanPayments(c)), meta: 'GET /loans/v2/contracts/{contractId}/payments · 200' };
   },
-  of_get_loan_scheduled_instalments(i = {}) {
-    const c = findLoan(i.contractId);
+  of_get_loan_scheduled_instalments(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
+    const c = findLoan(D, i.contractId);
     if (!c) return err('contractId não encontrado');
     return { data: singleEnv(`/loans/v2/contracts/${c.contractId}/scheduled-instalments`, D.loanInstalments(c)), meta: 'GET /loans/v2/contracts/{contractId}/scheduled-instalments · 200' };
   },
 
   // Financings
-  of_list_financings(i = {}) {
+  of_list_financings(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     const items = D.FINANCINGS.map((c) => ({ ...D.loanListItem(c), productType: 'FINANCIAMENTOS', productSubType: 'AQUISICAO_BENS_VEICULOS_AUTOMOTORES' }));
     return { data: listEnv('/financings/v2/contracts', items, pg(i)), meta: 'GET /financings/v2/contracts · 200' };
   },
 
   // Investments (por tipo — cada um é um endpoint próprio)
-  of_list_investments(i = {}) {
+  of_list_investments(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     const tipo = i.tipo || 'BANK_FIXED_INCOME';
     const arr = D.INVESTMENTS[tipo];
     if (!arr) return err(`tipo inválido. Use: ${Object.keys(D.INVESTMENTS).join(', ')}`);
@@ -145,10 +171,12 @@ export const executores = {
   },
 
   // ── Extensões (não fazem parte do padrão Open Finance) ──
-  select_account() {
+  select_account(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     return { data: { accounts: D.accountSelection() }, meta: 'extensão · seleção de conta PF/PJ' };
   },
-  analytics_cross_pf_pj() {
+  analytics_cross_pf_pj(i = {}, ctx) {
+    const D = getProfile(ctx?.profile);
     return { data: D.analytics(), meta: 'extensão · cruzamento analítico PF × PJ (12 meses)' };
   },
 
