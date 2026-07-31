@@ -28,7 +28,7 @@
 
 import express from 'express';
 import Anthropic from '@anthropic-ai/sdk';
-import { callFor, toolList, profiles, profileMeta, profileFor, setProfile, parseProfileCommand, pickerText, profileByIndex } from './multi.js';
+import { callFor, toolList, profiles, profileMeta, profileFor, setProfile, parseProfileCommand, pickerText, profileByIndex, wordCount } from './multi.js';
 
 const PORT = process.env.PORT || 3300;
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
@@ -146,17 +146,20 @@ async function handleMessage(from, body) {
   const text = (body || '').trim();
   let s = sessions.get(from);
 
-  // ── Comando de perfil (troca a qualquer momento) ──
+  // ── Identidade/perfil detectada em qualquer lugar da mensagem ──
   const pc = parseProfileCommand(text);
   if (pc === '__list__') {
     const cur = s?.profile ? profileMeta(s.profile).primeiro : '—';
     return `Perfil atual: *${cur}*.\n\n` + pickerText();
   }
-  if (pc && pc !== '__unknown__') {
-    s = { profile: pc, messages: [] }; sessions.set(from, s); setProfile(from, pc);
-    return `✅ Pronto! Agora você conversa com a massa de teste de *${profileMeta(pc).primeiro}* _(dados fictícios)_. Pode perguntar sobre saldo, extrato, cartões${profileMeta(pc).tipo === 'PF + PJ' ? ' ou uma análise PF×PJ' : ''}.`;
+  if (pc) {
+    if (!s || s.profile !== pc) { s = { profile: pc, messages: [] }; sessions.set(from, s); setProfile(from, pc); }
+    // Se a mensagem é só a identidade ("sou heitor"), confirma. Se traz um
+    // pedido junto ("sou o cadimo, quero ver minhas contas"), segue para o LLM.
+    if (wordCount(text) <= 3) {
+      return `✅ Pronto! Agora você conversa com a massa de teste de *${profileMeta(pc).primeiro}* _(dados fictícios)_. Pode perguntar sobre saldo, extrato, cartões${profileMeta(pc).tipo === 'PF + PJ' ? ' ou uma análise PF×PJ' : ''}.`;
+    }
   }
-  if (pc === '__unknown__') return 'Não reconheci esse nome. ' + pickerText();
 
   // ── Seleção de perfil obrigatória antes de conversar ──
   if (!s || !s.profile) {

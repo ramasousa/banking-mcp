@@ -128,11 +128,10 @@ async function handle(from, raw) {
     const cur = s?.profile ? profileMeta(s.profile).primeiro : '—';
     return `Perfil atual: *${cur}*.\n\n` + pickerText();
   }
-  if (pc && pc !== '__unknown__') {
+  if (pc && pc !== '__list__') {
     setProfile(from, pc); s = { step: 'optin', profile: pc }; sessions.set(from, s);
     return [`✅ Pronto! Agora você vê a massa de teste de *${profileMeta(pc).primeiro}* _(dados fictícios)_.`, ...greet(s)];
   }
-  if (pc === '__unknown__') return 'Não reconheci esse nome. ' + pickerText();
 
   // ── Seleção de perfil obrigatória antes de tudo ──
   if (!s || !s.profile) {

@@ -48,20 +48,29 @@ export function profileFor(from) { return chosen.get(from) || envMap[from] || nu
 export function setProfile(from, id) { chosen.set(from, id); }
 export function hasProfile(from) { return chosen.has(from) || Boolean(envMap[from]); }
 
+const strip = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
 /**
- * Interpreta comandos de troca de perfil: "sou heitor", "perfil raul",
- * "eu sou o cadimo". Devolve o id do perfil, '__list__' (pediu a lista/atual)
- * ou null (não é comando de perfil).
+ * Interpreta a identidade em QUALQUER lugar da mensagem — reconhece frases
+ * naturais como "Olá sou o Cadimo quero ver minhas contas", "eu sou heitor",
+ * "aqui é a Patz", "meu nome é Raul", "me chamo Bruno", "perfil cadimo".
+ * Devolve o id do perfil, '__list__' (pediu a lista/atual) ou null.
  */
 export function parseProfileCommand(text) {
-  const t = (text || '').trim().toLowerCase();
-  if (/^perfil$/.test(t) || /^quem sou eu\??$/.test(t)) return '__list__';
-  const m = t.match(/^(?:sou|perfil|eu sou|troca(?:r)? perfil)\s+(?:o\s+|a\s+)?(.+)$/);
-  if (!m) return null;
-  const q = m[1].trim();
-  const p = profiles.find((x) => x.id === q || x.primeiro.toLowerCase() === q || x.nome.toLowerCase().startsWith(q));
-  return p ? p.id : '__unknown__';
+  const t = strip((text || '').trim());
+  if (/^(perfil|quem sou eu)\??$/.test(t)) return '__list__';
+  // pista de identidade + nome (ou id) de um perfil conhecido, em qualquer posição.
+  const m = t.match(/(?:\beu sou\b|\bsou\b|\baqui (?:e|eh)\b|\bmeu nome (?:e|eh)\b|\bme chamo\b|\bperfil\b|\btrocar? perfil\b)\s+(?:o\s+|a\s+)?([a-z]+)/);
+  if (m) {
+    const q = m[1];
+    const p = profiles.find((x) => strip(x.id) === q || strip(x.primeiro) === q);
+    if (p) return p.id;
+  }
+  return null;
 }
+
+/** Conta palavras (para saber se a mensagem é "só a identidade" ou traz um pedido). */
+export function wordCount(text) { return String(text || '').trim().split(/\s+/).filter(Boolean).length; }
 
 /** Texto do seletor de perfil (menu de "quem é você"). */
 export function pickerText() {
