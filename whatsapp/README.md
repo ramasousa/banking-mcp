@@ -52,3 +52,64 @@ Comandos globais: `menu`, `recomeçar`.
 
 Trocar o Sandbox por um número WhatsApp aprovado (Twilio/Meta) e o mock pelo
 Axway/Core Bancário nas tools `of_*` (via `ctx.accessToken` do broker OAuth).
+
+---
+
+# Versão LLM (texto livre) — `webhook-llm.js`
+
+Em vez de menus numerados, o cliente escreve em **linguagem natural**
+(*"quanto gastei de imposto na PJ nos últimos 3 meses?"*) e o **Claude** decide
+quais tools `of_*` chamar, executa via MCP em processo e responde em pt-BR.
+
+```
+WhatsApp ──POST /whatsapp──▶ webhook-llm.js
+      │  (responde 200 na hora — evita o timeout de ~15s do Twilio)
+      └─▶ Claude (loop agêntico) ⇄ tools of_* (MCP em processo)
+              └─▶ resposta final via Twilio REST API (messages.create)
+```
+
+**Por que precisa de credenciais Twilio agora?** O LLM leva 5–30s (raciocínio +
+tools), acima do limite síncrono do webhook. Então respondemos **200 na hora** e
+enviamos a resposta **de forma assíncrona** pela API REST do Twilio — o que exige
+`Account SID` + `Auth Token`. Dentro da **janela de 24h** do WhatsApp, mensagem
+livre é permitida sem template.
+
+## Rodar (Render)
+
+Start Command: `npm run whatsapp:llm` · Build: `npm install`.
+A rota continua sendo `/whatsapp` (mesma URL no Twilio Sandbox).
+
+## Variáveis de ambiente
+
+| Variável | Obrigatória | Onde pegar / default |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | sim | console.anthropic.com → API Keys |
+| `TWILIO_ACCOUNT_SID` | sim* | console.twilio.com (Account Info) |
+| `TWILIO_AUTH_TOKEN` | sim* | idem |
+| `TWILIO_WHATSAPP_FROM` | não | default `whatsapp:+14155238886` (nº do sandbox) |
+| `ANTHROPIC_MODEL` | não | default `claude-haiku-4-5-20251001` |
+
+> \* Sem as credenciais Twilio, o webhook cai em **modo síncrono** (útil só para
+> teste local; pode estourar o timeout do Twilio em produção).
+
+## Guardrails embutidos
+
+- **Pagamentos fora**: `of_create_payment_consent` e `of_initiate_pix_payment`
+  não entram no *toolbelt* do LLM — só consulta.
+- **Escopo travado + protótipo/dados fictícios** via *system prompt*.
+- **Consentimento AUTHORISED** assumido no cenário; sem exposição de dados sensíveis.
+- **Corte de segurança**: no máximo 6 rodadas de tool por mensagem.
+
+## Testar
+
+`recomeçar` limpa o histórico. Exemplos de perguntas:
+
+- *"qual meu saldo na conta PJ?"*
+- *"quanto gastei com imposto na PJ nos últimos 3 meses?"*
+- *"compara meu gasto de cartão PF e PJ"*
+- *"me dá uma visão consolidada PF e PJ"*
+
+## Custo (honesto)
+
+Cada conversa gasta **centavos** de API Anthropic (algumas chamadas por
+mensagem). Recomenda-se um limite de billing no console da Anthropic.
