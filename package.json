@@ -10,7 +10,8 @@
     "mcp:http": "node mcp/http.js",
     "sap:stdio": "node sap-odata/stdio.js",
     "sap:http": "node sap-odata/http.js",
-    "proto": "node proto/server.js"
+    "proto": "node proto/server.js",
+    "whatsapp": "node whatsapp/webhook.js"
   },
   "engines": {
     "node": ">=18"
