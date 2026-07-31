@@ -12,7 +12,8 @@
     "sap:http": "node sap-odata/http.js",
     "proto": "node proto/server.js",
     "whatsapp": "node whatsapp/webhook.js",
-    "whatsapp:llm": "node whatsapp/webhook-llm.js"
+    "whatsapp:llm": "node whatsapp/webhook-llm.js",
+    "gerar:perfil": "node scripts/gerar-perfil.js"
   },
   "engines": {
     "node": ">=18"

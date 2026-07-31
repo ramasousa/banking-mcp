@@ -28,9 +28,7 @@
 
 import express from 'express';
 import Anthropic from '@anthropic-ai/sdk';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { createBankingServer } from '../mcp/core.js';
+import { callFor, toolList, profiles, profileMeta, profileFor, setProfile, parseProfileCommand, pickerText, profileByIndex, wordCount } from './multi.js';
 
 const PORT = process.env.PORT || 3300;
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-haiku-4-5-20251001';
@@ -43,37 +41,37 @@ const BLOCKED_TOOLS = new Set(['of_create_payment_consent', 'of_initiate_pix_pay
 const MAX_TURNS = 6;      // rodadas máximas de tool no loop agêntico
 const MAX_HISTORY = 16;   // mensagens de histórico guardadas por usuário
 
-// ── MCP em processo ──
-const [ct, st] = InMemoryTransport.createLinkedPair();
-const srv = createBankingServer(() => ({}));
-await srv.connect(st);
-const mcp = new Client({ name: 'wa-llm', version: '1.0.0' }, { capabilities: {} });
-await mcp.connect(ct);
+// ── Tools do MCP → formato Anthropic (inputSchema → input_schema), sem as destrutivas ──
+const anthropicTools = (await toolList())
+  .filter((t) => !BLOCKED_TOOLS.has(t.name))
+  .map((t) => ({ name: t.name, description: t.description || '', input_schema: t.inputSchema || { type: 'object', properties: {} } }));
 
-// Tools do MCP → formato de tools da API Anthropic (inputSchema → input_schema),
-// excluindo as destrutivas.
-const mcpToolList = (await mcp.listTools()).tools.filter((t) => !BLOCKED_TOOLS.has(t.name));
-const anthropicTools = mcpToolList.map((t) => ({
-  name: t.name,
-  description: t.description || '',
-  input_schema: t.inputSchema || { type: 'object', properties: {} },
-}));
-const callTool = async (name, args) => {
-  const r = await mcp.callTool({ name, arguments: args || {} });
-  return r.content?.[0]?.text ?? JSON.stringify(r.structuredContent ?? {});
+// Executa a tool NO PERFIL do usuário (cada pessoa vê os seus dados).
+const callTool = async (profileId, name, args) => {
+  try { return JSON.stringify(await callFor(profileId, name, args || {})); }
+  catch (e) { return JSON.stringify({ error: e?.message || 'falha ao executar tool' }); }
 };
 
 // ── Anthropic ──
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const SYSTEM = `Você é o assistente bancário do Bradesco no WhatsApp — um PROTÓTIPO com DADOS FICTÍCIOS.
+// System prompt específico do perfil (persona muda por pessoa).
+function systemFor(profileId) {
+  const p = profileMeta(profileId);
+  const tipo = p.tipo === 'PF + PJ'
+    ? `titular de contas PESSOA FÍSICA (PF) e PESSOA JURÍDICA (PJ) (empresa: ${p.empresa}).`
+    : `titular apenas de contas PESSOA FÍSICA (PF) — NÃO possui conta PJ. Se fizer sentido, pode sugerir a abertura de uma conta PJ.`;
+  return `Você é o assistente bancário do Bradesco no WhatsApp — um PROTÓTIPO com DADOS FICTÍCIOS.
 
 CONTEXTO DO CLIENTE (simulado):
-- O cliente se chama Raul. Ele é titular de contas PESSOA FÍSICA (PF) e PESSOA JURÍDICA (PJ).
+- O cliente se chama ${p.primeiro}. É ${tipo}
 - Já está autenticado e o consentimento Open Finance está AUTHORISED — pode ler saldo, extrato, cartões, empréstimos e investimentos.
 - A data de referência ("hoje") no cenário é ${DATE_REF}. Interprete "este mês", "últimos 3 meses" etc. a partir dessa data.
 
-COMO AGIR:
+COMO AGIR:` + SYSTEM_REST;
+}
+
+const SYSTEM_REST = `
 - Descubra as contas/cartões com as tools (ex.: select_account, of_list_accounts, of_list_credit_cards) antes de pedir saldo/extrato — cada uma tem um accountId/creditCardAccountId próprio.
 - Para períodos, use os filtros fromBookingDate/toBookingDate (formato AAAA-MM-DD) e creditDebitIndicator (CREDITO/DEBITO) do of_get_account_transactions. Para somar uma fatura inteira, use pageSize alto (ex.: 300).
 - Para cruzar PF e PJ (fluxo de caixa consolidado, pró-labore, carga tributária), use analytics_cross_pf_pj.
@@ -91,14 +89,14 @@ LIMITES:
 - Na PRIMEIRA resposta de cada conversa, deixe claro em uma linha que é um protótipo com dados fictícios.`;
 
 // ── Loop agêntico: mensagens[] entra, texto final sai ──
-async function runAgent(history) {
+async function runAgent(profileId, history) {
   const messages = [...history];
   let finalText = '';
   for (let turn = 0; turn < MAX_TURNS; turn++) {
     const resp = await anthropic.messages.create({
       model: MODEL,
       max_tokens: 1024,
-      system: SYSTEM,
+      system: systemFor(profileId),
       tools: anthropicTools,
       messages,
     });
@@ -110,20 +108,14 @@ async function runAgent(history) {
     const toolUses = resp.content.filter((b) => b.type === 'tool_use');
     if (resp.stop_reason !== 'tool_use' || toolUses.length === 0) break;
 
-    // Executa cada tool pedida e devolve os resultados.
+    // Executa cada tool pedida NO PERFIL do usuário e devolve os resultados.
     const results = [];
     for (const tu of toolUses) {
-      let out;
-      try {
-        out = await callTool(tu.name, tu.input);
-      } catch (e) {
-        out = JSON.stringify({ error: e?.message || 'falha ao executar tool' });
-      }
+      const out = await callTool(profileId, tu.name, tu.input);
       results.push({ type: 'tool_result', tool_use_id: tu.id, content: out });
     }
     messages.push({ role: 'user', content: results });
   }
-  // Devolve o texto final e o histórico atualizado (só as mensagens novas do modelo).
   return { finalText: finalText || 'Não consegui montar a resposta agora. Pode reformular?', messages };
 }
 
@@ -151,19 +143,53 @@ const escapeXml = (s) => String(s).replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>':
 const twiml = (msg) => `<?xml version="1.0" encoding="UTF-8"?><Response>${msg ? `<Message>${escapeXml(msg)}</Message>` : ''}</Response>`;
 
 async function handleMessage(from, body) {
+  const text = (body || '').trim();
   let s = sessions.get(from);
-  if (!s || /^(recome[çc]ar|reiniciar|reset|sair|limpar)$/i.test(body.trim())) {
-    s = { messages: [] };
-    sessions.set(from, s);
-    if (/^(recome[çc]ar|reiniciar|reset|sair|limpar)$/i.test(body.trim())) {
-      return '🔄 Conversa reiniciada. Pode perguntar sobre saldo, extrato, cartões ou uma análise PF×PJ.';
+
+  // ── Identidade/perfil detectada em qualquer lugar da mensagem ──
+  const pc = parseProfileCommand(text);
+  if (pc === '__list__') {
+    const cur = s?.profile ? profileMeta(s.profile).primeiro : '—';
+    return `Perfil atual: *${cur}*.\n\n` + pickerText();
+  }
+  if (pc) {
+    if (!s || s.profile !== pc) { s = { profile: pc, messages: [] }; sessions.set(from, s); setProfile(from, pc); }
+    // Se a mensagem é só a identidade ("sou heitor"), confirma. Se traz um
+    // pedido junto ("sou o cadimo, quero ver minhas contas"), segue para o LLM.
+    if (wordCount(text) <= 3) {
+      return `✅ Pronto! Agora você conversa com a massa de teste de *${profileMeta(pc).primeiro}* _(dados fictícios)_. Pode perguntar sobre saldo, extrato, cartões${profileMeta(pc).tipo === 'PF + PJ' ? ' ou uma análise PF×PJ' : ''}.`;
     }
   }
+
+  // ── Seleção de perfil obrigatória antes de conversar ──
+  if (!s || !s.profile) {
+    const known = profileFor(from);
+    if (known) { s = { profile: known, messages: [] }; sessions.set(from, s); }
+    else {
+      const byIdx = profileByIndex(parseInt((text.match(/\d+/) || [])[0], 10));
+      if (byIdx) { s = { profile: byIdx, messages: [] }; sessions.set(from, s); setProfile(from, byIdx); return `✅ Pronto! Você conversa com a massa de teste de *${profileMeta(byIdx).primeiro}* _(dados fictícios)_. Pode perguntar sobre saldo, extrato ou cartões.`; }
+      return pickerText();
+    }
+  }
+
+  if (/^(recome[çc]ar|reiniciar|reset|sair|limpar)$/i.test(text)) {
+    s.messages = [];
+    return `🔄 Conversa reiniciada _(perfil *${profileMeta(s.profile).primeiro}*)_. Pode perguntar sobre saldo, extrato, cartões ou uma análise PF×PJ.`;
+  }
+
   s.messages.push({ role: 'user', content: body });
-  const { finalText, messages } = await runAgent(s.messages);
-  // Persiste o histórico (limitado), preservando pares tool_use/tool_result.
-  s.messages = messages.slice(-MAX_HISTORY);
+  const { finalText, messages } = await runAgent(s.profile, s.messages);
+  s.messages = trimHistory(messages);
   return finalText;
+}
+
+// Corta o histórico sem quebrar pares tool_use/tool_result: mantém as últimas
+// ~N mensagens e "encosta" o início numa mensagem de usuário em texto puro
+// (um tool_result órfão no começo faz a API 400).
+function trimHistory(messages) {
+  let arr = messages.slice(-MAX_HISTORY);
+  while (arr.length && !(arr[0].role === 'user' && typeof arr[0].content === 'string')) arr = arr.slice(1);
+  return arr;
 }
 
 // ── App ──
