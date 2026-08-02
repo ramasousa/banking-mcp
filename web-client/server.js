@@ -68,8 +68,9 @@ const SYSTEM = [
   'REGRA PARA GRÁFICOS E ANÁLISE DE GASTOS:',
   'Quando o usuário pedir gráfico, análise de gastos por categoria, breakdown ou distribuição de despesas:',
   '(1) Agrupe as transações em categorias semânticas legíveis — ex: "Alimentação", "Transporte", "Moradia", "Vestuário", "Serviços", "Lazer", "Saúde", "Educação", "Investimentos". Nunca use tipos técnicos como PIX ou TED como categoria.',
-  '(2) Emita um bloco de dados estruturados NO INÍCIO da resposta, antes de qualquer texto, exatamente neste formato (sem quebras de linha dentro do bloco): <!--FINA_CHART:{"type":"spend","title":"Seus gastos","period":"D de mês - D de mês","total":0,"categories":[{"label":"Categoria","pct":30,"amount":0}],"suggestions":["pergunta follow-up 1","pergunta follow-up 2","pergunta follow-up 3"]}-->',
+  '(2) Emita um bloco de dados estruturados NO INÍCIO da resposta, antes de qualquer texto, exatamente neste formato (sem quebras de linha dentro do bloco): <!--FINA_CHART:{"type":"spend","title":"Seus gastos","period":"D de mês - D de mês","total":0,"categories":[{"label":"Categoria","pct":30,"amount":0,"transactions":[{"name":"Estabelecimento","date":"YYYY-MM-DD","amount":0}]}],"suggestions":["pergunta follow-up 1","pergunta follow-up 2","pergunta follow-up 3"]}-->',
   '(3) Máximo 8 categorias, ordenadas por valor decrescente. pct deve somar ~100.',
+  '(3b) Para cada categoria, inclua no campo "transactions" as top-3 transações que a compõem (name: nome do estabelecimento limpo, date: YYYY-MM-DD, amount: valor positivo). Se não tiver dados de transação disponíveis para uma categoria, omita o campo transactions dessa categoria.',
   '(4) As sugestões devem ser 3 perguntas curtas de follow-up contextuais ao que foi mostrado.',
   '(5) Após o bloco <!--FINA_CHART:-->, escreva APENAS UMA frase curta de resumo (ex: "Em julho você gastou R$ 23.118 — destaque para Cartão de Crédito (37%)."). PROIBIDO: tabelas markdown, listas com hífens, separadores ---, seções **Resumo por categoria**, sugestões em texto. Essas informações já estão no card visual — repeti-las é redundante e piora a experiência.',
 
