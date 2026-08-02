@@ -169,7 +169,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 .chat-nav{display:flex;align-items:center;gap:12px;padding:0 16px;height:54px;background:var(--sf);border-bottom:1px solid var(--bd);flex-shrink:0}
 .chat-back{background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--tx);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--fs)}
 .chat-back:hover{background:var(--sf3)}
-.chat-id{display:flex;flex-direction:column}
+.chat-id{display:flex;flex-direction:column;flex:1;min-width:0;overflow:hidden}
 .chat-title{font-size:13px;font-weight:700}
 .chat-subtitle{font-size:10.5px;color:var(--tx2)}
 .chat-status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx2)}
@@ -1063,14 +1063,21 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
       <div class="chat-subtitle">Open Finance · MCP · Fase 2</div>
     </div>
     <div class="chat-status" id="chat-status"><span class="chat-online-dot"></span><span id="status-txt">online</span></div>
-    <div class="theme-tog" onclick="toggleTheme()" style="margin-left:10px">
+    <div class="app-user" style="margin-left:0">
+      <div class="app-user-info">
+        <div class="app-user-name" id="chat-user-name">Maria S.</div>
+        <div class="app-user-doc mono" id="chat-user-doc">***.***.102-34</div>
+      </div>
+      <div class="app-avatar" id="chat-avatar">M</div>
+    </div>
+    <div class="theme-tog" onclick="toggleTheme()">
       <div class="tt-opt act" id="tt-n3">N</div>
       <div class="tt-opt" id="tt-v3">V</div>
     </div>
   </nav>
   <div class="chat-msgs" id="chat-msgs">
     <div class="msg-ai msg-enter">
-      <div class="bubble">Olá, Maria! 👋<br><br>Tenho acesso às suas contas <strong>PF</strong> e <strong>MEI (TechMei Ltda.)</strong> via Open Finance. Posso ajudar com saldos, extratos, análise de gastos e muito mais.<br><br>O que gostaria de saber?</div>
+      <div class="bubble" id="chat-greeting">Olá, Maria! 👋<br><br>Tenho acesso às suas contas <strong>PF</strong> e <strong>MEI (TechMei Ltda.)</strong> via Open Finance. Posso ajudar com saldos, extratos, análise de gastos e muito mais.<br><br>O que gostaria de saber?</div>
     </div>
     <div class="suggestions" id="suggestions">
       <button class="sug" onclick="sendPreset('Quero uma análise financeira completa. Tenho conta PF e MEI.')">Análise completa dos meus gastos</button>
@@ -1088,7 +1095,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 <!-- ══ LOGIN ══ -->
 <div id="scr-login" class="scr">
   <nav class="l-nav">
-    <div class="logo"><div class="logo-dot"></div>pulsando<em class="logo-ai">.ai</em></div>
+    <div class="logo"><div class="logo-dot"></div><span>pulsando<em class="logo-ai">.ai</em></span></div>
     <div class="l-nav-right">
       <div class="theme-tog" onclick="toggleTheme()">
         <div class="tt-opt act" id="tt-n4">N</div>
@@ -1098,7 +1105,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
   </nav>
   <div class="auth-wrap">
     <div class="auth-card">
-      <div class="auth-logo"><div class="logo-dot" style="width:9px;height:9px"></div>pulsando<em class="logo-ai">.ai</em></div>
+      <div class="auth-logo"><div class="logo-dot" style="width:9px;height:9px"></div><span>pulsando<em class="logo-ai">.ai</em></span></div>
       <div class="auth-title">Bem-vindo de volta</div>
       <div class="auth-sub">Entre na sua conta para acessar suas finanças</div>
       <div class="auth-form">
@@ -1122,7 +1129,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 <!-- ══ SIGNUP ══ -->
 <div id="scr-signup" class="scr">
   <nav class="l-nav">
-    <div class="logo"><div class="logo-dot"></div>pulsando<em class="logo-ai">.ai</em></div>
+    <div class="logo"><div class="logo-dot"></div><span>pulsando<em class="logo-ai">.ai</em></span></div>
     <div class="l-nav-right">
       <div class="theme-tog" onclick="toggleTheme()">
         <div class="tt-opt act" id="tt-n5">N</div>
@@ -1132,7 +1139,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
   </nav>
   <div class="auth-wrap">
     <div class="auth-card">
-      <div class="auth-logo"><div class="logo-dot" style="width:9px;height:9px"></div>pulsando<em class="logo-ai">.ai</em></div>
+      <div class="auth-logo"><div class="logo-dot" style="width:9px;height:9px"></div><span>pulsando<em class="logo-ai">.ai</em></span></div>
       <div class="auth-title">Criar conta gratuita</div>
       <div class="auth-sub">Conecte suas finanças e comece a conversar agora</div>
       <div class="auth-form">
@@ -1165,6 +1172,7 @@ var theme = 'n';
 var chatHistory = []; // { role, content } enviado ao backend
 var chatBusy = false;
 var backendReady = false;
+var dashData = null;
 
 /* ════════════════════════════════════════════════════
    THEME
@@ -1716,14 +1724,36 @@ function loadDashboard() {
     .catch(function() { /* silently keep static data */ });
 }
 
+function updateChatGreeting() {
+  var el = document.getElementById('chat-greeting');
+  if (!el || !dashData) return;
+  var first = dashData.identity.name.trim().split(/\s+/)[0] || 'você';
+  var entLine = dashData.entities && dashData.entities.pj
+    ? 'Tenho acesso às suas contas <strong>PF</strong> e <strong>MEI (' + dashData.entities.pj.name + ')</strong> via Open Finance.'
+    : 'Tenho acesso às suas contas via Open Finance.';
+  el.innerHTML = 'Olá, ' + first + '! 👋<br><br>' + entLine + ' Posso ajudar com saldos, extratos, análise de gastos e muito mais.<br><br>O que gostaria de saber?';
+}
+
 function renderDashboard(d) {
-  // Nav identity
+  dashData = d;
+
+  // Nav identity — dashboard
   var navName = document.getElementById('nav-user-name');
   var navDoc  = document.getElementById('nav-user-doc');
   var navAv   = document.getElementById('nav-avatar');
   if (navName) navName.textContent = shortName(d.identity.name);
   if (navDoc)  navDoc.textContent  = d.identity.cpf;
   if (navAv)   navAv.textContent   = nameInitials(d.identity.name);
+
+  // Nav identity — chat
+  var chatName = document.getElementById('chat-user-name');
+  var chatDoc  = document.getElementById('chat-user-doc');
+  var chatAv   = document.getElementById('chat-avatar');
+  if (chatName) chatName.textContent = shortName(d.identity.name);
+  if (chatDoc)  chatDoc.textContent  = d.identity.cpf;
+  if (chatAv)   chatAv.textContent   = nameInitials(d.identity.name);
+
+  updateChatGreeting();
 
   // Period
   var elPeriod = document.getElementById('pos-period');
