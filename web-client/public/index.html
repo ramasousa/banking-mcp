@@ -509,14 +509,14 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
   --bg:#06070f;--sf:#0c0e1c;--sf2:#12152a;--sf3:#181c34;
   --bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.04);
   --tx:#f1f5f9;--tx2:#64748b;--tx3:#1e293b;
-  --ac:#7c3aed;--ac-fg:#fff;
-  --ac-a:rgba(124,58,237,.12);--ac-ab:rgba(124,58,237,.22);
-  --badge:rgba(124,58,237,.1);--badge-tx:#a78bfa;
-  --logo-c:#7c3aed;
-  --ac-glow:rgba(124,58,237,.30);--ac-glow-h:rgba(124,58,237,.45);
-  --ac-card-bd:rgba(124,58,237,.18);--ac-card-sh:rgba(124,58,237,.10);
-  --ac-focus:rgba(124,58,237,.12);--ac-nav-bd:rgba(124,58,237,.20);
-  --ac-chip:rgba(124,58,237,.08);--ac-chip-tx:#a78bfa;
+  --ac:#c0020e;--ac-fg:#fff;
+  --ac-a:rgba(192,2,14,.12);--ac-ab:rgba(192,2,14,.22);
+  --badge:rgba(192,2,14,.10);--badge-tx:#e07080;
+  --logo-c:#c0020e;
+  --ac-glow:rgba(192,2,14,.30);--ac-glow-h:rgba(192,2,14,.45);
+  --ac-card-bd:rgba(192,2,14,.18);--ac-card-sh:rgba(192,2,14,.10);
+  --ac-focus:rgba(192,2,14,.12);--ac-nav-bd:rgba(192,2,14,.20);
+  --ac-chip:rgba(192,2,14,.08);--ac-chip-tx:#e07080;
   --nav-bg:rgba(6,7,15,.95);
   --fs:'DM Sans',system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
   background:#06070f;color:#f1f5f9;
@@ -1554,12 +1554,14 @@ function sendMsg() {
       // Determine chart vs. plain once we have enough chars
       if (isChart === null && (textBuf.length >= 50 || !ev.chunk.includes('<'))) {
         var tb = textBuf.trimStart();
-        isChart = tb.startsWith('<!--FINA_CHART') || tb.startsWith('<!--FINA_BILL');
-        if (!isChart) {
-          // Flush buffered text to bubble
-          if (!aiMsgObj) { aiMsgObj = makeAiMsgEl(); appendEl(aiMsgObj.wrap); }
-          aiMsgObj.bubble.textContent = textBuf;
-          scrollBottom();
+        if (tb.length > 0) {
+          isChart = tb.startsWith('<!--FINA_CHART') || tb.startsWith('<!--FINA_BILL');
+          if (!isChart) {
+            // Flush buffered text to bubble
+            if (!aiMsgObj) { aiMsgObj = makeAiMsgEl(); appendEl(aiMsgObj.wrap); }
+            aiMsgObj.bubble.textContent = textBuf;
+            scrollBottom();
+          }
         }
       } else if (isChart === false) {
         // Streaming plain text
@@ -1599,11 +1601,13 @@ function sendMsg() {
       }
       fullText = fullText.replace(/<!--FINA_BILL:[\s\S]+?-->/g, '').trim();
 
-      // Render remaining prose
+      // Render remaining prose (or remove bubble if chart/bill was the whole response)
       if (fullText) {
         if (!aiMsgObj) { aiMsgObj = makeAiMsgEl(); appendEl(aiMsgObj.wrap); }
         aiMsgObj.bubble.textContent = fullText;
         scrollBottom();
+      } else if (aiMsgObj && aiMsgObj.wrap && aiMsgObj.wrap.parentNode) {
+        aiMsgObj.wrap.parentNode.removeChild(aiMsgObj.wrap);
       }
 
       chatHistory.push({ role: 'assistant', content: ev.text || '' });
