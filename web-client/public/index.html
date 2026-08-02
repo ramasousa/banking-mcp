@@ -212,11 +212,49 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 .mode-badge.real{background:rgba(34,197,94,.12);color:#22C55E}
 .mode-badge.sim{background:var(--badge);color:var(--badge-tx)}
 
+/* ── Steps pill (feramentas colapsadas) ── */
+.steps-pill{align-self:flex-start;max-width:90%;cursor:pointer;user-select:none;margin:2px 0}
+.steps-head{display:flex;align-items:center;gap:7px;padding:5px 0;font-size:11.5px}
+.steps-spin{width:9px;height:9px;border:1.5px solid var(--sf3);border-top-color:var(--ac);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.steps-ok{color:#22C55E;font-size:13px;line-height:1;flex-shrink:0}
+.steps-txt{color:var(--tx2)}
+.steps-arr{font-size:11px;color:var(--tx3);margin-left:1px;transition:transform .15s;display:inline-block}
+.steps-arr.open{transform:rotate(90deg)}
+.steps-detail{padding:2px 0 6px 20px;display:none;flex-direction:column;gap:5px}
+.steps-detail.open{display:flex}
+.steps-ditem{font-size:11px;color:var(--tx2);font-family:var(--fm);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.steps-ditem-ok{color:#22C55E;flex-shrink:0}
+
+/* ── Fina rich card (spend breakdown) ── */
+.fina-card{background:var(--sf2);border:1px solid var(--bd);border-radius:16px;padding:18px 20px;align-self:flex-start;width:100%;max-width:480px;margin:4px 0}
+.fina-card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.fina-card-label{font-size:11.5px;font-weight:700;color:var(--tx2);letter-spacing:.06em;text-transform:uppercase}
+.fina-card-arr{font-size:16px;color:var(--tx2)}
+.fina-total{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:12px}
+.fina-total-amt{font-size:clamp(22px,5vw,30px);font-weight:900;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.fina-total-period{font-size:11.5px;color:var(--tx2)}
+.fina-bar{display:flex;height:7px;border-radius:5px;overflow:hidden;gap:2px;margin-bottom:18px}
+.fina-bar-seg{height:100%;min-width:4px;transition:flex .6s ease}
+.fina-cats{display:flex;flex-direction:column}
+.fina-cat-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--bd2)}
+.fina-cat-row:last-child{border:none;padding-bottom:4px}
+.fina-cat-icon{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.fina-cat-info{flex:1;min-width:0}
+.fina-cat-name{font-size:13px;font-weight:700}
+.fina-cat-sub{font-size:11px;color:var(--tx2);margin-top:1px}
+.fina-cat-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.fina-cat-amt{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.fina-cat-chev{font-size:14px;color:var(--tx2)}
+.fina-suggs{display:flex;gap:7px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--bd2);margin-top:6px}
+.fina-sugg{background:var(--sf3);border:1px solid var(--bd);border-radius:999px;padding:7px 14px;font-size:12px;color:var(--tx2);cursor:pointer;font-family:var(--fs);transition:border-color .12s,color .12s,background .12s;white-space:nowrap}
+.fina-sugg:hover{border-color:var(--ac);color:var(--ac);background:var(--ac-a)}
+
 @media(max-width:600px){
   .float-card{display:none}
   .l-features{grid-template-columns:1fr}
   .stats-row{grid-template-columns:1fr 1fr}
   .hero-h{font-size:28px}
+  .fina-card{max-width:100%}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -679,97 +717,121 @@ function sendMsg() {
   }
 
   // Real mode — SSE
-  var toolEls = {}; // name → DOM el (to update spin → checkmark)
-  var aiMsgObj = null;
-  var hasResponse = false;
+  // Per-turn state
+  var stepsWrapEl = null;   // outer div
+  var stepsHeadEl = null;   // clickable header line
+  var stepsDetEl  = null;   // expandable detail list
+  var turnSteps   = [];     // [{name,desc,summary,done}]
+  var aiMsgObj    = null;
+  var textBuf     = '';
+  var isChart     = null;   // null=unknown | true | false
 
-  fetch('/api/chat', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ messages: chatHistory }),
-  }).then(function(resp) {
-    if (!resp.ok || !resp.body) throw new Error('HTTP ' + resp.status);
+  function ensureSteps() {
+    if (stepsHeadEl) return;
+    var wrap = document.createElement('div');
+    wrap.className = 'steps-pill msg-enter';
+    var head = document.createElement('div');
+    head.className = 'steps-head';
+    head.innerHTML = '<span class="steps-spin"></span><span class="steps-txt">Executando...</span>';
+    var det = document.createElement('div');
+    det.className = 'steps-detail';
+    head.addEventListener('click', function() {
+      det.classList.toggle('open');
+      var arr = head.querySelector('.steps-arr');
+      if (arr) arr.classList.toggle('open');
+    });
+    wrap.appendChild(head);
+    wrap.appendChild(det);
+    appendEl(wrap);
+    stepsWrapEl = wrap; stepsHeadEl = head; stepsDetEl = det;
+  }
 
-    var reader = resp.body.getReader();
-    var decoder = new TextDecoder();
-    var buf = '';
-
-    function pump() {
-      return reader.read().then(function(chunk) {
-        if (chunk.done) {
-          setSendBusy(false);
-          return;
-        }
-        buf += decoder.decode(chunk.value, { stream: true });
-        var lines = buf.split('\n');
-        buf = lines.pop();
-        lines.forEach(function(line) {
-          if (!line.startsWith('data: ')) return;
-          var raw = line.slice(6).trim();
-          if (!raw) return;
-          try {
-            var ev = JSON.parse(raw);
-            handleSSE(ev);
-          } catch (_) {}
-        });
-        return pump();
-      });
-    }
-
-    return pump();
-  }).catch(function(err) {
-    appendEl((function(){
-      var w = document.createElement('div');
-      w.className = 'msg-ai msg-enter';
-      w.innerHTML = '<div class="bubble" style="color:#E53E3E">Erro ao conectar ao servidor: ' + esc(err.message) + '</div>';
-      return w;
-    })());
-    setSendBusy(false);
-  });
+  function finalizeSteps() {
+    if (!stepsHeadEl || !turnSteps.length) return;
+    var n = turnSteps.length;
+    stepsHeadEl.innerHTML =
+      '<span class="steps-ok">✓</span>' +
+      '<span class="steps-txt">Concluí ' + n + ' etapa' + (n > 1 ? 's' : '') + '</span>' +
+      '<span class="steps-arr">›</span>';
+  }
 
   function handleSSE(ev) {
     if (ev.type === 'reasoning') {
       appendEl(makeReasoningEl(ev.text));
 
     } else if (ev.type === 'tool_start') {
-      var el = makeToolCallEl(ev.name, ev.desc, false);
-      toolEls[ev.name] = el;
-      appendEl(el);
+      ensureSteps();
+      turnSteps.push({ name: ev.name, desc: ev.desc, done: false });
+      var n = turnSteps.length;
+      stepsHeadEl.innerHTML =
+        '<span class="steps-spin"></span>' +
+        '<span class="steps-txt">Executando ' + n + ' etapa' + (n > 1 ? 's' : '') + '...</span>';
+      var item = document.createElement('div');
+      item.className = 'steps-ditem';
+      item.setAttribute('data-step', ev.name);
+      item.innerHTML =
+        '<span style="color:var(--tx3)">○</span>' +
+        '<span style="color:var(--ac);font-weight:700">' + esc(ev.name) + '</span>' +
+        '<span style="color:var(--tx2)">' + esc(ev.desc) + '</span>';
+      stepsDetEl.appendChild(item);
 
     } else if (ev.type === 'tool_done') {
-      // Replace spinner with checkmark in-place.
-      var prev = toolEls[ev.name];
-      if (prev) {
-        var next = makeToolCallEl(ev.name, ev.summary, true);
-        prev.parentNode.replaceChild(next, prev);
-        toolEls[ev.name] = next;
-      } else {
-        appendEl(makeToolCallEl(ev.name, ev.summary, true));
+      for (var i = turnSteps.length - 1; i >= 0; i--) {
+        if (turnSteps[i].name === ev.name && !turnSteps[i].done) {
+          turnSteps[i].done = true; turnSteps[i].summary = ev.summary; break;
+        }
+      }
+      if (stepsDetEl) {
+        var items = stepsDetEl.querySelectorAll('.steps-ditem[data-step="' + ev.name + '"]');
+        var last = items[items.length - 1];
+        if (last) last.innerHTML =
+          '<span class="steps-ditem-ok">✓</span>' +
+          '<span style="color:var(--ac);font-weight:700">' + esc(ev.name) + '</span>' +
+          '<span style="color:var(--tx2)">· ' + esc(ev.summary) + '</span>';
       }
 
     } else if (ev.type === 'text') {
-      if (!aiMsgObj) {
-        aiMsgObj = makeAiMsgEl();
-        appendEl(aiMsgObj.wrap);
-        hasResponse = true;
+      textBuf += ev.chunk;
+      // Determine chart vs. plain once we have enough chars
+      if (isChart === null && (textBuf.length >= 50 || !ev.chunk.includes('<'))) {
+        isChart = textBuf.trimStart().startsWith('<!--FINA_CHART');
+        if (!isChart) {
+          // Flush buffered text to bubble
+          if (!aiMsgObj) { aiMsgObj = makeAiMsgEl(); appendEl(aiMsgObj.wrap); }
+          aiMsgObj.bubble.textContent = textBuf;
+          scrollBottom();
+        }
+      } else if (isChart === false) {
+        // Streaming plain text
+        if (!aiMsgObj) { aiMsgObj = makeAiMsgEl(); appendEl(aiMsgObj.wrap); }
+        aiMsgObj.bubble.textContent += ev.chunk;
+        scrollBottom();
       }
-      aiMsgObj.bubble.textContent += ev.chunk;
-      scrollBottom();
+      // isChart === true or null: keep buffering silently
 
     } else if (ev.type === 'done') {
-      if (!hasResponse && ev.text) {
-        if (!aiMsgObj) {
-          aiMsgObj = makeAiMsgEl();
-          appendEl(aiMsgObj.wrap);
-        }
-        aiMsgObj.bubble.textContent = ev.text;
+      finalizeSteps();
+      var fullText = ev.text || '';
+
+      // Parse chart block
+      var m = fullText.match(/<!--FINA_CHART:([\s\S]+?)-->/);
+      if (m) {
+        try { appendEl(renderFinaCard(JSON.parse(m[1]))); } catch (_) {}
+        fullText = fullText.replace(/<!--FINA_CHART:[\s\S]+?-->/, '').trim();
       }
-      // Push assistant turn to history.
-      var finalText = aiMsgObj ? aiMsgObj.bubble.textContent : (ev.text || '');
-      chatHistory.push({ role: 'assistant', content: finalText });
+
+      // Render remaining prose
+      if (fullText) {
+        if (!aiMsgObj) { aiMsgObj = makeAiMsgEl(); appendEl(aiMsgObj.wrap); }
+        aiMsgObj.bubble.textContent = fullText;
+        scrollBottom();
+      }
+
+      chatHistory.push({ role: 'assistant', content: ev.text || '' });
       setSendBusy(false);
 
     } else if (ev.type === 'error') {
+      finalizeSteps();
       var w = document.createElement('div');
       w.className = 'msg-ai msg-enter';
       w.innerHTML = '<div class="bubble" style="color:#E53E3E">⚠ ' + esc(ev.message) + '</div>';
@@ -777,6 +839,116 @@ function sendMsg() {
       setSendBusy(false);
     }
   }
+
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: chatHistory }),
+  }).then(function(resp) {
+    if (!resp.ok || !resp.body) throw new Error('HTTP ' + resp.status);
+    var reader = resp.body.getReader();
+    var decoder = new TextDecoder();
+    var buf = '';
+    function pump() {
+      return reader.read().then(function(chunk) {
+        if (chunk.done) { setSendBusy(false); return; }
+        buf += decoder.decode(chunk.value, { stream: true });
+        var lines = buf.split('\n');
+        buf = lines.pop();
+        lines.forEach(function(line) {
+          if (!line.startsWith('data: ')) return;
+          var raw = line.slice(6).trim();
+          if (!raw) return;
+          try { handleSSE(JSON.parse(raw)); } catch (_) {}
+        });
+        return pump();
+      });
+    }
+    return pump();
+  }).catch(function(err) {
+    finalizeSteps();
+    var w = document.createElement('div');
+    w.className = 'msg-ai msg-enter';
+    w.innerHTML = '<div class="bubble" style="color:#E53E3E">Erro ao conectar: ' + esc(err.message) + '</div>';
+    appendEl(w);
+    setSendBusy(false);
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   FINA RICH CARD — renderiza gráfico de gastos inline
+════════════════════════════════════════════════════ */
+var CHART_COLORS = [
+  '#FF3366','#FF9100','#A259FF','#00C2A8',
+  '#F59E0B','#3B82F6','#EF4444','#10B981',
+];
+
+function catIcon(label) {
+  var l = (label || '').toLowerCase();
+  if (/cartao|cartão|fatura/           .test(l)) return '💳';
+  if (/compra|vestuário|vestuario|roupa|moda|loja/.test(l)) return '🛍️';
+  if (/moradia|aluguel|condomín|imóvel|casa/.test(l)) return '🏠';
+  if (/invest|aplic|poupança|renda|tesouro/.test(l)) return '📈';
+  if (/aliment|mercado|supermercado|restaurante|lanche|café|padaria/.test(l)) return '🍽️';
+  if (/educa|escola|curso|livro|faculdade/.test(l)) return '📚';
+  if (/servico|serviço|conta|água|luz|energia|telefone|internet/.test(l)) return '🔧';
+  if (/transport|uber|taxi|combustível|gasolina|pedágio/.test(l)) return '🚗';
+  if (/saúde|saude|farmácia|farmacia|médico|hospital|plano/.test(l)) return '🏥';
+  if (/lazer|entret|cinema|show|streaming|netflix|spotify/.test(l)) return '🎬';
+  if (/viagem|hotel|avião|passagem/.test(l)) return '✈️';
+  if (/salário|salario|folha/.test(l)) return '👔';
+  return '💰';
+}
+
+function renderFinaCard(data) {
+  var cats = Array.isArray(data.categories) ? data.categories : [];
+  var el = document.createElement('div');
+  el.className = 'fina-card msg-enter';
+
+  // Header
+  var hdHtml = '<div class="fina-card-hd">' +
+    '<span class="fina-card-label">' + esc(data.title || 'Seus gastos') + '</span>' +
+    '<span class="fina-card-arr">›</span></div>';
+
+  // Total + period
+  var totHtml = '<div class="fina-total">' +
+    '<span class="fina-total-amt">' + brl(Number(data.total || 0)) + '</span>' +
+    (data.period ? '<span class="fina-total-period">' + esc(data.period) + '</span>' : '') +
+    '</div>';
+
+  // Segmented bar
+  var barHtml = '<div class="fina-bar">' +
+    cats.map(function(c, i) {
+      return '<div class="fina-bar-seg" style="flex:' + Math.max(c.pct || 1, 1) +
+        ';background:' + (CHART_COLORS[i % CHART_COLORS.length]) + '"></div>';
+    }).join('') + '</div>';
+
+  // Category rows
+  var catsHtml = '<div class="fina-cats">' + cats.map(function(c, i) {
+    var color = CHART_COLORS[i % CHART_COLORS.length];
+    return '<div class="fina-cat-row">' +
+      '<div class="fina-cat-icon" style="background:' + color + '22">' + catIcon(c.label) + '</div>' +
+      '<div class="fina-cat-info">' +
+        '<div class="fina-cat-name">' + esc(c.label || '') + '</div>' +
+        '<div class="fina-cat-sub">' + (c.pct || 0) + '% dos gastos</div>' +
+      '</div>' +
+      '<div class="fina-cat-right">' +
+        '<div class="fina-cat-amt">' + brl(Number(c.amount || 0)) + '</div>' +
+        '<span class="fina-cat-chev">›</span>' +
+      '</div></div>';
+  }).join('') + '</div>';
+
+  // Suggestion chips
+  var suggs = Array.isArray(data.suggestions) ? data.suggestions.slice(0, 3) : [];
+  var suggsHtml = suggs.length
+    ? '<div class="fina-suggs">' + suggs.map(function(s) {
+        return '<button class="fina-sugg" onclick="sendPreset(\'' +
+          String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\')">' + esc(s) + '</button>';
+      }).join('') + '</div>'
+    : '';
+
+  el.innerHTML = hdHtml + totHtml + barHtml + catsHtml + suggsHtml;
+  return el;
 }
 
 /* ════════════════════════════════════════════════════

@@ -64,6 +64,14 @@ const SYSTEM = [
   'Quando exibir listas de transações, agrupe por tipo ou período quando fizer sentido.',
   'Ofereça sempre um próximo passo útil após cada resposta.',
   'Este ambiente usa dados fictícios de demonstração.',
+
+  'REGRA PARA GRÁFICOS E ANÁLISE DE GASTOS:',
+  'Quando o usuário pedir gráfico, análise de gastos por categoria, breakdown ou distribuição de despesas:',
+  '(1) Agrupe as transações em categorias semânticas legíveis — ex: "Alimentação", "Transporte", "Moradia", "Vestuário", "Serviços", "Lazer", "Saúde", "Educação", "Investimentos". Nunca use tipos técnicos como PIX ou TED como categoria.',
+  '(2) Emita um bloco de dados estruturados NO INÍCIO da resposta, antes de qualquer texto, exatamente neste formato (sem quebras de linha dentro do bloco): <!--FINA_CHART:{"type":"spend","title":"Seus gastos","period":"D de mês - D de mês","total":0,"categories":[{"label":"Categoria","pct":30,"amount":0}],"suggestions":["pergunta follow-up 1","pergunta follow-up 2","pergunta follow-up 3"]}-->',
+  '(3) Máximo 8 categorias, ordenadas por valor decrescente. pct deve somar ~100.',
+  '(4) As sugestões devem ser 3 perguntas curtas de follow-up contextuais ao que foi mostrado.',
+  '(5) Após o bloco, escreva um resumo textual curto e conciso — máximo 2 linhas.',
 ].join(' ');
 
 // ── Express ───────────────────────────────────────────────────
