@@ -1731,6 +1731,13 @@ function catIcon(label) {
   return '💰';
 }
 
+function toggleDrill(rowEl) {
+  var drill = rowEl.nextElementSibling;
+  if (!drill || !drill.classList.contains('fina-cat-drill')) return;
+  var open = rowEl.classList.toggle('open');
+  drill.classList.toggle('open', open);
+}
+
 function renderFinaCard(data) {
   var cats = Array.isArray(data.categories) ? data.categories : [];
   var el = document.createElement('div');
@@ -1794,10 +1801,7 @@ function renderFinaCard(data) {
         inner.appendChild(item);
       });
       drill.appendChild(inner);
-      row.addEventListener('click', function() {
-        var open = row.classList.toggle('open');
-        drill.classList.toggle('open', open);
-      });
+      row.setAttribute('onclick', 'toggleDrill(this)');
     }
 
     catsEl.appendChild(row);

@@ -65,6 +65,8 @@ const SYSTEM = [
   'Ofereça sempre um próximo passo útil após cada resposta.',
   'Este ambiente usa dados fictícios de demonstração.',
 
+  'REGRA GERAL DE FORMATO: Em TODAS as respostas, sem exceção, é PROIBIDO usar markdown: sem **negrito**, sem _itálico_, sem ```código```, sem ## títulos, sem | tabelas |, sem hífens de lista, sem separadores ---. Escreva sempre em texto simples e direto.',
+
   'REGRA PARA GRÁFICOS E ANÁLISE DE GASTOS:',
   'Quando o usuário pedir gráfico, análise de gastos por categoria, breakdown ou distribuição de despesas:',
   '(1) Agrupe as transações em categorias semânticas legíveis — ex: "Alimentação", "Transporte", "Moradia", "Vestuário", "Serviços", "Lazer", "Saúde", "Educação", "Investimentos". Nunca use tipos técnicos como PIX ou TED como categoria.',
