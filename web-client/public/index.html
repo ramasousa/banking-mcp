@@ -604,6 +604,76 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 
 /* Chat: chips de sugestão */
 #scr-chat .sug:hover{border-color:var(--ac);color:var(--ac-chip-tx);background:var(--ac-chip);}
+
+/* ── Fina Bill Card — cartão de crédito visual ── */
+.bill-wrap{align-self:flex-start;width:100%;max-width:360px;margin:4px 0}
+.bill-card-vis{
+  height:200px;border-radius:18px 18px 0 0;padding:20px 22px;
+  background:linear-gradient(135deg,#c0020e 0%,#870009 55%,#520005 100%);
+  position:relative;overflow:hidden;color:#fff;
+  display:flex;flex-direction:column;justify-content:space-between;
+  box-shadow:0 10px 30px rgba(192,2,14,.35);
+}
+.bill-card-shine{position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.20) 0%,transparent 42%);pointer-events:none}
+.bill-card-halftone{position:absolute;bottom:-20px;right:-30px;width:200px;height:200px;border-radius:50%;border:40px solid rgba(255,255,255,.04);pointer-events:none}
+.bill-card-top{display:flex;justify-content:space-between;align-items:flex-start}
+.bill-card-brand-name{font-size:10px;font-weight:800;letter-spacing:.12em;opacity:.8;text-transform:uppercase}
+.bill-contactless{opacity:.6;font-size:14px}
+.bill-card-chip{
+  width:38px;height:28px;
+  background:linear-gradient(135deg,#f0d060 0%,#c8a435 50%,#e8c84a 100%);
+  border-radius:5px;position:relative;overflow:hidden;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.3);margin-top:4px;
+}
+.bill-card-chip::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,.2)}
+.bill-card-chip::after{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(0,0,0,.2)}
+.bill-card-number{font-size:15px;font-weight:400;letter-spacing:.16em;opacity:.92;font-family:var(--fm);margin:0}
+.bill-card-footer{display:flex;justify-content:space-between;align-items:flex-end}
+.bill-card-fl{display:flex;flex-direction:column;gap:2px}
+.bill-card-fl-lbl{font-size:7px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.55}
+.bill-card-fl-val{font-size:11px;font-weight:700;opacity:.9;letter-spacing:.03em}
+.bill-visa{font-style:italic;font-size:18px;font-weight:900;letter-spacing:-.02em;opacity:.9}
+.bill-mc{display:flex;align-items:center}
+.bill-mc-c1{width:22px;height:22px;border-radius:50%;background:#eb0a1e;opacity:.9}
+.bill-mc-c2{width:22px;height:22px;border-radius:50%;background:#f79e1b;opacity:.85;margin-left:-10px}
+.bill-info{
+  background:var(--sf2);border:1px solid var(--bd);border-top:none;
+  border-radius:0 0 14px 14px;padding:14px 18px;
+}
+.bill-info-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.bill-info-row:last-child{margin-bottom:0}
+.bill-info-label{font-size:11px;color:var(--tx2)}
+.bill-info-val{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
+.bill-info-due{font-size:10.5px;color:var(--tx2);margin-top:-6px;margin-bottom:10px}
+.bill-info-divider{height:1px;background:var(--bd2);margin:8px 0}
+.bill-info-sm{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ── Profile selector ── */
+.profile-sel{display:flex;align-items:center;gap:2px;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;margin-left:auto}
+.profile-opt{font-size:10px;font-weight:700;padding:4px 11px;border-radius:999px;cursor:pointer;color:var(--tx2);user-select:none;transition:background .15s,color .15s;white-space:nowrap}
+.profile-opt.act{background:var(--ac);color:var(--ac-fg)}
+
+/* ── Dashboard investments card ── */
+.invest-card{background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.invest-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.invest-total-lbl{font-size:11px;color:var(--tx2)}
+.invest-total-val{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+.invest-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid var(--bd2)}
+.invest-item-type{font-size:9px;font-weight:800;padding:2px 7px;border-radius:4px;background:var(--ac-a);color:var(--ac);font-family:var(--fm);letter-spacing:.04em}
+.invest-item-date{font-size:10px;color:var(--tx2)}
+.invest-item-val{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+
+/* ── Dashboard card mini ── */
+.dash-card-mini{background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:14px;margin-bottom:10px;cursor:pointer;transition:border-color .15s}
+.dash-card-mini:hover{border-color:var(--ac)}
+.dash-card-mini-art{width:52px;height:32px;border-radius:7px;background:linear-gradient(135deg,#c0020e,#870009);flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.dash-card-mini-chip{width:14px;height:10px;background:linear-gradient(135deg,#f0d060,#c8a435);border-radius:2px}
+.dash-card-mini-info{flex:1;min-width:0}
+.dash-card-mini-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-card-mini-sub{font-size:10.5px;color:var(--tx2);margin-top:2px}
+.dash-card-mini-amt{text-align:right;flex-shrink:0}
+.dash-card-mini-val{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.dash-card-mini-lbl{font-size:10px;color:var(--tx2)}
 </style>
 </head>
 <body>
@@ -953,7 +1023,10 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
     <div class="app-logo">pulsando<em class="logo-ai">.ai</em></div>
     <div style="height:28px;width:1px;background:var(--bd);margin:0 4px"></div>
     <div style="font-size:11px;color:var(--tx2)">Painel financeiro</div>
-    <div class="theme-tog" onclick="toggleTheme()" style="margin-left:auto;margin-right:10px">
+    <div class="profile-sel" id="profile-sel">
+      <!-- populated by loadProfiles() -->
+    </div>
+    <div class="theme-tog" onclick="toggleTheme()" style="margin-left:8px;margin-right:10px">
       <div class="tt-opt act" id="tt-n2">N</div>
       <div class="tt-opt" id="tt-v2">V</div>
     </div>
@@ -998,6 +1071,24 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
         <div class="stat-type">CC PJ + CDB</div>
       </div>
     </div>
+    <!-- Investimentos — preenchido por renderDashboard -->
+    <div id="dash-invest-section" style="display:none">
+      <div class="sec-hd">
+        <div class="sec-hd-title">Investimentos</div>
+        <span class="sec-hd-link" onclick="sendPreset('Como estão meus investimentos? Me dê um resumo completo com rentabilidade.')">analisar ↗</span>
+      </div>
+      <div id="dash-invest-list"></div>
+    </div>
+
+    <!-- Cartão de crédito — preenchido por renderDashboard -->
+    <div id="dash-card-section" style="display:none">
+      <div class="sec-hd">
+        <div class="sec-hd-title">Cartão de crédito</div>
+        <span class="sec-hd-link" onclick="sendPreset('Qual é minha fatura atual do cartão de crédito? Mostre o card visual.')">ver fatura ↗</span>
+      </div>
+      <div id="dash-card-mini-wrap"></div>
+    </div>
+
     <div id="dash-tx-section">
     <div class="sec-hd">
       <div class="sec-hd-title">Transações recentes</div>
@@ -1201,7 +1292,7 @@ function goTo(id) {
       if (s === id) { el.classList.add('fade-in'); }
     }
   });
-  if (id === 'app') loadDashboard();
+  if (id === 'app') { loadDashboard(); loadProfiles(); }
 }
 
 /* ════════════════════════════════════════════════════
@@ -1462,7 +1553,8 @@ function sendMsg() {
       textBuf += ev.chunk;
       // Determine chart vs. plain once we have enough chars
       if (isChart === null && (textBuf.length >= 50 || !ev.chunk.includes('<'))) {
-        isChart = textBuf.trimStart().startsWith('<!--FINA_CHART');
+        var tb = textBuf.trimStart();
+        isChart = tb.startsWith('<!--FINA_CHART') || tb.startsWith('<!--FINA_BILL');
         if (!isChart) {
           // Flush buffered text to bubble
           if (!aiMsgObj) { aiMsgObj = makeAiMsgEl(); appendEl(aiMsgObj.wrap); }
@@ -1481,18 +1573,31 @@ function sendMsg() {
       finalizeSteps();
       var fullText = ev.text || '';
 
-      // Parse chart block
-      var m = fullText.match(/<!--FINA_CHART:([\s\S]+?)-->/);
-      if (m) {
+      // Parse ALL FINA_CHART blocks — global regex fixes bug where 2nd chart stayed as raw text
+      var chartRe = /<!--FINA_CHART:([\s\S]+?)-->/g;
+      var cm;
+      while ((cm = chartRe.exec(fullText)) !== null) {
         try {
-          // Sanitize: collapse whitespace/newlines Claude may have inserted inside the block
-          var raw = m[1].replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
-          appendEl(renderFinaCard(JSON.parse(raw)));
+          var rawChart = cm[1].replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+          appendEl(renderFinaCard(JSON.parse(rawChart)));
         } catch (e) {
-          console.warn('[fina] chart parse error:', e.message, '\nraw:', m[1].slice(0, 200));
+          console.warn('[fina] chart parse error:', e.message);
         }
-        fullText = fullText.replace(/<!--FINA_CHART:[\s\S]+?-->/, '').trim();
       }
+      fullText = fullText.replace(/<!--FINA_CHART:[\s\S]+?-->/g, '');
+
+      // Parse ALL FINA_BILL blocks — credit card visual
+      var billRe = /<!--FINA_BILL:([\s\S]+?)-->/g;
+      var bm;
+      while ((bm = billRe.exec(fullText)) !== null) {
+        try {
+          var rawBill = bm[1].replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+          appendEl(renderBillCard(JSON.parse(rawBill)));
+        } catch (e) {
+          console.warn('[fina] bill parse error:', e.message);
+        }
+      }
+      fullText = fullText.replace(/<!--FINA_BILL:[\s\S]+?-->/g, '').trim();
 
       // Render remaining prose
       if (fullText) {
@@ -1626,6 +1731,82 @@ function renderFinaCard(data) {
 }
 
 /* ════════════════════════════════════════════════════
+   FINA BILL CARD — cartão de crédito visual na fatura
+════════════════════════════════════════════════════ */
+function renderBillCard(data) {
+  var brand    = String(data.brand || 'VISA').toUpperCase();
+  var product  = data.product || '';
+  var holder   = String(data.holder || 'TITULAR').toUpperCase();
+  var number   = String(data.number || '????');
+  var expiry   = data.expiry || '12/28';
+  var amount   = Number(data.amount || 0);
+  var dueDate  = data.dueDate || '';
+  var minDue   = Number(data.minDue || 0);
+  var limitT   = Number(data.limit || 0);
+  var limitA   = Number(data.available || 0);
+
+  var masked = '•••• •••• •••• ' + number;
+
+  var logoHtml = brand === 'MASTERCARD'
+    ? '<div class="bill-mc"><div class="bill-mc-c1"></div><div class="bill-mc-c2"></div></div>'
+    : '<div class="bill-visa">VISA</div>';
+
+  var dueFmt = '';
+  if (dueDate) {
+    try {
+      var d2 = new Date(dueDate + 'T12:00:00');
+      dueFmt = d2.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+    } catch(e2) { dueFmt = dueDate; }
+  }
+
+  var el = document.createElement('div');
+  el.className = 'bill-wrap msg-enter';
+  el.innerHTML =
+    '<div class="bill-card-vis">' +
+      '<div class="bill-card-shine"></div>' +
+      '<div class="bill-card-halftone"></div>' +
+      '<div class="bill-card-top">' +
+        '<div class="bill-card-brand-name">Bradesco · ' + esc(product) + '</div>' +
+        '<div class="bill-contactless">)))</div>' +
+      '</div>' +
+      '<div class="bill-card-chip"></div>' +
+      '<div class="bill-card-number">' + esc(masked) + '</div>' +
+      '<div class="bill-card-footer">' +
+        '<div class="bill-card-fl">' +
+          '<div class="bill-card-fl-lbl">Titular</div>' +
+          '<div class="bill-card-fl-val">' + esc(holder) + '</div>' +
+        '</div>' +
+        '<div class="bill-card-fl" style="text-align:right">' +
+          '<div class="bill-card-fl-lbl">Válido até</div>' +
+          '<div class="bill-card-fl-val">' + esc(expiry) + '</div>' +
+        '</div>' +
+        logoHtml +
+      '</div>' +
+    '</div>' +
+    '<div class="bill-info">' +
+      '<div class="bill-info-row">' +
+        '<div class="bill-info-label">Total da fatura</div>' +
+        '<div class="bill-info-val">' + brl(amount) + '</div>' +
+      '</div>' +
+      (dueFmt ? '<div class="bill-info-due">Vencimento: ' + esc(dueFmt) + '</div>' : '') +
+      (minDue > 0
+        ? '<div class="bill-info-divider"></div><div class="bill-info-row">' +
+            '<div class="bill-info-label">Pagamento mínimo</div>' +
+            '<div class="bill-info-sm">' + brl(minDue) + '</div>' +
+          '</div>'
+        : '') +
+      (limitT > 0
+        ? '<div class="bill-info-row">' +
+            '<div class="bill-info-label">Limite disponível</div>' +
+            '<div class="bill-info-sm">' + brl(limitA) + ' / ' + brl(limitT) + '</div>' +
+          '</div>'
+        : '') +
+    '</div>';
+
+  return el;
+}
+
+/* ════════════════════════════════════════════════════
    SIMULATED FALLBACK — when no API key is configured.
    Replays a canned sequence so the UI is still demonstrable.
 ════════════════════════════════════════════════════ */
@@ -1714,14 +1895,53 @@ function fmtTxDate(isoDate) {
 }
 
 function loadDashboard() {
+  if (dashLoaded) return;
+  dashLoaded = true; // prevent double load
   fetch('/api/dashboard')
     .then(function(r) { return r.json(); })
     .then(function(d) {
       if (d.demo || d.error) return;
       renderDashboard(d);
-      dashLoaded = true;
     })
     .catch(function() { /* silently keep static data */ });
+}
+
+function loadProfiles() {
+  var sel = document.getElementById('profile-sel');
+  if (!sel) return;
+  fetch('/api/profiles')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (!Array.isArray(d.profiles)) return;
+      sel.innerHTML = d.profiles.map(function(p) {
+        return '<span class="profile-opt' + (p.id === d.current ? ' act' : '') + '" ' +
+          'data-pid="' + p.id + '" title="' + esc(p.desc) + '" ' +
+          'onclick="switchProfile(\'' + p.id + '\')">' + esc(p.label) + '</span>';
+      }).join('');
+    })
+    .catch(function() { /* no profiles endpoint — ok */ });
+}
+
+function switchProfile(pid) {
+  fetch('/api/switch-profile', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profile: pid }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function() {
+    // Update active indicator
+    document.querySelectorAll('#profile-sel .profile-opt').forEach(function(el) {
+      el.classList.toggle('act', el.dataset.pid === pid);
+    });
+    // Reload dashboard
+    dashLoaded = false;
+    loadDashboard();
+    // Clear chat history (new profile = new context)
+    chatHistory = [];
+    dashData = null;
+  })
+  .catch(function() {});
 }
 
 function updateChatGreeting() {
@@ -1816,6 +2036,49 @@ function renderDashboard(d) {
         '</div>';
     }
     elStats.innerHTML = html;
+  }
+
+  // Investments
+  var elInvest = document.getElementById('dash-invest-section');
+  var elInvestList = document.getElementById('dash-invest-list');
+  if (d.investments && d.investments.total > 0 && elInvest && elInvestList) {
+    elInvest.style.display = '';
+    var invHtml = '<div class="invest-card">' +
+      '<div class="invest-total-row">' +
+        '<span class="invest-total-lbl">Total aplicado</span>' +
+        '<span class="invest-total-val amt">' + brl(d.investments.total) + '</span>' +
+      '</div>';
+    (d.investments.items || []).forEach(function(it) {
+      var due = it.dueDate ? fmtTxDate(it.dueDate) : '—';
+      invHtml += '<div class="invest-item">' +
+        '<span class="invest-item-type">' + esc(it.type) + '</span>' +
+        '<span class="invest-item-date">' + due + '</span>' +
+        '<span class="invest-item-val amt">' + brl(it.value) + '</span>' +
+        '</div>';
+    });
+    invHtml += '</div>';
+    elInvestList.innerHTML = invHtml;
+  }
+
+  // Credit card mini
+  var elCardSec = document.getElementById('dash-card-section');
+  var elCardMiniWrap = document.getElementById('dash-card-mini-wrap');
+  if (d.card && elCardSec && elCardMiniWrap) {
+    elCardSec.style.display = '';
+    var cardBillAmt = d.card.bill ? d.card.bill.total : 0;
+    var cardBillDue = d.card.bill ? d.card.bill.dueDate : '';
+    var miniHtml = '<div class="dash-card-mini" onclick="sendPreset(\'Qual é minha fatura atual do cartão de crédito? Mostre o card visual.\')">' +
+      '<div class="dash-card-mini-art"><div class="dash-card-mini-chip"></div></div>' +
+      '<div class="dash-card-mini-info">' +
+        '<div class="dash-card-mini-name">' + esc(d.card.product || 'Cartão Bradesco') + '</div>' +
+        '<div class="dash-card-mini-sub">•••• ' + esc(d.card.last4 || '????') + (cardBillDue ? ' · vence ' + fmtTxDate(cardBillDue) : '') + '</div>' +
+      '</div>' +
+      '<div class="dash-card-mini-amt">' +
+        '<div class="dash-card-mini-val amt">' + brl(cardBillAmt) + '</div>' +
+        '<div class="dash-card-mini-lbl">fatura atual</div>' +
+      '</div>' +
+      '</div>';
+    elCardMiniWrap.innerHTML = miniHtml;
   }
 
   // Transactions
