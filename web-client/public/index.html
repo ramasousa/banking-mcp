@@ -502,7 +502,9 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 .auth-divider{display:flex;align-items:center;gap:10px;color:var(--tx2);font-size:11.5px}
 .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--bd)}
 
-/* ══ APP SCREENS — paleta landing (navy + roxo + DM Sans) ══ */
+/* ══ APP SCREENS — paleta landing (DM Sans + Syne) ══ */
+
+/* Tema N = Roxo Pulsando (padrão) */
 #scr-app,#scr-chat,#scr-login,#scr-signup{
   --bg:#06070f;--sf:#0c0e1c;--sf2:#12152a;--sf3:#181c34;
   --bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.04);
@@ -511,19 +513,47 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
   --ac-a:rgba(124,58,237,.12);--ac-ab:rgba(124,58,237,.22);
   --badge:rgba(124,58,237,.1);--badge-tx:#a78bfa;
   --logo-c:#7c3aed;
+  --ac-glow:rgba(124,58,237,.30);--ac-glow-h:rgba(124,58,237,.45);
+  --ac-card-bd:rgba(124,58,237,.18);--ac-card-sh:rgba(124,58,237,.10);
+  --ac-focus:rgba(124,58,237,.12);--ac-nav-bd:rgba(124,58,237,.20);
+  --ac-chip:rgba(124,58,237,.08);--ac-chip-tx:#a78bfa;
+  --nav-bg:rgba(6,7,15,.95);
   --fs:'DM Sans',system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
   background:#06070f;color:#f1f5f9;
 }
 
-/* Tipografia Syne para logotipos e títulos principais */
+/* Tema V = Vermelho Bradesco */
+[data-t="v"] #scr-app,[data-t="v"] #scr-chat,
+[data-t="v"] #scr-login,[data-t="v"] #scr-signup{
+  --bg:#07040a;--sf:#110910;--sf2:#1b1018;--sf3:#251520;
+  --bd:rgba(240,100,120,.10);--bd2:rgba(240,100,120,.05);
+  --tx:#f5edf0;--tx2:#8a6070;--tx3:#3a1a28;
+  --ac:#e8102e;--ac-fg:#fff;--ac-a:rgba(232,16,46,.11);--ac-ab:rgba(232,16,46,.22);
+  --badge:rgba(232,16,46,.08);--badge-tx:#c07080;
+  --logo-c:#e8102e;
+  --ac-glow:rgba(232,16,46,.30);--ac-glow-h:rgba(232,16,46,.45);
+  --ac-card-bd:rgba(232,16,46,.18);--ac-card-sh:rgba(232,16,46,.10);
+  --ac-focus:rgba(232,16,46,.12);--ac-nav-bd:rgba(232,16,46,.20);
+  --ac-chip:rgba(232,16,46,.08);--ac-chip-tx:#e07080;
+  --nav-bg:rgba(7,4,10,.95);
+  background:#07040a;
+}
+
+/* ".ai" no logo sempre na cor accent */
+#scr-app .logo-ai,#scr-chat .logo-ai,
+#scr-login .logo-ai,#scr-signup .logo-ai{
+  font-style:normal;color:var(--ac);
+}
+
+/* Tipografia Syne para logotipos e títulos */
 #scr-app .app-logo,
 #scr-chat .chat-title,
-#scr-login .auth-title,#scr-login .auth-logo,
-#scr-signup .auth-title,#scr-signup .auth-logo{
+#scr-login .logo,#scr-login .auth-title,#scr-login .auth-logo,
+#scr-signup .logo,#scr-signup .auth-title,#scr-signup .auth-logo{
   font-family:'Syne',system-ui,sans-serif;
 }
 
-/* Botão primário: arredondamento e sombra suaves no padrão landing */
+/* Botão primário */
 #scr-app .btn-ac,#scr-chat .btn-ac,
 #scr-login .btn-ac,#scr-signup .btn-ac,
 #scr-login .auth-btn,#scr-signup .auth-btn,
@@ -532,48 +562,48 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 }
 #scr-chat .send-btn,#scr-chat .chat-fab-btn,
 #scr-login .auth-btn,#scr-signup .auth-btn{
-  box-shadow:0 4px 20px rgba(124,58,237,.3);
+  box-shadow:0 4px 20px var(--ac-glow);
 }
 #scr-chat .send-btn:hover,#scr-chat .chat-fab-btn:hover,
 #scr-login .auth-btn:hover,#scr-signup .auth-btn:hover{
-  box-shadow:0 6px 28px rgba(124,58,237,.45);transform:translateY(-1px);
+  box-shadow:0 6px 28px var(--ac-glow-h);transform:translateY(-1px);
 }
 
-/* Auth card: borda roxa sutil */
+/* Auth card */
 #scr-login .auth-card,#scr-signup .auth-card{
-  border-color:rgba(124,58,237,.18);
-  box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 0 1px rgba(124,58,237,.1);
+  border-color:var(--ac-card-bd);
+  box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 0 1px var(--ac-card-sh);
 }
 
-/* Input focus ring roxo */
+/* Input focus ring */
 #scr-login .form-input:focus,#scr-signup .form-input:focus{
-  border-color:#7c3aed;
-  box-shadow:0 0 0 3px rgba(124,58,237,.12);
+  border-color:var(--ac);
+  box-shadow:0 0 0 3px var(--ac-focus);
 }
 
-/* Nav dashboard: borda inferior com toque roxo */
+/* Nav dashboard */
 #scr-app .app-nav{
-  border-bottom-color:rgba(124,58,237,.2);
-  background:rgba(6,7,15,.95);
+  border-bottom-color:var(--ac-nav-bd);
+  background:var(--nav-bg);
   backdrop-filter:blur(12px);
 }
 
 /* Chat nav */
 #scr-chat .chat-nav{
-  border-bottom-color:rgba(124,58,237,.2);
-  background:rgba(6,7,15,.95);
+  border-bottom-color:var(--ac-nav-bd);
+  background:var(--nav-bg);
   backdrop-filter:blur(12px);
 }
 
-/* Mensagem do usuário: roxo */
+/* Chat: bolha do usuário */
 #scr-chat .msg-user .bubble{border-radius:14px 14px 3px 14px;}
 
-/* Tool-call spinner: roxo */
-#scr-chat .tc-spin{border-top-color:#7c3aed;}
-#scr-chat .steps-spin{border-top-color:#7c3aed;}
+/* Chat: spinners */
+#scr-chat .tc-spin{border-top-color:var(--ac);}
+#scr-chat .steps-spin{border-top-color:var(--ac);}
 
-/* Suggestion chips: hover roxo */
-#scr-chat .sug:hover{border-color:#7c3aed;color:#a78bfa;background:rgba(124,58,237,.08);}
+/* Chat: chips de sugestão */
+#scr-chat .sug:hover{border-color:var(--ac);color:var(--ac-chip-tx);background:var(--ac-chip);}
 </style>
 </head>
 <body>
@@ -920,7 +950,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 <div id="scr-app" class="scr">
   <nav class="app-nav">
     <div class="logo-dot" style="width:7px;height:7px"></div>
-    <div class="app-logo">p<span>u</span>lsando</div>
+    <div class="app-logo">pulsando<em class="logo-ai">.ai</em></div>
     <div style="height:28px;width:1px;background:var(--bd);margin:0 4px"></div>
     <div style="font-size:11px;color:var(--tx2)">Painel financeiro</div>
     <div class="theme-tog" onclick="toggleTheme()" style="margin-left:auto;margin-right:10px">
@@ -1029,7 +1059,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
   <nav class="chat-nav">
     <button class="chat-back" onclick="goTo('app')">← Voltar</button>
     <div class="chat-id">
-      <div class="chat-title">Pulsando · Assistente Financeiro</div>
+      <div class="chat-title">pulsando<em class="logo-ai">.ai</em> · Assistente Financeiro</div>
       <div class="chat-subtitle">Open Finance · MCP · Fase 2</div>
     </div>
     <div class="chat-status" id="chat-status"><span class="chat-online-dot"></span><span id="status-txt">online</span></div>
@@ -1058,7 +1088,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 <!-- ══ LOGIN ══ -->
 <div id="scr-login" class="scr">
   <nav class="l-nav">
-    <div class="logo"><div class="logo-dot"></div>pulsando</div>
+    <div class="logo"><div class="logo-dot"></div>pulsando<em class="logo-ai">.ai</em></div>
     <div class="l-nav-right">
       <div class="theme-tog" onclick="toggleTheme()">
         <div class="tt-opt act" id="tt-n4">N</div>
@@ -1068,7 +1098,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
   </nav>
   <div class="auth-wrap">
     <div class="auth-card">
-      <div class="auth-logo"><div class="logo-dot" style="width:9px;height:9px"></div>pulsando</div>
+      <div class="auth-logo"><div class="logo-dot" style="width:9px;height:9px"></div>pulsando<em class="logo-ai">.ai</em></div>
       <div class="auth-title">Bem-vindo de volta</div>
       <div class="auth-sub">Entre na sua conta para acessar suas finanças</div>
       <div class="auth-form">
@@ -1092,7 +1122,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 <!-- ══ SIGNUP ══ -->
 <div id="scr-signup" class="scr">
   <nav class="l-nav">
-    <div class="logo"><div class="logo-dot"></div>pulsando</div>
+    <div class="logo"><div class="logo-dot"></div>pulsando<em class="logo-ai">.ai</em></div>
     <div class="l-nav-right">
       <div class="theme-tog" onclick="toggleTheme()">
         <div class="tt-opt act" id="tt-n5">N</div>
@@ -1102,7 +1132,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
   </nav>
   <div class="auth-wrap">
     <div class="auth-card">
-      <div class="auth-logo"><div class="logo-dot" style="width:9px;height:9px"></div>pulsando</div>
+      <div class="auth-logo"><div class="logo-dot" style="width:9px;height:9px"></div>pulsando<em class="logo-ai">.ai</em></div>
       <div class="auth-title">Criar conta gratuita</div>
       <div class="auth-sub">Conecte suas finanças e comece a conversar agora</div>
       <div class="auth-form">
