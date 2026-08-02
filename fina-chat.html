@@ -235,10 +235,11 @@ a{text-decoration:none;color:inherit;}
       </div>
 
       <div class="chips" id="chips">
-        <div class="chip" data-q="Qual é o meu saldo total?">💰 Saldo total</div>
+        <div class="chip" data-q="Qual é o meu saldo total?">💰 Saldo</div>
         <div class="chip" data-q="Quero ver meu extrato">📄 Extrato</div>
-        <div class="chip" data-q="Quanto gastei esse mês?">📊 Gastos do mês</div>
-        <div class="chip" data-q="Meus últimos PIX">⚡ PIX recentes</div>
+        <div class="chip" data-q="Quanto gastei esse mês?">📊 Gastos</div>
+        <div class="chip" data-q="Ver minha fatura do cartão">💳 Fatura</div>
+        <div class="chip" data-q="Meus últimos PIX">⚡ PIX</div>
         <div class="chip" data-q="Ver meus investimentos">📈 Investimentos</div>
       </div>
 
@@ -264,52 +265,53 @@ a{text-decoration:none;color:inherit;}
   function nowStr(){ return '09:41'; }
   function scrollDown(){ chat.scrollTop = chat.scrollHeight; }
 
-  /* ── DADOS MOCK ── */
-  var ACCOUNTS = [
-    { bank:'Bradesco', ag:'1234-5', conta:'56789-0', disponivel:8427.63, bloqueado:120.00, limite:5000.00, color:'#CC092F' },
-    { bank:'Nubank', conta:'789.123-0', disponivel:2340.00, bloqueado:0, limite:10000.00, color:'#820AD1' },
-    { bank:'Inter', conta:'456.789-0', disponivel:1893.21, bloqueado:0, limite:3000.00, color:'#FF7A00' }
-  ];
-  var TOTAL_SALDO = ACCOUNTS.reduce(function(s,a){return s+a.disponivel;},0);
-
-  var EXTRATO = [
-    {day:'Hoje · 1 ago',items:[
-      {desc:'PIX recebido · João P. Silva',cat:'Transferência recebida',val:1200.00,dir:'in',ic:'⚡'},
-      {desc:'Rappi · Pedido #4421',cat:'Alimentação',val:-68.90,dir:'out',ic:'🛵'}
-    ]},
-    {day:'Ontem · 31 jul',items:[
-      {desc:'Supermercado Pão de Açúcar',cat:'Compra no débito',val:-342.18,dir:'out',ic:'🛒'},
-      {desc:'iFood · Pedido #8842',cat:'Alimentação',val:-78.50,dir:'out',ic:'🍔'},
-      {desc:'Uber',cat:'Transporte',val:-23.40,dir:'out',ic:'🚗'}
-    ]},
-    {day:'30 jul',items:[
-      {desc:'PIX enviado · Maria Souza',cat:'Transferência enviada',val:-500.00,dir:'out',ic:'⚡'},
-      {desc:'Salário · Empresa Tech Ltda',cat:'Crédito em conta',val:8200.00,dir:'in',ic:'💼'}
-    ]}
-  ];
-
-  var PIX = [
-    {desc:'Recebido · João P. Silva',val:1200.00,dir:'in',when:'Hoje 08:12',ic:'⚡'},
-    {desc:'Enviado · Maria Souza',val:-500.00,dir:'out',when:'30 jul 19:40',ic:'⚡'},
-    {desc:'Enviado · Padaria da Vila',val:-34.00,dir:'out',when:'28 jul 07:55',ic:'⚡'},
-    {desc:'Recebido · Carlos Lima',val:250.00,dir:'in',when:'25 jul 14:22',ic:'⚡'}
-  ];
-
-  var GASTOS = [
+  /* ── DADOS MOCK (sim mode only) ── */
+  var SIM_SALDO = { disponivel:8427.63, poupanca:2340.00, bloqueado:120.00, rendimento_mes:284.12, conta:'56789-0' };
+  var SIM_EXTRATO = {
+    conta:'56789-0', entradas:9400.00, saidas:1012.98,
+    grupos:[
+      {day:'Hoje · 1 ago',items:[
+        {desc:'PIX recebido · João P. Silva',cat:'Transferência recebida',val:1200.00,dir:'in',ic:'⚡'},
+        {desc:'Rappi · Pedido #4421',cat:'Alimentação',val:-68.90,dir:'out',ic:'🛵'}
+      ]},
+      {day:'Ontem · 31 jul',items:[
+        {desc:'Supermercado Pão de Açúcar',cat:'Compra no débito',val:-342.18,dir:'out',ic:'🛒'},
+        {desc:'iFood · Pedido #8842',cat:'Alimentação',val:-78.50,dir:'out',ic:'🍔'},
+        {desc:'Uber',cat:'Transporte',val:-23.40,dir:'out',ic:'🚗'}
+      ]},
+      {day:'30 jul',items:[
+        {desc:'PIX enviado · Maria Souza',cat:'Transferência enviada',val:-500.00,dir:'out',ic:'⚡'},
+        {desc:'Salário · Empresa Tech Ltda',cat:'Crédito em conta',val:8200.00,dir:'in',ic:'💼'}
+      ]}
+    ]
+  };
+  var SIM_PIX = { pix:[
+    {desc:'Recebido · João P. Silva',val:1200.00,dir:'in',when:'Hoje 08:12'},
+    {desc:'Enviado · Maria Souza',val:-500.00,dir:'out',when:'30 jul 19:40'},
+    {desc:'Enviado · Padaria da Vila',val:-34.00,dir:'out',when:'28 jul 07:55'},
+    {desc:'Recebido · Carlos Lima',val:250.00,dir:'in',when:'25 jul 14:22'}
+  ]};
+  var SIM_GASTOS = { total:4823.40, gastos:[
     {cat:'🍔 Alimentação',val:1842.30,pct:38,color:'#7c3aed'},
     {cat:'🛒 Mercado',val:1540.00,pct:32,color:'#3b82f6'},
     {cat:'🚗 Transporte',val:712.40,pct:15,color:'#10b981'},
     {cat:'📱 Assinaturas',val:728.70,pct:15,color:'#f59e0b'}
-  ];
-  var GASTO_TOTAL = 4823.40;
-
-  var INVESTIMENTOS = [
+  ]};
+  var SIM_FATURA = { fatura_atual:{
+    total:3842.90, vencimento:'07/08/2026', limite_disponivel:11157.10,
+    por_categoria:[
+      {cat:'Alimentação',val:1240.00,pct:32,color:'#7c3aed'},
+      {cat:'Assinaturas',val:890.00,pct:23,color:'#3b82f6'},
+      {cat:'Transporte',val:680.00,pct:18,color:'#10b981'},
+      {cat:'Compras',val:1032.90,pct:27,color:'#f59e0b'}
+    ]
+  }};
+  var SIM_INV = { items:[
     {name:'Tesouro Direto IPCA+',type:'Renda Fixa',val:12400.00,yield:'+11,4% a.a.',ic:'🏛️'},
     {name:'CDB Bradesco 120%CDI',type:'Renda Fixa',val:8750.00,yield:'+14,2% a.a.',ic:'🏦'},
     {name:'Fundo Multimercado XP',type:'Fundos',val:5320.00,yield:'+8,7% a.a.',ic:'📊'},
     {name:'Ações PETR4 / VALE3',type:'Renda Variável',val:3180.00,yield:'+22,1% no ano',ic:'📈'}
-  ];
-  var INV_TOTAL = INVESTIMENTOS.reduce(function(s,i){return s+i.val;},0);
+  ]};
 
   /* ── RENDER HELPERS ── */
   function addUser(text){
@@ -352,87 +354,139 @@ a{text-decoration:none;color:inherit;}
     }, 920);
   }
 
-  /* ── CARD BUILDERS ── */
-  function saldoCard(){
-    var total = ACCOUNTS.reduce(function(s,a){return s+a.disponivel;},0);
-    var d = document.createElement('div');
-    d.className = 'rich';
-    var html = '<div class="rich-head"><div class="rh-label">Saldo · '+ACCOUNTS.length+' bancos conectados</div><div class="rh-acct">Open Finance · dados em tempo real</div></div>';
-    html += '<div class="bal-main">';
-    ACCOUNTS.forEach(function(a){
-      html += '<div class="bal-row"><span class="bal-k" style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:'+a.color+';display:inline-block;"></span>'+a.bank+'</span><span class="bal-v" style="font-size:14px;">'+BRL(a.disponivel)+'</span></div>';
-    });
+  /* ── CARD BUILDERS (data-driven — accept real tool result or sim fallback) ── */
+  function saldoCard(data){
+    data = data || {};
+    var disp = data.disponivel || 0;
+    var poup = data.poupanca || 0;
+    var total = disp + poup;
+    var el = document.createElement('div');
+    el.className = 'rich';
+    var html = '<div class="rich-head"><div class="rh-label">Saldo · Bradesco</div><div class="rh-acct">Conta '+(data.conta||'56789-0')+'</div></div><div class="bal-main">';
+    if(disp) html += '<div class="bal-row"><span class="bal-k">Conta corrente</span><span class="bal-v" style="font-size:14px;">'+BRL(disp)+'</span></div>';
+    if(poup) html += '<div class="bal-row"><span class="bal-k">Poupança</span><span class="bal-v" style="font-size:14px;">'+BRL(poup)+'</span></div>';
+    if(data.bloqueado) html += '<div class="bal-row"><span class="bal-k">Bloqueado</span><span class="bal-v" style="font-size:14px;color:var(--neg);">'+BRL(data.bloqueado)+'</span></div>';
     html += '<div class="bal-div"></div>';
     html += '<div class="bal-row"><span class="bal-k"><strong>Total disponível</strong></span><span class="bal-v big">'+BRL(total)+'</span></div>';
-    html += '</div><div class="bal-div"></div><div class="bal-foot"><span class="lock">✦</span>consultar_saldo · Open Finance · todos os bancos</div>';
-    d.innerHTML = html;
-    return d;
+    html += '</div><div class="bal-div"></div><div class="bal-foot"><span class="lock">✦</span>consultar_saldo · core-bancario-api</div>';
+    el.innerHTML = html;
+    return el;
   }
 
-  function extratoCard(){
-    var d = document.createElement('div');
-    d.className = 'rich';
-    var html = '<div class="rich-head"><div class="rh-label">Extrato · últimos lançamentos</div><div class="rh-acct">Bradesco · Conta 56789-0</div></div><div class="stmt-list">';
-    EXTRATO.forEach(function(g){
+  function extratoCard(data){
+    data = data || {};
+    var grupos = data.grupos || [];
+    var el = document.createElement('div');
+    el.className = 'rich';
+    var html = '<div class="rich-head"><div class="rh-label">Extrato · últimos lançamentos</div><div class="rh-acct">Bradesco · Conta '+(data.conta||'56789-0')+'</div></div><div class="stmt-list">';
+    var count = 0;
+    for(var gi=0; gi<grupos.length && count<15; gi++){
+      var g = grupos[gi];
       html += '<div class="stmt-day">'+g.day+'</div>';
-      g.items.forEach(function(it){
+      for(var ii=0; ii<g.items.length && count<15; ii++){
+        var it = g.items[ii];
         var din = it.dir==='in';
         html += '<div class="stmt-item">'+
-          '<div class="si-ic '+it.dir+'">'+it.ic+'</div>'+
+          '<div class="si-ic '+it.dir+'">'+(it.ic||'💳')+'</div>'+
           '<div class="si-body"><div class="si-desc">'+it.desc+'</div><div class="si-cat">'+it.cat+'</div></div>'+
-          '<div class="si-val '+it.dir+'">'+(din?'+':'−')+BRL(Math.abs(it.val))+'</div>'+
+          '<div class="si-val '+it.dir+'">'+(din?'+':'−')+BRL(Math.abs(it.val||0))+'</div>'+
         '</div>';
-      });
-    });
-    html += '</div><div class="bal-foot"><span class="lock">✦</span>consultar_extrato · Open Finance · Bradesco</div>';
-    d.innerHTML = html;
-    return d;
+        count++;
+      }
+    }
+    html += '</div>';
+    if(data.entradas!=null||data.saidas!=null){
+      html += '<div class="bal-foot" style="justify-content:space-between;">'+
+        '<span>+ <span style="color:var(--money)">'+BRL(data.entradas||0)+'</span></span>'+
+        '<span>− <span style="color:var(--neg)">'+BRL(data.saidas||0)+'</span></span>'+
+      '</div>';
+    } else {
+      html += '<div class="bal-foot"><span class="lock">✦</span>consultar_extrato · Bradesco</div>';
+    }
+    el.innerHTML = html;
+    return el;
   }
 
-  function gastosCard(){
-    var d = document.createElement('div');
-    d.className = 'rich';
-    var html = '<div class="rich-head"><div class="rh-label">Gastos · mês atual · todos os bancos</div><div class="rh-acct">Total '+BRL(GASTO_TOTAL)+'</div></div><div class="spend">';
-    GASTOS.forEach(function(g){
-      html += '<div class="sp-row"><div class="sp-top"><span class="cat">'+g.cat+'</span><span class="val">'+BRL(g.val)+'</span></div>'+
-        '<div class="sp-track"><div class="sp-fill" style="width:'+g.pct+'%;background:'+g.color+'"></div></div></div>';
+  function gastosCard(data){
+    data = data || {};
+    var gastos = data.gastos || [];
+    var total = data.total || gastos.reduce(function(s,g){return s+(g.val||0);},0);
+    var el = document.createElement('div');
+    el.className = 'rich';
+    var html = '<div class="rich-head"><div class="rh-label">Gastos · '+(data.periodo||'mês atual')+'</div><div class="rh-acct">Total '+BRL(total)+'</div></div><div class="spend">';
+    gastos.slice(0,6).forEach(function(g){
+      var pct = g.pct || (total>0 ? Math.round((g.val||0)/total*100) : 0);
+      var color = g.color||'#7c3aed';
+      html += '<div class="sp-row"><div class="sp-top"><span class="cat">'+(g.cat||'Outros')+'</span><span class="val">'+BRL(g.val||0)+'</span></div>'+
+        '<div class="sp-track"><div class="sp-fill" style="width:'+pct+'%;background:'+color+'"></div></div></div>';
     });
     html += '</div><div class="bal-foot"><span class="lock">✦</span>consultar_gastos · agregado por categoria</div>';
-    d.innerHTML = html;
-    return d;
+    el.innerHTML = html;
+    return el;
   }
 
-  function pixCard(){
-    var d = document.createElement('div');
-    d.className = 'rich';
-    var html = '<div class="rich-head"><div class="rh-label">PIX · movimentações recentes</div><div class="rh-acct">Todos os bancos</div></div><div class="stmt-list">';
-    PIX.forEach(function(it){
+  function pixCard(data){
+    data = data || {};
+    var pix = data.pix || [];
+    var el = document.createElement('div');
+    el.className = 'rich';
+    var html = '<div class="rich-head"><div class="rh-label">PIX · movimentações recentes</div><div class="rh-acct">Bradesco</div></div><div class="stmt-list">';
+    pix.slice(0,10).forEach(function(it){
       var din = it.dir==='in';
       html += '<div class="stmt-item">'+
-        '<div class="si-ic '+it.dir+'">'+it.ic+'</div>'+
-        '<div class="si-body"><div class="si-desc">'+it.desc+'</div><div class="si-cat">'+it.when+'</div></div>'+
-        '<div class="si-val '+it.dir+'">'+(din?'+':'−')+BRL(Math.abs(it.val))+'</div>'+
+        '<div class="si-ic '+it.dir+'">⚡</div>'+
+        '<div class="si-body"><div class="si-desc">'+it.desc+'</div><div class="si-cat">'+(it.when||'')+'</div></div>'+
+        '<div class="si-val '+it.dir+'">'+(din?'+':'−')+BRL(Math.abs(it.val||0))+'</div>'+
       '</div>';
     });
-    html += '</div><div class="bal-foot"><span class="lock">✦</span>consultar_extrato · filtro tipo=PIX</div>';
-    d.innerHTML = html;
-    return d;
+    html += '</div><div class="bal-foot"><span class="lock">✦</span>consultar_pix · filtro tipo=PIX</div>';
+    el.innerHTML = html;
+    return el;
   }
 
-  function investCard(){
-    var d = document.createElement('div');
-    d.className = 'rich';
-    var html = '<div class="rich-head"><div class="rh-label">Investimentos · carteira total</div><div class="rh-acct">Total '+BRL(INV_TOTAL)+' · Open Finance</div></div><div class="inv-list">';
-    INVESTIMENTOS.forEach(function(i){
+  function faturaCard(data){
+    data = data || {};
+    var fa = data.fatura_atual || data;
+    var el = document.createElement('div');
+    el.className = 'rich';
+    var html = '<div class="rich-head"><div class="rh-label">Fatura · Cartão de crédito</div><div class="rh-acct">Bradesco Visa · RAUL SOUSA</div></div><div class="bal-main">';
+    if(fa.total!=null) html += '<div class="bal-row"><span class="bal-k">Total da fatura</span><span class="bal-v big" style="color:var(--neg);">'+BRL(fa.total)+'</span></div>';
+    if(fa.vencimento) html += '<div class="bal-row"><span class="bal-k">Vencimento</span><span class="bal-v" style="font-size:14px;">'+fa.vencimento+'</span></div>';
+    if(fa.limite_disponivel!=null) html += '<div class="bal-row"><span class="bal-k">Limite disponível</span><span class="bal-v" style="font-size:14px;color:var(--money);">'+BRL(fa.limite_disponivel)+'</span></div>';
+    html += '</div>';
+    var cats = fa.por_categoria || [];
+    if(cats.length){
+      var catTotal = cats.reduce(function(s,c){return s+(c.val||0);},0);
+      html += '<div class="spend" style="border-top:1px solid var(--app-line);padding-top:12px;">';
+      cats.slice(0,5).forEach(function(c){
+        var pct = c.pct||(catTotal>0?Math.round((c.val||0)/catTotal*100):0);
+        html += '<div class="sp-row"><div class="sp-top"><span class="cat">'+(c.cat||'Outros')+'</span><span class="val">'+BRL(c.val||0)+'</span></div>'+
+          '<div class="sp-track"><div class="sp-fill" style="width:'+pct+'%;background:'+(c.color||'#7c3aed')+'"></div></div></div>';
+      });
+      html += '</div>';
+    }
+    html += '<div class="bal-foot"><span class="lock">✦</span>consultar_fatura · cartoes-api</div>';
+    el.innerHTML = html;
+    return el;
+  }
+
+  function investCard(data){
+    data = data || {};
+    var items = data.items || data.investimentos || (Array.isArray(data) ? data : []);
+    var total = items.reduce(function(s,i){return s+(i.val||0);},0);
+    var el = document.createElement('div');
+    el.className = 'rich';
+    var html = '<div class="rich-head"><div class="rh-label">Investimentos · carteira total</div><div class="rh-acct">Total '+BRL(total)+' · Open Finance</div></div><div class="inv-list">';
+    items.forEach(function(i){
       html += '<div class="inv-item">'+
-        '<div class="inv-ic">'+i.ic+'</div>'+
-        '<div class="inv-body"><div class="inv-name">'+i.name+'</div><div class="inv-type">'+i.type+'</div></div>'+
-        '<div class="inv-right"><div class="inv-val">'+BRL(i.val)+'</div><div class="inv-yield">'+i.yield+'</div></div>'+
+        '<div class="inv-ic">'+(i.ic||'💰')+'</div>'+
+        '<div class="inv-body"><div class="inv-name">'+(i.name||i.nome||'Investimento')+'</div><div class="inv-type">'+(i.type||i.tipo||'')+'</div></div>'+
+        '<div class="inv-right"><div class="inv-val">'+BRL(i.val||0)+'</div><div class="inv-yield">'+(i.yield||i.rentabilidade||'')+'</div></div>'+
       '</div>';
     });
     html += '</div><div class="bal-foot"><span class="lock">✦</span>consultar_investimentos · Open Finance</div>';
-    d.innerHTML = html;
-    return d;
+    el.innerHTML = html;
+    return el;
   }
 
   /* ── INTENT CLASSIFIER ── */
@@ -440,7 +494,8 @@ a{text-decoration:none;color:inherit;}
     var s = q.toLowerCase();
     if(/(invest|aplica|carteira|cdb|tesouro|a[cç][aã]o|fundo|rendimento|yield)/.test(s)) return 'investimentos';
     if(/(saldo|quanto.*(tenho|conta|dispon[ií]vel)|meu dinheiro|total.*banco)/.test(s)) return 'saldo';
-    if(/(gast(ei|o|os)|despesa|quanto.*(gast)|categoria|mais gast)/.test(s)) return 'gastos';
+    if(/(fatura|cartao|cart[aã]o|cr[eé]dito|vencimento|limite)/.test(s)) return 'fatura';
+    if(/(gast(ei|o|os)|despesa|quanto.*(gast)|categoria|mais gast|gr[aá]fico|pizza|visual)/.test(s)) return 'gastos';
     if(/\bpix\b/.test(s)) return 'pix';
     if(/(extrato|movimenta|transa|[uú]ltim.*(lan[çc]|compra|gasto)|hist[oó]rico)/.test(s)) return 'extrato';
     if(/(oi|ol[áa]|bom dia|boa tarde|ajuda|o que voc[êe]|pode|help)/.test(s)) return 'hello';
@@ -456,45 +511,55 @@ a{text-decoration:none;color:inherit;}
     if(intent==='saldo'){
       go(920, function(){
         addBotText('Vou consultar o saldo em todos os seus bancos via Open Finance 🔍');
-        toolCall('consultar_saldo','<span class="k">GET</span> /openfinance/v2/saldo · todos os bancos · 318ms',function(){
-          addRich(saldoCard());
-          addBotText('Você tem <b>'+BRL(TOTAL_SALDO)+'</b> disponíveis no total — somando Bradesco, Nubank e Inter. Quer ver o extrato de algum deles?');
+        toolCall('consultar_saldo','<span class="k">GET</span> /contas/v1/saldo · Bradesco · 318ms',function(){
+          addRich(saldoCard(SIM_SALDO));
+          addBotText('Você tem <b>'+BRL(SIM_SALDO.disponivel+SIM_SALDO.poupanca)+'</b> disponíveis no total. Quer ver o extrato?');
         });
       });
     }
     else if(intent==='extrato'){
       go(920, function(){
         addBotText('Buscando seus últimos lançamentos 📄');
-        toolCall('consultar_extrato','<span class="k">GET</span> /openfinance/v2/extrato?dias=3 · Bradesco · 291ms',function(){
-          addRich(extratoCard());
-          addBotText('Nos últimos dias entraram <b>'+BRL(9400)+'</b> e saíram <b>'+BRL(1012.98)+'</b>. Quer ver os gastos agrupados por categoria?');
+        toolCall('consultar_extrato','<span class="k">GET</span> /contas/v1/extrato?dias=7 · Bradesco · 291ms',function(){
+          addRich(extratoCard(SIM_EXTRATO));
+          addBotText('Nos últimos dias entraram <b>'+BRL(SIM_EXTRATO.entradas)+'</b> e saíram <b>'+BRL(SIM_EXTRATO.saidas)+'</b>. Quer ver os gastos por categoria?');
         });
       });
     }
     else if(intent==='gastos'){
       go(920, function(){
-        addBotText('Somando seus gastos do mês em todos os bancos 📊');
-        toolCall('consultar_gastos','<span class="k">GET</span> /openfinance/v2/extrato?periodo=2026-08 · agregação · 344ms',function(){
-          addRich(gastosCard());
-          addBotText('Você gastou <b>'+BRL(GASTO_TOTAL)+'</b> neste mês. <b>Alimentação</b> liderou com R$ 1.842 — 38% do total. Quer dicas para economizar? 💡');
+        addBotText('Somando seus gastos do mês 📊');
+        toolCall('consultar_gastos','<span class="k">GET</span> /contas/v1/extrato?periodo=2026-07 · agregação · 344ms',function(){
+          addRich(gastosCard(SIM_GASTOS));
+          addBotText('Você gastou <b>'+BRL(SIM_GASTOS.total)+'</b> neste mês. Alimentação liderou com 38% do total. Quer dicas para economizar? 💡');
         });
       });
     }
     else if(intent==='pix'){
       go(920, function(){
         addBotText('Aqui estão seus PIX mais recentes ⚡');
-        toolCall('consultar_pix','<span class="k">GET</span> /openfinance/v2/extrato?tipo=PIX · todos os bancos · 271ms',function(){
-          addRich(pixCard());
-          addBotText('Foram <b>2 recebidos</b> (R$ 1.450) e <b>2 enviados</b> (R$ 534) recentemente. Quer fazer um novo PIX?');
+        toolCall('consultar_pix','<span class="k">GET</span> /contas/v1/extrato?tipo=PIX · 271ms',function(){
+          addRich(pixCard(SIM_PIX));
+          addBotText('Foram 2 recebidos (R$ 1.450) e 2 enviados (R$ 534) recentemente. Quer fazer um novo PIX?');
+        });
+      });
+    }
+    else if(intent==='fatura'){
+      go(920, function(){
+        addBotText('Consultando sua fatura do cartão 💳');
+        toolCall('consultar_fatura','<span class="k">GET</span> /cartoes/v1/faturas · cartoes-api · 305ms',function(){
+          addRich(faturaCard(SIM_FATURA));
+          addBotText('Sua fatura fecha em 28/07 e vence em 07/08. Quer ver os lançamentos detalhados?');
         });
       });
     }
     else if(intent==='investimentos'){
       go(920, function(){
-        addBotText('Buscando sua carteira de investimentos via Open Finance 📈');
-        toolCall('consultar_investimentos','<span class="k">GET</span> /openfinance/v2/investimentos · corretoras · 412ms',function(){
-          addRich(investCard());
-          addBotText('Sua carteira vale <b>'+BRL(INV_TOTAL)+'</b> no total. O Tesouro IPCA+ é o maior ativo. Quer uma análise de diversificação?');
+        addBotText('Buscando sua carteira de investimentos 📈');
+        toolCall('consultar_investimentos','<span class="k">GET</span> /investimentos · Open Finance · 412ms',function(){
+          addRich(investCard(SIM_INV));
+          var tot=SIM_INV.items.reduce(function(s,i){return s+(i.val||0);},0);
+          addBotText('Sua carteira vale <b>'+BRL(tot)+'</b> no total. O Tesouro IPCA+ é o maior ativo. Quer uma análise de diversificação?');
         });
       });
     }
@@ -505,7 +570,7 @@ a{text-decoration:none;color:inherit;}
     }
     else{
       go(780, function(){
-        addBotText('Ainda estou aprendendo novas perguntas 🙂 Posso te ajudar com <b>saldo total</b>, <b>extrato</b>, <b>gastos por categoria</b>, <b>PIX</b> ou <b>investimentos</b>. Experimente um dos atalhos abaixo!');
+        addBotText('Ainda estou aprendendo novas perguntas 🙂 Posso te ajudar com <b>saldo</b>, <b>extrato</b>, <b>gastos por categoria</b>, <b>PIX</b>, <b>fatura do cartão</b> ou <b>investimentos</b>. Experimente um dos atalhos abaixo!');
       });
     }
   }
@@ -526,12 +591,14 @@ a{text-decoration:none;color:inherit;}
 
   function toolCallAsync(name,meta){return new Promise(function(res){toolCall(name,meta||'',res);});}
   function cardForStep(step){
+    var d = step.data;
     switch(step.tool){
-      case 'consultar_saldo': return saldoCard();
-      case 'consultar_extrato': return extratoCard();
-      case 'consultar_gastos': return gastosCard();
-      case 'consultar_pix': return pixCard();
-      case 'consultar_investimentos': return investCard();
+      case 'consultar_saldo': return saldoCard(d);
+      case 'consultar_extrato': return extratoCard(d);
+      case 'consultar_gastos': return gastosCard(d);
+      case 'consultar_pix': return pixCard(d);
+      case 'consultar_fatura': return faturaCard(d);
+      case 'consultar_investimentos': return investCard(d);
       default: return null;
     }
   }
