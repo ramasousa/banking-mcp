@@ -816,7 +816,13 @@ function sendMsg() {
       // Parse chart block
       var m = fullText.match(/<!--FINA_CHART:([\s\S]+?)-->/);
       if (m) {
-        try { appendEl(renderFinaCard(JSON.parse(m[1]))); } catch (_) {}
+        try {
+          // Sanitize: collapse whitespace/newlines Claude may have inserted inside the block
+          var raw = m[1].replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+          appendEl(renderFinaCard(JSON.parse(raw)));
+        } catch (e) {
+          console.warn('[fina] chart parse error:', e.message, '\nraw:', m[1].slice(0, 200));
+        }
         fullText = fullText.replace(/<!--FINA_CHART:[\s\S]+?-->/, '').trim();
       }
 

@@ -71,7 +71,7 @@ const SYSTEM = [
   '(2) Emita um bloco de dados estruturados NO INÍCIO da resposta, antes de qualquer texto, exatamente neste formato (sem quebras de linha dentro do bloco): <!--FINA_CHART:{"type":"spend","title":"Seus gastos","period":"D de mês - D de mês","total":0,"categories":[{"label":"Categoria","pct":30,"amount":0}],"suggestions":["pergunta follow-up 1","pergunta follow-up 2","pergunta follow-up 3"]}-->',
   '(3) Máximo 8 categorias, ordenadas por valor decrescente. pct deve somar ~100.',
   '(4) As sugestões devem ser 3 perguntas curtas de follow-up contextuais ao que foi mostrado.',
-  '(5) Após o bloco, escreva um resumo textual curto e conciso — máximo 2 linhas.',
+  '(5) Após o bloco <!--FINA_CHART:-->, escreva APENAS UMA frase curta de resumo (ex: "Em julho você gastou R$ 23.118 — destaque para Cartão de Crédito (37%)."). PROIBIDO: tabelas markdown, listas com hífens, separadores ---, seções **Resumo por categoria**, sugestões em texto. Essas informações já estão no card visual — repeti-las é redundante e piora a experiência.',
 ].join(' ');
 
 // ── Express ───────────────────────────────────────────────────
