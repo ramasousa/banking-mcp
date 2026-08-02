@@ -89,6 +89,142 @@ app.get('/api/health', async (_req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────
+// Helpers internos para o dashboard
+// ─────────────────────────────────────────────────────────────
+const TIPO_LABEL = {
+  PIX: 'PIX', TED: 'TED', DOC: 'DOC', BOLETO: 'Boleto',
+  CARTAO: 'Cartão de crédito', CONVENIO_ARRECADACAO: 'Arrecadação',
+  FOLHA_PAGAMENTO: 'Folha de pagamento', DEPOSITO: 'Depósito',
+  SAQUE: 'Saque', RENDIMENTO_APLIC_FINANCEIRA: 'Rendimento',
+  RESGATE_APLIC_FINANCEIRA: 'Resgate', OPERACAO_CREDITO: 'Crédito',
+  PACOTE_TARIFA_SERVICOS: 'Tarifa de serviços', OUTROS: 'Outros',
+};
+
+async function mcpCall(name, args = {}) {
+  try {
+    const r = await mcp.callTool({ name, arguments: args });
+    return JSON.parse(r.content?.[0]?.text ?? '{}');
+  } catch (err) {
+    console.warn(`[dashboard] ${name} falhou:`, err?.message);
+    return {};
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// GET /api/dashboard
+// Retorna dados reais do MCP Server para o painel financeiro.
+// Resposta: { identity, totals, entities, period, accounts, categories, totalSpend, transactions }
+// ─────────────────────────────────────────────────────────────
+app.get('/api/dashboard', async (_req, res) => {
+  if (!hasKey) return res.json({ demo: true });
+
+  try {
+    const [analyticsRaw, identEnv, accountsEnv] = await Promise.all([
+      mcpCall('analytics_cross_pf_pj'),
+      mcpCall('of_get_personal_identifications'),
+      mcpCall('of_list_accounts'),
+    ]);
+
+    const accounts = Array.isArray(accountsEnv.data) ? accountsEnv.data : [];
+    const identity = Array.isArray(identEnv.data) ? identEnv.data[0] : (identEnv.data ?? {});
+
+    const today = new Date();
+    const thirtyAgo = new Date(today);
+    thirtyAgo.setDate(thirtyAgo.getDate() - 30);
+    const fromDate = thirtyAgo.toISOString().slice(0, 10);
+
+    const txArrays = await Promise.all(
+      accounts.map((a) =>
+        mcpCall('of_get_account_transactions', {
+          accountId: a.accountId,
+          fromBookingDate: fromDate,
+          pageSize: 30,
+        })
+      )
+    );
+
+    const allTx = accounts
+      .flatMap((a, i) => {
+        const data = Array.isArray(txArrays[i]?.data) ? txArrays[i].data : [];
+        return data.map((t) => ({ ...t, _ownerType: a.ownerType }));
+      })
+      .sort((a, b) => (b.transactionDateTime ?? '').localeCompare(a.transactionDateTime ?? ''));
+
+    // Categorias de gasto (top_saidas de PF + PJ agregadas)
+    const pfSaidas = analyticsRaw.entidades?.PF?.top_saidas_por_tipo ?? [];
+    const pjSaidas = analyticsRaw.entidades?.PJ?.top_saidas_por_tipo ?? [];
+    const spendMap = {};
+    [...pfSaidas, ...pjSaidas].forEach(({ tipo, valor }) => {
+      spendMap[tipo] = (spendMap[tipo] ?? 0) + valor;
+    });
+    const totalSpend = Object.values(spendMap).reduce((s, v) => s + v, 0);
+    const categories = Object.entries(spendMap)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 7)
+      .map(([tipo, valor], i) => ({
+        tipo,
+        label: TIPO_LABEL[tipo] ?? tipo,
+        valor: Number(valor.toFixed(2)),
+        pct: totalSpend > 0 ? Math.round((valor / totalSpend) * 100) : 0,
+        colorIdx: i + 1,
+      }));
+
+    const cpfRaw = identity.documents?.cpfNumber ?? '';
+    const cpfMasked =
+      cpfRaw.length === 11
+        ? `***.***.${cpfRaw.slice(6, 9)}-${cpfRaw.slice(9)}`
+        : '***';
+
+    const pfEnt = analyticsRaw.entidades?.PF ?? {};
+    const pjEnt = analyticsRaw.entidades?.PJ ?? null;
+
+    const fmtDate = (d, opts) =>
+      d.toLocaleDateString('pt-BR', opts);
+
+    res.json({
+      identity: {
+        name: identity.civilName ?? 'Usuário',
+        cpf: cpfMasked,
+      },
+      totals: {
+        position: analyticsRaw.consolidado?.saldo_disponivel_total ?? 0,
+      },
+      entities: {
+        pf: {
+          label: pfEnt.titular ?? 'Conta PF',
+          balance: pfEnt.saldo_disponivel_total ?? 0,
+          type: 'CC + Poupança',
+        },
+        pj: pjEnt
+          ? {
+              label: pjEnt.titular ?? 'MEI',
+              balance: pjEnt.saldo_disponivel_total ?? 0,
+              type: 'CC PJ + CDB',
+            }
+          : null,
+      },
+      period: {
+        from: fmtDate(thirtyAgo, { day: 'numeric', month: 'short' }),
+        to: fmtDate(today, { day: 'numeric', month: 'short', year: 'numeric' }),
+      },
+      accounts: { count: accounts.length },
+      categories,
+      totalSpend,
+      transactions: allTx.slice(0, 12).map((t) => ({
+        name: t.transactionName ?? t.type ?? 'Transação',
+        type: t.type ?? 'OUTROS',
+        amount: Number(t.transactionAmount?.amount ?? 0),
+        credit: t.creditDebitType === 'CREDITO',
+        date: t.transactionDateTime?.slice(0, 10) ?? '',
+      })),
+    });
+  } catch (err) {
+    console.error('[dashboard] erro:', err?.message);
+    res.status(500).json({ error: err?.message ?? 'Erro interno' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────
 // POST /api/chat
 // Body: { messages: [{ role: "user"|"assistant", content: string }] }
 //

@@ -333,18 +333,18 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
     </div>
     <div class="app-user">
       <div class="app-user-info">
-        <div class="app-user-name">Maria S.</div>
-        <div class="app-user-doc mono">***.***.102-34</div>
+        <div class="app-user-name" id="nav-user-name">Maria S.</div>
+        <div class="app-user-doc mono" id="nav-user-doc">***.***.102-34</div>
       </div>
-      <div class="app-avatar">M</div>
+      <div class="app-avatar" id="nav-avatar">M</div>
     </div>
   </nav>
   <div class="dash-body">
     <div class="pos-card">
-      <div class="pos-period mono">2 mai — 2 ago 2026</div>
-      <div class="pos-amount amt">R$ 39.637<span style="font-size:50%;color:var(--tx2)">,00</span></div>
-      <div class="pos-sub">Posição consolidada · PF + MEI · 4 contas</div>
-      <div class="spend-bar">
+      <div class="pos-period mono" id="pos-period">2 mai — 2 ago 2026</div>
+      <div class="pos-amount amt" id="pos-amount">R$ 39.637<span style="font-size:50%;color:var(--tx2)">,00</span></div>
+      <div class="pos-sub" id="pos-sub">Posição consolidada · PF + MEI · 4 contas</div>
+      <div class="spend-bar" id="pos-spend-bar">
         <div class="sb-seg" style="flex:24;background:var(--s1)"></div>
         <div class="sb-seg" style="flex:17;background:var(--s2)"></div>
         <div class="sb-seg" style="flex:14;background:var(--s3)"></div>
@@ -353,14 +353,14 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
         <div class="sb-seg" style="flex:9;background:var(--s6)"></div>
         <div class="sb-seg" style="flex:13;background:var(--s7)"></div>
       </div>
-      <div class="cat-list">
+      <div class="cat-list" id="pos-cat-list">
         <div class="cat-item"><div class="cat-dot" style="background:var(--s1)"></div><div class="cat-info"><div class="cat-name">Cheque especial e atraso</div><div class="cat-pct">24% dos gastos</div></div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:24%;background:var(--s1)"></div></div><div class="cat-amt amt">R$ 3.120</div></div>
         <div class="cat-item"><div class="cat-dot" style="background:var(--s2)"></div><div class="cat-info"><div class="cat-name">Vestuário</div><div class="cat-pct">17% dos gastos</div></div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:17%;background:var(--s2)"></div></div><div class="cat-amt amt">R$ 2.210</div></div>
         <div class="cat-item"><div class="cat-dot" style="background:var(--s3)"></div><div class="cat-info"><div class="cat-name">Compras online</div><div class="cat-pct">14% dos gastos</div></div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:14%;background:var(--s3)"></div></div><div class="cat-amt amt">R$ 1.820</div></div>
         <div class="cat-item"><div class="cat-dot" style="background:var(--s4)"></div><div class="cat-info"><div class="cat-name">Alimentação</div><div class="cat-pct">12% dos gastos</div></div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:12%;background:var(--s4)"></div></div><div class="cat-amt amt">R$ 1.560</div></div>
       </div>
     </div>
-    <div class="stats-row">
+    <div class="stats-row" id="dash-stats">
       <div class="stat-card">
         <div class="stat-label"><span class="stat-label-dot" style="background:#3D7FEE"></span>Conta PF</div>
         <div class="stat-val amt">R$ 16.047</div>
@@ -372,6 +372,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
         <div class="stat-type">CC PJ + CDB</div>
       </div>
     </div>
+    <div id="dash-tx-section">
     <div class="sec-hd">
       <div class="sec-hd-title">Transações recentes</div>
       <span class="sec-hd-link">ver todas ↗</span>
@@ -397,6 +398,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
       <div class="tx-icon">💸</div>
       <div class="tx-info"><div class="tx-name">Transferência enviada</div><div class="tx-cat">Serviços automotivos</div></div>
       <div class="tx-amt amt">−R$ 25,00</div>
+    </div>
     </div>
     <div class="sec-hd">
       <div class="sec-hd-title">Assinaturas</div>
@@ -493,6 +495,7 @@ function goTo(id) {
       if (s === id) { el.classList.add('fade-in'); }
     }
   });
+  if (id === 'app') loadDashboard();
 }
 
 /* ════════════════════════════════════════════════════
@@ -811,6 +814,171 @@ var SIM = [
   ]},
 ];
 var simIdx = 0;
+
+/* ════════════════════════════════════════════════════
+   DYNAMIC DASHBOARD — loads real data from /api/dashboard
+════════════════════════════════════════════════════ */
+var dashLoaded = false;
+
+var TIPO_LABEL_FE = {
+  PIX:'PIX', TED:'TED', DOC:'DOC', BOLETO:'Boleto',
+  CARTAO:'Cartão', CONVENIO_ARRECADACAO:'Arrecadação',
+  FOLHA_PAGAMENTO:'Folha', DEPOSITO:'Depósito',
+  SAQUE:'Saque', RENDIMENTO_APLIC_FINANCEIRA:'Rendimento',
+  RESGATE_APLIC_FINANCEIRA:'Resgate', OPERACAO_CREDITO:'Crédito',
+  PACOTE_TARIFA_SERVICOS:'Tarifa', OUTROS:'Outros',
+};
+
+var CAT_COLORS = ['--s1','--s2','--s3','--s4','--s5','--s6','--s7'];
+
+var TX_ICONS = {
+  PIX:'⚡', TED:'🏦', DOC:'📄', BOLETO:'🧾',
+  CARTAO:'💳', DEPOSITO:'💵', SAQUE:'💰',
+  RENDIMENTO_APLIC_FINANCEIRA:'📈', RESGATE_APLIC_FINANCEIRA:'📉',
+  FOLHA_PAGAMENTO:'👔', OUTROS:'💸',
+};
+
+function brl(v) {
+  return Number(v).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+}
+
+function brlSplit(v) {
+  var formatted = Number(v).toLocaleString('pt-BR', { minimumFractionDigits:2, maximumFractionDigits:2 });
+  var idx = formatted.lastIndexOf(',');
+  if (idx === -1) return { whole: formatted, dec: ',00' };
+  return { whole: formatted.slice(0, idx), dec: formatted.slice(idx) };
+}
+
+function shortName(name) {
+  var parts = String(name).trim().split(/\s+/).filter(Boolean);
+  if (parts.length < 2) return parts[0] || name;
+  return parts[0] + ' ' + parts[parts.length-1][0] + '.';
+}
+
+function nameInitials(name) {
+  var parts = String(name).trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return '?';
+  return (parts[0][0] + (parts.length > 1 ? parts[parts.length-1][0] : '')).toUpperCase();
+}
+
+function fmtTxDate(isoDate) {
+  if (!isoDate) return 'Sem data';
+  var d = new Date(isoDate + 'T12:00:00');
+  return d.toLocaleDateString('pt-BR', { weekday:'short', day:'numeric', month:'short' }).toUpperCase().replace('.','');
+}
+
+function loadDashboard() {
+  fetch('/api/dashboard')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.demo || d.error) return;
+      renderDashboard(d);
+      dashLoaded = true;
+    })
+    .catch(function() { /* silently keep static data */ });
+}
+
+function renderDashboard(d) {
+  // Nav identity
+  var navName = document.getElementById('nav-user-name');
+  var navDoc  = document.getElementById('nav-user-doc');
+  var navAv   = document.getElementById('nav-avatar');
+  if (navName) navName.textContent = shortName(d.identity.name);
+  if (navDoc)  navDoc.textContent  = d.identity.cpf;
+  if (navAv)   navAv.textContent   = nameInitials(d.identity.name);
+
+  // Period
+  var elPeriod = document.getElementById('pos-period');
+  if (elPeriod) elPeriod.textContent = d.period.from + ' — ' + d.period.to;
+
+  // Total position
+  var elAmt = document.getElementById('pos-amount');
+  if (elAmt) {
+    var p = brlSplit(d.totals.position);
+    elAmt.innerHTML = 'R$ ' + p.whole + '<span style="font-size:50%;color:var(--tx2)">' + p.dec + '</span>';
+  }
+
+  // Sub-title
+  var elSub = document.getElementById('pos-sub');
+  if (elSub) {
+    var entLabel = d.entities.pj ? 'PF + MEI' : 'PF';
+    var n = d.accounts.count;
+    elSub.textContent = 'Posição consolidada · ' + entLabel + ' · ' + n + ' conta' + (n !== 1 ? 's' : '');
+  }
+
+  // Spend bar
+  var elBar = document.getElementById('pos-spend-bar');
+  if (elBar && d.categories.length) {
+    elBar.innerHTML = d.categories.map(function(c, i) {
+      return '<div class="sb-seg" style="flex:' + c.pct + ';background:var(' + CAT_COLORS[i] + ')"></div>';
+    }).join('');
+  }
+
+  // Category list
+  var elCat = document.getElementById('pos-cat-list');
+  if (elCat && d.categories.length) {
+    elCat.innerHTML = d.categories.map(function(c, i) {
+      return '<div class="cat-item">' +
+        '<div class="cat-dot" style="background:var(' + CAT_COLORS[i] + ')"></div>' +
+        '<div class="cat-info">' +
+          '<div class="cat-name">' + esc(c.label) + '</div>' +
+          '<div class="cat-pct">' + c.pct + '% dos gastos</div>' +
+        '</div>' +
+        '<div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:' + Math.min(c.pct, 100) + '%;background:var(' + CAT_COLORS[i] + ')"></div></div>' +
+        '<div class="cat-amt amt">' + brl(c.valor) + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  // Stats row (PF / PJ)
+  var elStats = document.getElementById('dash-stats');
+  if (elStats) {
+    var pf = d.entities.pf;
+    var pj = d.entities.pj;
+    var html = '<div class="stat-card">' +
+      '<div class="stat-label"><span class="stat-label-dot" style="background:#3D7FEE"></span>' + esc(pf.label) + '</div>' +
+      '<div class="stat-val amt">' + brl(pf.balance) + '</div>' +
+      '<div class="stat-type">' + esc(pf.type) + '</div>' +
+      '</div>';
+    if (pj) {
+      html += '<div class="stat-card">' +
+        '<div class="stat-label"><span class="stat-label-dot" style="background:var(--ac)"></span>' + esc(pj.label) + '</div>' +
+        '<div class="stat-val amt">' + brl(pj.balance) + '</div>' +
+        '<div class="stat-type">' + esc(pj.type) + '</div>' +
+        '</div>';
+    }
+    elStats.innerHTML = html;
+  }
+
+  // Transactions
+  var elTx = document.getElementById('dash-tx-section');
+  if (elTx && d.transactions && d.transactions.length) {
+    var groups = {}, order = [];
+    d.transactions.forEach(function(t) {
+      var key = t.date || '';
+      if (!groups[key]) { groups[key] = []; order.push(key); }
+      groups[key].push(t);
+    });
+    var txHtml = '<div class="sec-hd"><div class="sec-hd-title">Transações recentes</div><span class="sec-hd-link">ver todas ↗</span></div>';
+    order.forEach(function(date) {
+      txHtml += '<div class="tx-date mono">' + fmtTxDate(date) + '</div>';
+      groups[date].forEach(function(t) {
+        var icon = TX_ICONS[t.type] || '💸';
+        var clr  = t.credit ? '#22C55E' : '#E53E3E';
+        var sign = t.credit ? '+' : '−';
+        txHtml += '<div class="tx-item">' +
+          '<div class="tx-icon">' + icon + '</div>' +
+          '<div class="tx-info">' +
+            '<div class="tx-name">' + esc(t.name) + '</div>' +
+            '<div class="tx-cat">' + esc(TIPO_LABEL_FE[t.type] || t.type) + '</div>' +
+          '</div>' +
+          '<div class="tx-amt amt" style="color:' + clr + '">' + sign + brl(Math.abs(t.amount)) + '</div>' +
+          '</div>';
+      });
+    });
+    elTx.innerHTML = txHtml;
+  }
+}
 
 function runSimulated(query) {
   var lower = query.toLowerCase();
