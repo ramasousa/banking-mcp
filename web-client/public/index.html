@@ -245,7 +245,21 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 .fina-cat-sub{font-size:11px;color:var(--tx2);margin-top:1px}
 .fina-cat-right{display:flex;align-items:center;gap:6px;flex-shrink:0}
 .fina-cat-amt{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
-.fina-cat-chev{font-size:14px;color:var(--tx2)}
+.fina-cat-chev{font-size:14px;color:var(--tx2);transition:transform .22s ease;display:inline-block}
+.fina-cat-row{cursor:pointer}
+.fina-cat-row:hover .fina-cat-name{color:var(--ac)}
+.fina-cat-row.open .fina-cat-chev{transform:rotate(90deg)}
+.fina-cat-row.open{border-bottom:none}
+.fina-cat-drill{max-height:0;overflow:hidden;transition:max-height .28s ease;border-bottom:1px solid var(--bd2)}
+.fina-cat-drill:last-child{border-bottom:none}
+.fina-cat-drill.open{max-height:400px}
+.fina-drill-inner{padding:2px 0 10px 50px}
+.fina-drill-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-top:1px solid var(--bd2)}
+.fina-drill-item:first-child{border-top:none}
+.fina-drill-left{flex:1;min-width:0}
+.fina-drill-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fina-drill-date{font-size:10.5px;color:var(--tx2);margin-top:1px}
+.fina-drill-amt{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0;margin-left:10px}
 .fina-suggs{display:flex;gap:7px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--bd2);margin-top:6px}
 .fina-sugg{background:var(--sf3);border:1px solid var(--bd);border-radius:999px;padding:7px 14px;font-size:12px;color:var(--tx2);cursor:pointer;font-family:var(--fs);transition:border-color .12s,color .12s,background .12s;white-space:nowrap}
 .fina-sugg:hover{border-color:var(--ac);color:var(--ac);background:var(--ac-a)}
@@ -1706,10 +1720,17 @@ function renderFinaCard(data) {
         ';background:' + (CHART_COLORS[i % CHART_COLORS.length]) + '"></div>';
     }).join('') + '</div>';
 
-  // Category rows
-  var catsHtml = '<div class="fina-cats">' + cats.map(function(c, i) {
+  // Category rows — built as DOM nodes for accordion interaction
+  var catsEl = document.createElement('div');
+  catsEl.className = 'fina-cats';
+  cats.forEach(function(c, i) {
     var color = CHART_COLORS[i % CHART_COLORS.length];
-    return '<div class="fina-cat-row">' +
+    var txs = Array.isArray(c.transactions) ? c.transactions : [];
+    var hasDrill = txs.length > 0;
+
+    var row = document.createElement('div');
+    row.className = 'fina-cat-row';
+    row.innerHTML =
       '<div class="fina-cat-icon" style="background:' + color + '22">' + catIcon(c.label) + '</div>' +
       '<div class="fina-cat-info">' +
         '<div class="fina-cat-name">' + esc(c.label || '') + '</div>' +
@@ -1717,9 +1738,37 @@ function renderFinaCard(data) {
       '</div>' +
       '<div class="fina-cat-right">' +
         '<div class="fina-cat-amt">' + brl(Number(c.amount || 0)) + '</div>' +
-        '<span class="fina-cat-chev">›</span>' +
-      '</div></div>';
-  }).join('') + '</div>';
+        '<span class="fina-cat-chev">' + (hasDrill ? '›' : '') + '</span>' +
+      '</div>';
+
+    var drill = document.createElement('div');
+    drill.className = 'fina-cat-drill';
+
+    if (hasDrill) {
+      var inner = document.createElement('div');
+      inner.className = 'fina-drill-inner';
+      txs.forEach(function(t) {
+        var item = document.createElement('div');
+        item.className = 'fina-drill-item';
+        var d = t.date ? t.date.slice(5).replace('-', '/') : '';
+        item.innerHTML =
+          '<div class="fina-drill-left">' +
+            '<div class="fina-drill-name">' + esc(t.name || '') + '</div>' +
+            (d ? '<div class="fina-drill-date">' + d + '</div>' : '') +
+          '</div>' +
+          '<div class="fina-drill-amt">' + brl(Number(t.amount || 0)) + '</div>';
+        inner.appendChild(item);
+      });
+      drill.appendChild(inner);
+      row.addEventListener('click', function() {
+        var open = row.classList.toggle('open');
+        drill.classList.toggle('open', open);
+      });
+    }
+
+    catsEl.appendChild(row);
+    catsEl.appendChild(drill);
+  });
 
   // Suggestion chips
   var suggs = Array.isArray(data.suggestions) ? data.suggestions.slice(0, 3) : [];
@@ -1730,7 +1779,13 @@ function renderFinaCard(data) {
       }).join('') + '</div>'
     : '';
 
-  el.innerHTML = hdHtml + totHtml + barHtml + catsHtml + suggsHtml;
+  el.innerHTML = hdHtml + totHtml + barHtml;
+  el.appendChild(catsEl);
+  if (suggsHtml) {
+    var suggsEl = document.createElement('div');
+    suggsEl.innerHTML = suggsHtml;
+    el.appendChild(suggsEl.firstChild);
+  }
   return el;
 }
 
