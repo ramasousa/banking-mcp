@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Fina · Assistente Financeiro</title>
+<title>Pulsando · Assistente Financeiro</title>
 <style>
 /* ══════════════════════════════════════════════
    DESIGN TOKENS — dois temas via data-t="n|v"
@@ -255,8 +255,52 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
   .stats-row{grid-template-columns:1fr 1fr}
   .hero-h{font-size:28px}
   .fina-card{max-width:100%}
+  .how-steps{grid-template-columns:1fr}
+  .cta-btns{flex-direction:column;align-items:stretch}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ── Como funciona ── */
+.l-how{border-top:1px solid var(--bd);padding:36px 28px;display:flex;flex-direction:column;align-items:center;gap:28px}
+.how-eyebrow{font-size:10.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--tx2)}
+.how-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;width:100%}
+.how-step{display:flex;flex-direction:column;gap:10px;padding:20px;border-radius:12px;transition:background .15s}
+.how-step:hover{background:var(--sf)}
+.how-num{font-size:28px;font-weight:900;letter-spacing:-.04em;color:var(--ac);opacity:.35;font-family:var(--fm);line-height:1}
+.how-title{font-size:13.5px;font-weight:800;letter-spacing:-.01em}
+.how-desc{font-size:12px;color:var(--tx2);line-height:1.65}
+
+/* ── CTA section ── */
+.l-cta{border-top:1px solid var(--bd);padding:48px 28px;display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center}
+.cta-h{font-size:clamp(22px,3.5vw,34px);font-weight:900;letter-spacing:-.035em;max-width:560px;line-height:1.08;text-wrap:balance}
+.cta-h em{font-style:normal;color:var(--ac)}
+.cta-sub{font-size:13.5px;color:var(--tx2);max-width:380px;line-height:1.65}
+.cta-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+
+/* ── Auth screens ── */
+.auth-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:14px;overflow-y:auto}
+.auth-card{background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:36px 32px;width:100%;max-width:400px;display:flex;flex-direction:column}
+.auth-logo{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:900;letter-spacing:-.03em;margin-bottom:22px;color:var(--tx)}
+.auth-title{font-size:22px;font-weight:900;letter-spacing:-.03em;margin-bottom:5px}
+.auth-sub{font-size:13px;color:var(--tx2);margin-bottom:22px;line-height:1.55}
+.auth-form{display:flex;flex-direction:column;gap:14px}
+.form-field{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:11px;font-weight:700;color:var(--tx2);letter-spacing:.06em;text-transform:uppercase}
+.form-input{background:var(--sf2);border:1.5px solid var(--bd);border-radius:10px;padding:11px 14px;font-size:13.5px;color:var(--tx);outline:none;font-family:var(--fs);transition:border-color .12s;width:100%}
+.form-input:focus{border-color:var(--ac)}
+.form-input::placeholder{color:var(--tx2)}
+.auth-forgot{text-align:right;font-size:12px;color:var(--tx2);cursor:pointer;margin-top:-4px;transition:color .12s}
+.auth-forgot:hover{color:var(--ac)}
+.auth-btn{width:100%;justify-content:center;padding:13px;font-size:14px;border-radius:12px;margin-top:4px}
+.auth-switch{text-align:center;font-size:12.5px;color:var(--tx2);margin-top:4px}
+.auth-link{color:var(--ac);cursor:pointer;font-weight:700;transition:opacity .12s}
+.auth-link:hover{opacity:.8;text-decoration:underline}
+.auth-back-row{display:flex;justify-content:center}
+.auth-back{background:transparent;border:none;padding:8px 16px;font-size:12px;color:var(--tx2);cursor:pointer;font-family:var(--fs);transition:color .12s}
+.auth-back:hover{color:var(--ac)}
+.auth-terms{font-size:11px;color:var(--tx2);text-align:center;max-width:340px;line-height:1.7}
+.auth-divider{display:flex;align-items:center;gap:10px;color:var(--tx2);font-size:11.5px}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--bd)}
 </style>
 </head>
 <body>
@@ -264,7 +308,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 <!-- ══ LANDING ══ -->
 <div id="scr-land" class="scr on fade-in">
   <nav class="l-nav">
-    <div class="logo"><div class="logo-dot"></div>fina</div>
+    <div class="logo"><div class="logo-dot"></div>pulsando</div>
     <div class="l-nav-links">
       <span class="l-nav-link">Recursos</span>
       <span class="l-nav-link">Segurança</span>
@@ -275,7 +319,8 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
         <div class="tt-opt act" id="tt-n">N</div>
         <div class="tt-opt" id="tt-v">V</div>
       </div>
-      <button class="btn btn-ac" style="padding:8px 18px;font-size:12.5px" onclick="goTo('app')">Entrar</button>
+      <button class="btn btn-ghost" style="padding:8px 16px;font-size:12.5px" onclick="goTo('login')">Entrar</button>
+      <button class="btn btn-ac" style="padding:8px 18px;font-size:12.5px" onclick="goTo('signup')">Criar conta</button>
     </div>
   </nav>
   <div class="l-hero">
@@ -284,9 +329,9 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
       <span class="pill pill-muted" style="font-size:10px" id="mode-badge-land">a verificar...</span>
     </div>
     <h1 class="hero-h">Seu banco.<br><em>Sua linguagem.</em></h1>
-    <p class="hero-sub">Converse naturalmente com suas finanças — conta PF, MEI e PJ em uma única conversa. Via Claude.ai, WhatsApp ou aqui.</p>
+    <p class="hero-sub">Pulsando conecta suas contas PF, MEI e PJ a um assistente inteligente. Pergunte em português, receba análises visuais em segundos.</p>
     <div class="hero-ctas">
-      <button class="btn btn-ac" style="font-size:14px;padding:13px 28px" onclick="goTo('app')">Começar agora</button>
+      <button class="btn btn-ac" style="font-size:14px;padding:13px 28px" onclick="goTo('signup')">Começar grátis →</button>
       <button class="btn btn-ghost" onclick="goTo('chat')">Ver demo ↗</button>
     </div>
     <div class="hero-tags">
@@ -346,6 +391,38 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
       <div class="feat-desc">FAPI 2.0, PKCE, mTLS com ICP-Brasil. bankJWT isolado do LLM. LGPD com mascaramento em todas as respostas.</div>
     </div>
   </div>
+  <!-- Como funciona -->
+  <div class="l-how">
+    <div class="how-eyebrow">Como funciona</div>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-num">01</div>
+        <div class="how-title">Conecte via Open Finance</div>
+        <div class="how-desc">Autorize o acesso às suas contas PF, MEI e PJ em segundos. Protocolo FAPI 2.0 com segurança de nível bancário.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">02</div>
+        <div class="how-title">Pergunte em português</div>
+        <div class="how-desc">"Qual meu saldo?", "tenho gastos duplicados?", "como está meu fluxo de caixa?" — linguagem natural, resposta instantânea.</div>
+      </div>
+      <div class="how-step">
+        <div class="how-num">03</div>
+        <div class="how-title">Tome decisões melhores</div>
+        <div class="how-desc">Análises visuais, alertas inteligentes e sugestões personalizadas com base nos seus dados financeiros reais.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="l-cta">
+    <h2 class="cta-h">Pronto para <em>entender</em> suas finanças de verdade?</h2>
+    <p class="cta-sub">Crie sua conta gratuita e conecte suas contas em menos de 2 minutos.</p>
+    <div class="cta-btns">
+      <button class="btn btn-ac" style="font-size:14px;padding:13px 28px" onclick="goTo('signup')">Criar conta grátis →</button>
+      <button class="btn btn-ghost" onclick="goTo('login')">Já tenho conta</button>
+    </div>
+  </div>
+
   <div class="l-sec">
     <span class="sec-label">Certificado:</span>
     <span class="sec-badge">FAPI 2.0</span>
@@ -354,7 +431,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
     <span class="sec-badge">Bacen OF</span>
     <span class="sec-badge">OAuth 2.1 · PKCE</span>
     <span class="sec-badge">mTLS</span>
-    <span style="margin-left:auto;font-size:11px;color:var(--tx2)">fina · Banking MCP · v2.0</span>
+    <span style="margin-left:auto;font-size:11px;color:var(--tx2)">pulsando · Banking MCP · v2.0</span>
   </div>
 </div>
 
@@ -362,7 +439,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 <div id="scr-app" class="scr">
   <nav class="app-nav">
     <div class="logo-dot" style="width:7px;height:7px"></div>
-    <div class="app-logo">f<span>i</span>na</div>
+    <div class="app-logo">p<span>u</span>lsando</div>
     <div style="height:28px;width:1px;background:var(--bd);margin:0 4px"></div>
     <div style="font-size:11px;color:var(--tx2)">Painel financeiro</div>
     <div class="theme-tog" onclick="toggleTheme()" style="margin-left:auto;margin-right:10px">
@@ -461,7 +538,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
       <div class="sub-amt amt">R$ 14,90</div>
     </div>
     <div class="chat-fab">
-      <button class="chat-fab-btn" onclick="goTo('chat')">✦ Conversar com Fina</button>
+      <button class="chat-fab-btn" onclick="goTo('chat')">✦ Conversar com Pulsando</button>
     </div>
   </div>
 </div>
@@ -471,7 +548,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
   <nav class="chat-nav">
     <button class="chat-back" onclick="goTo('app')">← Voltar</button>
     <div class="chat-id">
-      <div class="chat-title">Fina · Assistente Financeiro</div>
+      <div class="chat-title">Pulsando · Assistente Financeiro</div>
       <div class="chat-subtitle">Open Finance · MCP · Fase 2</div>
     </div>
     <div class="chat-status" id="chat-status"><span class="chat-online-dot"></span><span id="status-txt">online</span></div>
@@ -497,6 +574,78 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
   </div>
 </div>
 
+<!-- ══ LOGIN ══ -->
+<div id="scr-login" class="scr">
+  <nav class="l-nav">
+    <div class="logo"><div class="logo-dot"></div>pulsando</div>
+    <div class="l-nav-right">
+      <div class="theme-tog" onclick="toggleTheme()">
+        <div class="tt-opt act" id="tt-n4">N</div>
+        <div class="tt-opt" id="tt-v4">V</div>
+      </div>
+    </div>
+  </nav>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo"><div class="logo-dot" style="width:9px;height:9px"></div>pulsando</div>
+      <div class="auth-title">Bem-vindo de volta</div>
+      <div class="auth-sub">Entre na sua conta para acessar suas finanças</div>
+      <div class="auth-form">
+        <div class="form-field">
+          <label class="form-label">E-mail</label>
+          <input class="form-input" type="email" id="login-email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Senha</label>
+          <input class="form-input" type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="auth-forgot">Esqueci minha senha</div>
+        <button class="btn btn-ac auth-btn" onclick="goTo('app')">Entrar</button>
+        <div class="auth-switch">Não tem conta? <span class="auth-link" onclick="goTo('signup')">Criar conta grátis →</span></div>
+      </div>
+    </div>
+    <div class="auth-back-row"><button class="auth-back" onclick="goTo('land')">← Voltar para o início</button></div>
+  </div>
+</div>
+
+<!-- ══ SIGNUP ══ -->
+<div id="scr-signup" class="scr">
+  <nav class="l-nav">
+    <div class="logo"><div class="logo-dot"></div>pulsando</div>
+    <div class="l-nav-right">
+      <div class="theme-tog" onclick="toggleTheme()">
+        <div class="tt-opt act" id="tt-n5">N</div>
+        <div class="tt-opt" id="tt-v5">V</div>
+      </div>
+    </div>
+  </nav>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo"><div class="logo-dot" style="width:9px;height:9px"></div>pulsando</div>
+      <div class="auth-title">Criar conta gratuita</div>
+      <div class="auth-sub">Conecte suas finanças e comece a conversar agora</div>
+      <div class="auth-form">
+        <div class="form-field">
+          <label class="form-label">Nome completo</label>
+          <input class="form-input" type="text" id="signup-name" placeholder="Seu nome" autocomplete="name">
+        </div>
+        <div class="form-field">
+          <label class="form-label">E-mail</label>
+          <input class="form-input" type="email" id="signup-email" placeholder="seu@email.com" autocomplete="email">
+        </div>
+        <div class="form-field">
+          <label class="form-label">Senha</label>
+          <input class="form-input" type="password" id="signup-pass" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+        </div>
+        <button class="btn btn-ac auth-btn" onclick="goTo('app')">Criar conta →</button>
+        <div class="auth-switch">Já tem conta? <span class="auth-link" onclick="goTo('login')">Entrar →</span></div>
+      </div>
+    </div>
+    <div class="auth-terms">Ao criar uma conta, você concorda com os <span class="auth-link">Termos de Uso</span> e <span class="auth-link">Política de Privacidade</span> da Pulsando.</div>
+    <div class="auth-back-row"><button class="auth-back" onclick="goTo('land')">← Voltar para o início</button></div>
+  </div>
+</div>
+
 <script>
 /* ════════════════════════════════════════════════════
    STATE
@@ -512,11 +661,11 @@ var backendReady = false;
 function toggleTheme() {
   theme = theme === 'n' ? 'v' : 'n';
   document.documentElement.setAttribute('data-t', theme === 'v' ? 'v' : '');
-  ['tt-n','tt-n2','tt-n3'].forEach(function(id) {
+  ['tt-n','tt-n2','tt-n3','tt-n4','tt-n5'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.classList.toggle('act', theme === 'n');
   });
-  ['tt-v','tt-v2','tt-v3'].forEach(function(id) {
+  ['tt-v','tt-v2','tt-v3','tt-v4','tt-v5'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.classList.toggle('act', theme === 'v');
   });
@@ -526,7 +675,7 @@ function toggleTheme() {
    NAVIGATION
 ════════════════════════════════════════════════════ */
 function goTo(id) {
-  ['land','app','chat'].forEach(function(s) {
+  ['land','app','chat','login','signup'].forEach(function(s) {
     var el = document.getElementById('scr-' + s);
     if (el) {
       el.classList.toggle('on', s === id);
@@ -816,7 +965,13 @@ function sendMsg() {
       // Parse chart block
       var m = fullText.match(/<!--FINA_CHART:([\s\S]+?)-->/);
       if (m) {
-        try { appendEl(renderFinaCard(JSON.parse(m[1]))); } catch (_) {}
+        try {
+          // Sanitize: collapse whitespace/newlines Claude may have inserted inside the block
+          var raw = m[1].replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+          appendEl(renderFinaCard(JSON.parse(raw)));
+        } catch (e) {
+          console.warn('[fina] chart parse error:', e.message, '\nraw:', m[1].slice(0, 200));
+        }
         fullText = fullText.replace(/<!--FINA_CHART:[\s\S]+?-->/, '').trim();
       }
 
