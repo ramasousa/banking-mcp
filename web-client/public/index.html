@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pulsando · Assistente Financeiro</title>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=DM+Mono:wght@400;500&display=swap');
 /* ══════════════════════════════════════════════
    DESIGN TOKENS — dois temas via data-t="n|v"
 ══════════════════════════════════════════════ */
@@ -277,6 +278,205 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 .cta-sub{font-size:13.5px;color:var(--tx2);max-width:380px;line-height:1.65}
 .cta-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:4px}
 
+/* ══ LANDING PAGE — fina-ai design, Pulsando brand ══ */
+#scr-land{overflow-y:auto;background:#06070f;color:#f1f5f9;
+  --lnd-bg:#06070f;--lnd-s1:#0c0e1c;--lnd-s2:#12152a;--lnd-s3:#181c34;
+  --lnd-b1:rgba(255,255,255,.08);--lnd-b2:rgba(255,255,255,.04);
+  --lnd-fina:#7c3aed;--lnd-fina-l:#a78bfa;--lnd-fina-d:#6d28d9;
+  --lnd-fina-g:rgba(124,58,237,.12);
+  --lnd-money:#10b981;--lnd-money-l:#34d399;--lnd-money-g:rgba(16,185,129,.1);
+  --lnd-blue:#3b82f6;--lnd-warn:#f59e0b;
+  --lnd-text:#f1f5f9;--lnd-muted:#64748b;--lnd-muted2:#1e2a3a;
+}
+.lnd-nav{position:sticky;top:0;z-index:100;height:62px;padding:0 52px;display:flex;align-items:center;justify-content:space-between;background:rgba(6,7,15,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--lnd-b1);}
+.lnd-nav-brand{display:flex;align-items:center;gap:10px;}
+.lnd-logo-sq{width:34px;height:34px;background:var(--lnd-fina);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;color:#fff;font-weight:900;}
+.lnd-name{font-family:'Syne',system-ui,sans-serif;font-size:17px;font-weight:800;color:var(--lnd-text);}
+.lnd-name em{color:var(--lnd-fina-l);font-style:normal;}
+.lnd-nav-links{display:flex;gap:28px;font-size:13px;}
+.lnd-nav-links a{color:var(--lnd-muted);text-decoration:none;transition:color .15s;}
+.lnd-nav-links a:hover{color:var(--lnd-text);}
+.lnd-nav-cta{background:var(--lnd-fina);color:#fff;font-size:13px;font-weight:700;padding:9px 22px;border-radius:10px;transition:all .2s;cursor:pointer;text-decoration:none;}
+.lnd-nav-cta:hover{background:var(--lnd-fina-d);transform:translateY(-1px);}
+
+.lnd-hero{min-height:96vh;display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:64px;padding:72px 80px 64px;position:relative;overflow:hidden;}
+.lnd-bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:56px 56px;pointer-events:none;}
+.lnd-glow1{position:absolute;top:-220px;left:-160px;width:860px;height:860px;background:radial-gradient(circle,rgba(124,58,237,.14) 0%,transparent 62%);pointer-events:none;}
+.lnd-glow2{position:absolute;bottom:-200px;right:-120px;width:640px;height:640px;background:radial-gradient(circle,rgba(16,185,129,.08) 0%,transparent 62%);pointer-events:none;}
+.lnd-hero-tag{font-family:'DM Mono','SF Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--lnd-fina-l);margin-bottom:22px;}
+.lnd-h1{font-family:'Syne',system-ui,sans-serif;font-size:clamp(36px,5.2vw,70px);font-weight:800;line-height:1.04;margin-bottom:24px;color:var(--lnd-text);}
+.lnd-acc{color:var(--lnd-fina-l);}
+.lnd-hero-sub{font-size:17px;color:var(--lnd-muted);line-height:1.78;font-weight:300;max-width:520px;margin-bottom:36px;}
+.lnd-hero-sub strong{color:var(--lnd-text);}
+.lnd-hero-btns{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:48px;}
+.lnd-btn-primary{background:var(--lnd-fina);color:#fff;padding:14px 28px;border-radius:12px;font-size:15px;font-weight:700;display:inline-flex;align-items:center;gap:9px;transition:all .2s;cursor:pointer;text-decoration:none;}
+.lnd-btn-primary:hover{background:var(--lnd-fina-d);transform:translateY(-1px);box-shadow:0 14px 36px rgba(124,58,237,.4);}
+.lnd-btn-outline{background:transparent;color:var(--lnd-text);padding:14px 28px;border-radius:12px;font-size:15px;font-weight:700;border:1.5px solid var(--lnd-b1);display:inline-flex;align-items:center;gap:9px;transition:all .2s;cursor:pointer;text-decoration:none;}
+.lnd-btn-outline:hover{border-color:var(--lnd-fina-l);color:var(--lnd-fina-l);}
+.lnd-hero-stats{display:flex;gap:36px;flex-wrap:wrap;}
+.lnd-hstat-n{font-family:'Syne',system-ui,sans-serif;font-size:24px;font-weight:800;color:var(--lnd-fina-l);}
+.lnd-hstat-l{font-size:12px;color:var(--lnd-muted);margin-top:2px;}
+
+.lnd-hero-visual{position:relative;display:flex;justify-content:center;align-items:center;padding-top:16px;}
+.lnd-hero-chat{width:340px;background:var(--lnd-s1);border:1px solid var(--lnd-b1);border-radius:20px;overflow:hidden;box-shadow:0 36px 90px rgba(0,0,0,.55),0 0 0 1px rgba(124,58,237,.18);}
+.lhc-head{background:var(--lnd-s2);border-bottom:1px solid var(--lnd-b1);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;}
+.lhc-brand{display:flex;align-items:center;gap:9px;}
+.lhc-logo{width:28px;height:28px;background:var(--lnd-fina);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:900;}
+.lhc-brand span{font-family:'Syne',system-ui,sans-serif;font-size:14px;font-weight:800;color:var(--lnd-text);}
+.lhc-brand em{color:var(--lnd-fina-l);font-style:normal;font-size:14px;}
+.lhc-status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--lnd-money);}
+.lhc-status-dot{width:7px;height:7px;border-radius:50%;background:var(--lnd-money);box-shadow:0 0 0 3px rgba(16,185,129,.2);}
+.lhc-msgs{padding:14px;display:flex;flex-direction:column;gap:10px;min-height:310px;max-height:310px;overflow:hidden;}
+.lhc-m{max-width:88%;}
+.lhc-bot{align-self:flex-start;}
+.lhc-user{align-self:flex-end;}
+.lhc-b{padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.5;}
+.lhc-bot .lhc-b{background:var(--lnd-s2);border:1px solid var(--lnd-b1);border-bottom-left-radius:4px;color:var(--lnd-text);}
+.lhc-user .lhc-b{background:var(--lnd-fina);color:#fff;border-bottom-right-radius:4px;}
+.lhc-card{background:var(--lnd-s2);border:1px solid var(--lnd-b1);border-radius:12px;padding:13px;margin-top:4px;font-size:12px;}
+.lhc-card-hd{font-size:9.5px;color:var(--lnd-muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:10px;font-family:'DM Mono','SF Mono',monospace;}
+.lhc-spend-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.lhc-spend-lbl{font-size:12px;color:var(--lnd-muted);}
+.lhc-spend-val{font-family:'Syne',system-ui,sans-serif;font-weight:700;font-size:12px;}
+.lhc-bar{height:4px;background:var(--lnd-muted2);border-radius:3px;margin-bottom:8px;overflow:hidden;}
+.lhc-bar-f{height:100%;border-radius:3px;}
+.lhc-balance{text-align:center;padding:4px 0 6px;}
+.lhc-balance-amt{font-family:'Syne',system-ui,sans-serif;font-size:28px;font-weight:800;color:var(--lnd-money-l);}
+.lhc-balance-lbl{font-size:11px;color:var(--lnd-muted);margin-top:2px;}
+.lhc-typing{align-self:flex-start;background:var(--lnd-s2);border:1px solid var(--lnd-b1);border-radius:14px;border-bottom-left-radius:4px;padding:12px 15px;display:flex;gap:5px;}
+.lhc-typing span{width:6px;height:6px;border-radius:50%;background:var(--lnd-muted);animation:lhctdot 1.3s infinite;}
+.lhc-typing span:nth-child(2){animation-delay:.2s;}
+.lhc-typing span:nth-child(3){animation-delay:.4s;}
+@keyframes lhctdot{0%,60%,100%{opacity:.3;transform:translateY(0);}30%{opacity:1;transform:translateY(-3px);}}
+.lhc-input-bar{background:var(--lnd-s2);border-top:1px solid var(--lnd-b1);padding:11px 13px;display:flex;align-items:center;gap:9px;}
+.lhc-input-fake{flex:1;background:var(--lnd-s3);border:1px solid var(--lnd-b1);border-radius:20px;padding:9px 14px;font-size:12px;color:var(--lnd-muted);}
+.lhc-send-btn{width:30px;height:30px;border-radius:50%;background:var(--lnd-fina);border:none;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;}
+.lhc-badge{position:absolute;bottom:-14px;right:-14px;background:var(--lnd-s1);border:1px solid var(--lnd-b1);border-radius:13px;padding:11px 15px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:lhcfl 3s ease-in-out infinite;}
+@keyframes lhcfl{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+.lhb-dot{width:10px;height:10px;border-radius:50%;background:var(--lnd-money);box-shadow:0 0 0 4px rgba(16,185,129,.18);}
+.lhb-t{font-size:12px;font-weight:700;color:var(--lnd-text);}
+.lhb-s{font-size:10.5px;color:var(--lnd-muted);font-family:'DM Mono','SF Mono',monospace;}
+
+.lnd-sbar{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--lnd-b1);border-bottom:1px solid var(--lnd-b1);}
+.lnd-sbar-i{padding:28px 32px;border-right:1px solid var(--lnd-b1);}
+.lnd-sbar-i:last-child{border-right:none;}
+.lnd-sn{font-family:'Syne',system-ui,sans-serif;font-size:30px;font-weight:800;margin-bottom:4px;}
+.lnd-sl{font-size:12px;color:var(--lnd-muted);}
+
+.lnd-banks{padding:52px 80px;}
+.lnd-banks-lbl{font-family:'DM Mono','SF Mono',monospace;font-size:10.5px;letter-spacing:3px;text-transform:uppercase;color:var(--lnd-muted);text-align:center;margin-bottom:28px;}
+.lnd-banks-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+.lnd-bchip{background:var(--lnd-s1);border:1px solid var(--lnd-b1);border-radius:10px;padding:9px 17px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;transition:border-color .2s,transform .2s;color:var(--lnd-text);}
+.lnd-bchip:hover{border-color:rgba(124,58,237,.4);transform:translateY(-1px);}
+.lnd-bdot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0;}
+
+.lnd-sec{padding:100px 80px;max-width:1200px;margin:0 auto;}
+.lnd-stag{font-family:'DM Mono','SF Mono',monospace;font-size:10.5px;letter-spacing:3px;text-transform:uppercase;color:var(--lnd-fina-l);margin-bottom:14px;}
+.lnd-stitle{font-family:'Syne',system-ui,sans-serif;font-size:clamp(26px,3.5vw,44px);font-weight:800;line-height:1.12;margin-bottom:14px;color:var(--lnd-text);}
+.lnd-ssub{font-size:15px;color:var(--lnd-muted);max-width:680px;line-height:1.78;font-weight:300;}
+
+.lnd-hiw-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px;}
+.lnd-step{background:var(--lnd-s1);border:1px solid var(--lnd-b1);border-radius:16px;padding:28px;position:relative;overflow:hidden;transition:border-color .2s;}
+.lnd-step:hover{border-color:rgba(124,58,237,.4);}
+.lnd-step-bg-n{font-family:'Syne',system-ui,sans-serif;font-size:80px;font-weight:800;color:rgba(124,58,237,.06);position:absolute;right:14px;top:4px;pointer-events:none;line-height:1;}
+.lnd-step-ic{width:46px;height:46px;border-radius:13px;background:var(--lnd-fina-g);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:18px;}
+.lnd-step-t{font-family:'Syne',system-ui,sans-serif;font-size:17px;font-weight:700;margin-bottom:9px;color:var(--lnd-text);}
+.lnd-step-b{font-size:13.5px;color:var(--lnd-muted);line-height:1.68;}
+
+.lnd-feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:48px;}
+.lnd-feat{background:var(--lnd-s1);border:1px solid var(--lnd-b1);border-radius:14px;padding:24px;transition:all .2s;}
+.lnd-feat:hover{border-color:rgba(124,58,237,.3);transform:translateY(-2px);box-shadow:0 12px 36px rgba(0,0,0,.3);}
+.lnd-feat-ic{font-size:28px;margin-bottom:14px;}
+.lnd-feat-t{font-family:'Syne',system-ui,sans-serif;font-size:15px;font-weight:700;margin-bottom:8px;color:var(--lnd-text);}
+.lnd-feat-b{font-size:13px;color:var(--lnd-muted);line-height:1.65;}
+
+.lnd-demo-sec{background:var(--lnd-s1);border-top:1px solid var(--lnd-b1);border-bottom:1px solid var(--lnd-b1);padding:80px;}
+.lnd-demo-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;}
+.lnd-demo-screen{background:var(--lnd-s2);border:1px solid var(--lnd-b1);border-radius:16px;padding:16px;box-shadow:0 24px 60px rgba(0,0,0,.4);}
+.lnd-demo-head{background:var(--lnd-s3);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+.lnd-dsh-logo{width:24px;height:24px;background:var(--lnd-fina);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:900;}
+.lnd-dsh-name{font-size:13px;font-weight:700;color:var(--lnd-text);}
+.lnd-dsh-status{margin-left:auto;font-size:11px;color:var(--lnd-money);display:flex;align-items:center;gap:5px;}
+.lnd-dsh-dot{width:6px;height:6px;border-radius:50%;background:var(--lnd-money);}
+.lnd-demo-msg{display:flex;flex-direction:column;gap:10px;}
+.lnd-dm-row{display:flex;gap:10px;align-items:flex-start;}
+.lnd-dm-user{flex-direction:row-reverse;}
+.lnd-dm-av{width:28px;height:28px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;}
+.lnd-dm-ai-av{background:var(--lnd-fina-g);color:var(--lnd-fina-l);}
+.lnd-dm-user-av{background:var(--lnd-muted2);}
+.lnd-dm-bubble{padding:10px 14px;border-radius:12px;font-size:13px;line-height:1.55;max-width:82%;background:var(--lnd-s3);border:1px solid var(--lnd-b1);color:var(--lnd-text);}
+.lnd-dm-user-bub{background:var(--lnd-fina);border:none;color:#fff;}
+.lnd-dm-insight{background:linear-gradient(135deg,rgba(124,58,237,.1),rgba(16,185,129,.06));border:1px solid rgba(124,58,237,.25);border-radius:12px;padding:14px;margin-top:4px;}
+.lnd-di-tag{font-family:'DM Mono','SF Mono',monospace;font-size:10px;color:var(--lnd-fina-l);letter-spacing:.5px;text-transform:uppercase;margin-bottom:8px;}
+.lnd-di-row{display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px;}
+.lnd-di-lbl{color:var(--lnd-muted);}
+.lnd-di-val{font-weight:700;font-family:'Syne',system-ui,sans-serif;}
+
+.lnd-price-toggle{display:flex;align-items:center;gap:14px;margin-top:28px;margin-bottom:48px;}
+.lnd-pto{font-size:13px;color:var(--lnd-muted);cursor:pointer;transition:color .15s;}
+.lnd-pto-on{color:var(--lnd-text);font-weight:600;}
+.lnd-ptswitch{width:44px;height:24px;background:var(--lnd-fina);border-radius:12px;position:relative;cursor:pointer;flex-shrink:0;}
+.lnd-ptknob{width:18px;height:18px;border-radius:9px;background:#fff;position:absolute;top:3px;left:3px;transition:transform .22s;}
+.lnd-ptswitch.lnd-pts-a .lnd-ptknob{transform:translateX(20px);}
+.lnd-ptbadge{background:var(--lnd-money-g);color:var(--lnd-money-l);font-size:11px;font-weight:700;padding:3px 11px;border-radius:12px;font-family:'DM Mono','SF Mono',monospace;}
+.lnd-pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.lnd-pcard{background:var(--lnd-s1);border:1px solid var(--lnd-b1);border-radius:16px;padding:28px;display:flex;flex-direction:column;transition:border-color .2s;}
+.lnd-pcard-pop{border-color:var(--lnd-fina);background:linear-gradient(135deg,rgba(124,58,237,.08) 0%,var(--lnd-s1) 55%);position:relative;}
+.lnd-pbadge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--lnd-fina);color:#fff;font-size:11px;font-weight:700;padding:4px 18px;border-radius:20px;font-family:'DM Mono','SF Mono',monospace;letter-spacing:.5px;white-space:nowrap;}
+.lnd-pc-n{font-family:'Syne',system-ui,sans-serif;font-size:16px;font-weight:700;margin-bottom:6px;color:var(--lnd-text);}
+.lnd-pc-d{font-size:13px;color:var(--lnd-muted);line-height:1.55;margin-bottom:22px;}
+.lnd-pc-price{display:flex;align-items:baseline;gap:3px;margin-bottom:24px;}
+.lnd-pc-cur{font-size:15px;color:var(--lnd-muted);margin-top:7px;}
+.lnd-pc-amt{font-family:'Syne',system-ui,sans-serif;font-size:44px;font-weight:800;color:var(--lnd-text);}
+.lnd-pc-per{font-size:14px;color:var(--lnd-muted);}
+.lnd-pc-feats{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px;flex:1;font-size:13.5px;color:var(--lnd-text);}
+.lnd-pc-feats li{display:flex;align-items:flex-start;gap:10px;}
+.lnd-ck{color:var(--lnd-money);font-size:14px;flex-shrink:0;margin-top:1px;}
+.lnd-nx{color:var(--lnd-muted2);font-size:14px;flex-shrink:0;margin-top:1px;}
+.lnd-nx+span{color:var(--lnd-muted);}
+.lnd-pcbtn{display:block;text-align:center;padding:13px;border-radius:10px;font-size:14px;font-weight:700;transition:all .2s;cursor:pointer;text-decoration:none;}
+.lnd-pcbtn-pri{background:var(--lnd-fina);color:#fff;}
+.lnd-pcbtn-pri:hover{background:var(--lnd-fina-d);}
+.lnd-pcbtn-gh{background:transparent;border:1.5px solid var(--lnd-b1);color:var(--lnd-text);}
+.lnd-pcbtn-gh:hover{border-color:var(--lnd-fina-l);color:var(--lnd-fina-l);}
+
+.lnd-sec-wrap{background:var(--lnd-s1);border-top:1px solid var(--lnd-b1);border-bottom:1px solid var(--lnd-b1);padding:80px;}
+.lnd-sec-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;}
+.lnd-sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.lnd-sbadge{background:var(--lnd-s2);border:1px solid var(--lnd-b1);border-radius:13px;padding:20px;display:flex;align-items:flex-start;gap:13px;transition:border-color .2s;}
+.lnd-sbadge:hover{border-color:rgba(124,58,237,.3);}
+.lnd-sb-ic{font-size:26px;flex-shrink:0;}
+.lnd-sb-t{font-size:13px;font-weight:700;margin-bottom:3px;color:var(--lnd-text);}
+.lnd-sb-b{font-size:12px;color:var(--lnd-muted);line-height:1.55;}
+
+.lnd-faq-wrap{max-width:860px;margin:0 auto;padding:100px 80px;}
+.lnd-faq-list{margin-top:40px;}
+.lnd-faq-item{border-bottom:1px solid var(--lnd-b1);}
+.lnd-faq-q{padding:20px 0;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:15px;font-weight:600;gap:16px;transition:color .15s;color:var(--lnd-text);}
+.lnd-faq-q:hover{color:var(--lnd-fina-l);}
+.lnd-faq-ch{font-size:22px;color:var(--lnd-muted);transition:transform .25s;flex-shrink:0;line-height:1;}
+.lnd-faq-item.lnd-op .lnd-faq-ch{transform:rotate(45deg);color:var(--lnd-fina-l);}
+.lnd-faq-a{font-size:14px;color:var(--lnd-muted);line-height:1.78;max-height:0;overflow:hidden;transition:max-height .3s ease,padding-bottom .3s;font-weight:300;}
+.lnd-faq-item.lnd-op .lnd-faq-a{max-height:300px;padding-bottom:20px;}
+
+.lnd-cta-sec{padding:100px 80px;text-align:center;position:relative;overflow:hidden;}
+.lnd-cta-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:640px;height:440px;background:radial-gradient(ellipse,rgba(124,58,237,.18) 0%,transparent 70%);pointer-events:none;}
+.lnd-cta-h2{font-family:'Syne',system-ui,sans-serif;font-size:clamp(28px,4.5vw,56px);font-weight:800;margin-bottom:16px;position:relative;line-height:1.1;color:var(--lnd-text);}
+.lnd-cta-p{font-size:17px;color:var(--lnd-muted);margin-bottom:36px;font-weight:300;position:relative;}
+.lnd-cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;}
+
+.lnd-footer{background:var(--lnd-s1);border-top:1px solid var(--lnd-b1);padding:40px 80px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;}
+.lnd-ft-brand{font-family:'Syne',system-ui,sans-serif;font-size:16px;font-weight:800;color:var(--lnd-text);}
+.lnd-ft-brand em{color:var(--lnd-fina-l);font-style:normal;}
+.lnd-ft-links{display:flex;gap:20px;font-size:13px;flex-wrap:wrap;}
+.lnd-ft-links a{color:var(--lnd-muted);text-decoration:none;transition:color .15s;}
+.lnd-ft-links a:hover{color:var(--lnd-text);}
+.lnd-ft-legal{font-size:11.5px;color:var(--lnd-muted);font-family:'DM Mono','SF Mono',monospace;}
+
+@media(max-width:960px){.lnd-hero{grid-template-columns:1fr;padding:56px 32px 48px;}.lnd-hero-visual{display:none;}}
+@media(max-width:768px){.lnd-nav{padding:0 24px;}.lnd-nav-links{display:none;}.lnd-sec{padding:64px 24px;}.lnd-banks{padding:40px 24px;}.lnd-demo-sec{padding:56px 24px;}.lnd-demo-inner{grid-template-columns:1fr;}.lnd-sec-wrap{padding:56px 24px;}.lnd-sec-inner{grid-template-columns:1fr;gap:40px;}.lnd-faq-wrap{padding:64px 24px;}.lnd-cta-sec{padding:64px 24px;}.lnd-footer{padding:32px 24px;flex-direction:column;align-items:flex-start;}}
+@media(max-width:640px){.lnd-sbar{grid-template-columns:1fr 1fr;}.lnd-hiw-steps{grid-template-columns:1fr;}.lnd-feat-grid{grid-template-columns:1fr;}.lnd-pgrid{grid-template-columns:1fr;max-width:380px;margin:0 auto;}.lnd-sec-grid{grid-template-columns:1fr;}}
+
 /* ── Auth screens ── */
 .auth-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:14px;overflow-y:auto}
 .auth-card{background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:36px 32px;width:100%;max-width:400px;display:flex;flex-direction:column}
@@ -307,132 +507,340 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 
 <!-- ══ LANDING ══ -->
 <div id="scr-land" class="scr on fade-in">
-  <nav class="l-nav">
-    <div class="logo"><div class="logo-dot"></div>pulsando</div>
-    <div class="l-nav-links">
-      <span class="l-nav-link">Recursos</span>
-      <span class="l-nav-link">Segurança</span>
-      <span class="l-nav-link">Open Finance</span>
+
+  <!-- NAV -->
+  <nav class="lnd-nav">
+    <div class="lnd-nav-brand">
+      <div class="lnd-logo-sq">◉</div>
+      <div class="lnd-name">pulsando<em>.ai</em></div>
     </div>
-    <div class="l-nav-right">
-      <div class="theme-tog" title="Alternar identidade visual" onclick="toggleTheme()">
-        <div class="tt-opt act" id="tt-n">N</div>
-        <div class="tt-opt" id="tt-v">V</div>
-      </div>
-      <button class="btn btn-ghost" style="padding:8px 16px;font-size:12.5px" onclick="goTo('login')">Entrar</button>
-      <button class="btn btn-ac" style="padding:8px 18px;font-size:12.5px" onclick="goTo('signup')">Criar conta</button>
+    <div class="lnd-nav-links">
+      <a href="#lnd-hiw">Como funciona</a>
+      <a href="#lnd-features">Funcionalidades</a>
+      <a href="#lnd-pricing">Preços</a>
+      <a href="#lnd-security">Segurança</a>
+      <a href="javascript:void(0)" onclick="goTo('chat')">Demo</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <a href="javascript:void(0)" onclick="goTo('login')" style="color:var(--lnd-muted);font-size:13px;text-decoration:none;transition:color .15s" onmouseover="this.style.color='#f1f5f9'" onmouseout="this.style.color=''">Entrar</a>
+      <a class="lnd-nav-cta" href="javascript:void(0)" onclick="goTo('signup')">Começar grátis →</a>
     </div>
   </nav>
-  <div class="l-hero">
-    <div class="hero-eyebrow">
-      <div class="hero-live"><span class="hero-live-dot"></span>Ao vivo · Banking MCP</div>
-      <span class="pill pill-muted" style="font-size:10px" id="mode-badge-land">a verificar...</span>
+
+  <!-- HERO -->
+  <section class="lnd-hero">
+    <div class="lnd-bg-grid"></div>
+    <div class="lnd-glow1"></div>
+    <div class="lnd-glow2"></div>
+    <div>
+      <div class="lnd-hero-tag">Assistente Financeiro · Open Finance · 100+ Bancos</div>
+      <h1 class="lnd-h1">Sua IA que <span class="lnd-acc">fala</span><br>com o seu<br>dinheiro</h1>
+      <p class="lnd-hero-sub">Conecte seus bancos, faça perguntas em português e entenda suas finanças de verdade.<br><strong>Sem planilhas, sem confusão — só conversa.</strong></p>
+      <div class="lnd-hero-btns">
+        <a class="lnd-btn-primary" href="javascript:void(0)" onclick="goTo('signup')">Começar grátis →</a>
+        <a class="lnd-btn-outline" href="javascript:void(0)" onclick="goTo('chat')">▶ Ver demo</a>
+      </div>
+      <div class="lnd-hero-stats">
+        <div><div class="lnd-hstat-n">100+</div><div class="lnd-hstat-l">Bancos conectados</div></div>
+        <div><div class="lnd-hstat-n">64M+</div><div class="lnd-hstat-l">Transações analisadas</div></div>
+        <div><div class="lnd-hstat-n">175K</div><div class="lnd-hstat-l">Conversas realizadas</div></div>
+      </div>
     </div>
-    <h1 class="hero-h">Seu banco.<br><em>Sua linguagem.</em></h1>
-    <p class="hero-sub">Pulsando conecta suas contas PF, MEI e PJ a um assistente inteligente. Pergunte em português, receba análises visuais em segundos.</p>
-    <div class="hero-ctas">
-      <button class="btn btn-ac" style="font-size:14px;padding:13px 28px" onclick="goTo('signup')">Começar grátis →</button>
-      <button class="btn btn-ghost" onclick="goTo('chat')">Ver demo ↗</button>
-    </div>
-    <div class="hero-tags">
-      <span class="pill pill-ac">Open Finance</span>
-      <span class="pill pill-ac">Claude.ai</span>
-      <span class="pill pill-ac">WhatsApp</span>
-      <span class="pill pill-ac">Claude Desktop</span>
-      <span class="pill pill-muted">FAPI 2.0</span>
-      <span class="pill pill-muted">LGPD</span>
-    </div>
-    <div class="phone-wrap">
-      <div class="phone-outer">
-        <div class="phone-island"></div>
-        <div class="phone-screen">
-          <div class="phone-chat-area" id="phone-chat">
-            <div class="p-msg-in">Olá! Como posso ajudar com suas finanças hoje?</div>
+    <div class="lnd-hero-visual">
+      <div class="lnd-hero-chat">
+        <div class="lhc-head">
+          <div class="lhc-brand">
+            <div class="lhc-logo">◉</div>
+            <span>pulsando</span><em>.ai</em>
           </div>
-          <div class="phone-bottom">
-            <div class="p-input">Mensagem...</div>
-            <div class="p-send">↑</div>
-          </div>
+          <div class="lhc-status"><span class="lhc-status-dot"></span>Online</div>
+        </div>
+        <div class="lhc-msgs" id="heroChat"></div>
+        <div class="lhc-input-bar">
+          <div class="lhc-input-fake" id="heroPh">Pergunte sobre suas finanças...</div>
+          <button class="lhc-send-btn">→</button>
         </div>
       </div>
-      <div class="float-card fc-left">
-        <div class="fc-label">Total consolidado</div>
-        <div class="fc-val amt">R$ 39.637<span class="fc-delta">+12%</span></div>
-        <div class="mini-bars">
-          <div class="mbar" style="height:60%"></div>
-          <div class="mbar" style="height:75%"></div>
-          <div class="mbar" style="height:55%"></div>
-          <div class="mbar" style="height:85%"></div>
-          <div class="mbar" style="height:70%"></div>
-          <div class="mbar" style="height:100%"></div>
+      <div class="lhc-badge">
+        <div class="lhb-dot"></div>
+        <div>
+          <div class="lhb-t">Open Finance ativo</div>
+          <div class="lhb-s">Bradesco · Itaú · Nubank · +97</div>
         </div>
       </div>
-      <div class="float-card fc-right">
-        <div class="fc-label">MEI · TechMei Ltda.</div>
-        <div class="fc-val amt" style="font-size:14px;color:var(--ac)">R$ 23.590</div>
-        <div style="font-size:10px;color:var(--tx2);margin-top:2px">CC + CDB · saldo real-time</div>
-      </div>
+    </div>
+  </section>
+
+  <!-- STATS BAR -->
+  <div class="lnd-sbar">
+    <div class="lnd-sbar-i"><div class="lnd-sn">R$ 2,4 bi</div><div class="lnd-sl">Transações monitoradas / mês</div></div>
+    <div class="lnd-sbar-i"><div class="lnd-sn">99,97%</div><div class="lnd-sl">Uptime garantido</div></div>
+    <div class="lnd-sbar-i"><div class="lnd-sn">&lt; 1,2s</div><div class="lnd-sl">Tempo médio de resposta</div></div>
+    <div class="lnd-sbar-i"><div class="lnd-sn">100%</div><div class="lnd-sl">Conformidade LGPD</div></div>
+  </div>
+
+  <!-- BANKS -->
+  <div class="lnd-banks">
+    <div class="lnd-banks-lbl">Conectado a mais de 100 bancos via Open Finance Brasil</div>
+    <div class="lnd-banks-row">
+      <div class="lnd-bchip"><span class="lnd-bdot" style="background:#CC0000"></span>Bradesco</div>
+      <div class="lnd-bchip"><span class="lnd-bdot" style="background:#EC7000"></span>Itaú</div>
+      <div class="lnd-bchip"><span class="lnd-bdot" style="background:#820AD1"></span>Nubank</div>
+      <div class="lnd-bchip"><span class="lnd-bdot" style="background:#00A859"></span>Caixa</div>
+      <div class="lnd-bchip"><span class="lnd-bdot" style="background:#003087"></span>Santander</div>
+      <div class="lnd-bchip"><span class="lnd-bdot" style="background:#FFCC00"></span>Sicoob</div>
+      <div class="lnd-bchip"><span class="lnd-bdot" style="background:#F08C00"></span>Inter</div>
+      <div class="lnd-bchip"><span class="lnd-bdot" style="background:#004B87"></span>C6 Bank</div>
+      <div class="lnd-bchip"><span class="lnd-bdot" style="background:#10b981"></span>PicPay</div>
+      <div class="lnd-bchip" style="background:transparent;border-color:var(--lnd-b1);color:var(--lnd-muted)">+ 91 mais</div>
     </div>
   </div>
-  <div class="l-features">
-    <div class="feat-card">
-      <div class="feat-icon">🔌</div>
-      <div class="feat-title">Open Finance nativo</div>
-      <div class="feat-desc">27 ferramentas conectadas via MCP. Contas, cartões, crédito, investimentos e PIX — tudo em uma conversa.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">🤖</div>
-      <div class="feat-title">Multi-LLM via MCP</div>
-      <div class="feat-desc">Claude.ai, Claude Desktop, GPT-4, Gemini e WhatsApp. Um único servidor MCP. Qualquer assistente que suporte o protocolo.</div>
-    </div>
-    <div class="feat-card">
-      <div class="feat-icon">🛡</div>
-      <div class="feat-title">Segurança financeira</div>
-      <div class="feat-desc">FAPI 2.0, PKCE, mTLS com ICP-Brasil. bankJWT isolado do LLM. LGPD com mascaramento em todas as respostas.</div>
-    </div>
-  </div>
-  <!-- Como funciona -->
-  <div class="l-how">
-    <div class="how-eyebrow">Como funciona</div>
-    <div class="how-steps">
-      <div class="how-step">
-        <div class="how-num">01</div>
-        <div class="how-title">Conecte via Open Finance</div>
-        <div class="how-desc">Autorize o acesso às suas contas PF, MEI e PJ em segundos. Protocolo FAPI 2.0 com segurança de nível bancário.</div>
+
+  <!-- HOW IT WORKS -->
+  <div id="lnd-hiw" class="lnd-sec">
+    <div class="lnd-stag">Como funciona</div>
+    <h2 class="lnd-stitle">Três passos para entender<br>suas finanças de verdade</h2>
+    <p class="lnd-ssub">Da conexão à insight, tudo acontece em segundos — sem planilhas, sem configuração complexa.</p>
+    <div class="lnd-hiw-steps">
+      <div class="lnd-step">
+        <div class="lnd-step-bg-n">01</div>
+        <div class="lnd-step-ic">🔌</div>
+        <div class="lnd-step-t">Conecte via Open Finance</div>
+        <div class="lnd-step-b">Autorize o acesso às suas contas PF, MEI e PJ em segundos. Protocolo FAPI 2.0 com segurança de nível bancário. Sem senhas compartilhadas.</div>
       </div>
-      <div class="how-step">
-        <div class="how-num">02</div>
-        <div class="how-title">Pergunte em português</div>
-        <div class="how-desc">"Qual meu saldo?", "tenho gastos duplicados?", "como está meu fluxo de caixa?" — linguagem natural, resposta instantânea.</div>
+      <div class="lnd-step">
+        <div class="lnd-step-bg-n">02</div>
+        <div class="lnd-step-ic">💬</div>
+        <div class="lnd-step-t">Pergunte em português</div>
+        <div class="lnd-step-b">"Qual meu saldo?", "tenho gastos duplicados?", "como está meu fluxo de caixa?" — linguagem natural, resposta instantânea com dados reais.</div>
       </div>
-      <div class="how-step">
-        <div class="how-num">03</div>
-        <div class="how-title">Tome decisões melhores</div>
-        <div class="how-desc">Análises visuais, alertas inteligentes e sugestões personalizadas com base nos seus dados financeiros reais.</div>
+      <div class="lnd-step">
+        <div class="lnd-step-bg-n">03</div>
+        <div class="lnd-step-ic">📊</div>
+        <div class="lnd-step-t">Tome decisões melhores</div>
+        <div class="lnd-step-b">Análises visuais ricas, alertas de gastos, detecção de cobranças duplicadas e sugestões personalizadas com base nos seus dados.</div>
       </div>
     </div>
   </div>
 
-  <!-- CTA -->
-  <div class="l-cta">
-    <h2 class="cta-h">Pronto para <em>entender</em> suas finanças de verdade?</h2>
-    <p class="cta-sub">Crie sua conta gratuita e conecte suas contas em menos de 2 minutos.</p>
-    <div class="cta-btns">
-      <button class="btn btn-ac" style="font-size:14px;padding:13px 28px" onclick="goTo('signup')">Criar conta grátis →</button>
-      <button class="btn btn-ghost" onclick="goTo('login')">Já tenho conta</button>
+  <!-- FEATURES -->
+  <div id="lnd-features" class="lnd-sec">
+    <div class="lnd-stag">Funcionalidades</div>
+    <h2 class="lnd-stitle">Tudo que você precisa para<br>controlar suas finanças</h2>
+    <div class="lnd-feat-grid">
+      <div class="lnd-feat">
+        <div class="lnd-feat-ic">🏦</div>
+        <div class="lnd-feat-t">Open Finance nativo</div>
+        <div class="lnd-feat-b">27 ferramentas MCP conectadas. Contas PF, MEI e PJ, cartões, crédito, investimentos e PIX em uma única conversa.</div>
+      </div>
+      <div class="lnd-feat">
+        <div class="lnd-feat-ic">💬</div>
+        <div class="lnd-feat-t">Linguagem natural</div>
+        <div class="lnd-feat-b">Faça qualquer pergunta em português. A IA entende o contexto, busca os dados e responde com análises detalhadas.</div>
+      </div>
+      <div class="lnd-feat">
+        <div class="lnd-feat-ic">📈</div>
+        <div class="lnd-feat-t">Análise multi-entidade</div>
+        <div class="lnd-feat-b">Visão consolidada de PF, MEI e PJ. Veja gastos, receitas e fluxo de caixa de todas as suas entidades num só lugar.</div>
+      </div>
+      <div class="lnd-feat">
+        <div class="lnd-feat-ic">🔍</div>
+        <div class="lnd-feat-t">Detecção de anomalias</div>
+        <div class="lnd-feat-b">Identifica cobranças duplicadas, gastos fora do padrão e transações suspeitas automaticamente, antes que você perceba.</div>
+      </div>
+      <div class="lnd-feat">
+        <div class="lnd-feat-ic">🤖</div>
+        <div class="lnd-feat-t">Multi-LLM via MCP</div>
+        <div class="lnd-feat-b">Funciona com Claude.ai, Claude Desktop, GPT-4, Gemini e WhatsApp. Um servidor MCP, qualquer assistente compatível.</div>
+      </div>
+      <div class="lnd-feat">
+        <div class="lnd-feat-ic">🛡</div>
+        <div class="lnd-feat-t">Segurança bancária</div>
+        <div class="lnd-feat-b">FAPI 2.0, PKCE, mTLS com ICP-Brasil. bankJWT isolado da IA. Dados mascarados por LGPD em todas as respostas.</div>
+      </div>
     </div>
   </div>
 
-  <div class="l-sec">
-    <span class="sec-label">Certificado:</span>
-    <span class="sec-badge">FAPI 2.0</span>
-    <span class="sec-badge">LGPD</span>
-    <span class="sec-badge">ICP-Brasil</span>
-    <span class="sec-badge">Bacen OF</span>
-    <span class="sec-badge">OAuth 2.1 · PKCE</span>
-    <span class="sec-badge">mTLS</span>
-    <span style="margin-left:auto;font-size:11px;color:var(--tx2)">pulsando · Banking MCP · v2.0</span>
+  <!-- DEMO PREVIEW -->
+  <div class="lnd-demo-sec">
+    <div class="lnd-demo-inner">
+      <div>
+        <div class="lnd-stag">Demo ao vivo</div>
+        <h2 class="lnd-stitle">Veja a Pulsando<br>em ação</h2>
+        <p class="lnd-ssub" style="margin-bottom:28px">Uma conversa real com dados financeiros simulados. Sem cadastro necessário.</p>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px">
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--lnd-muted)"><span style="color:var(--lnd-money)">✓</span> Saldos em tempo real via Open Finance</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--lnd-muted)"><span style="color:var(--lnd-money)">✓</span> Análise de gastos por categoria</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--lnd-muted)"><span style="color:var(--lnd-money)">✓</span> Detecção de cobranças duplicadas</div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--lnd-muted)"><span style="color:var(--lnd-money)">✓</span> Previsão de fluxo de caixa</div>
+        </div>
+        <a class="lnd-btn-primary" href="javascript:void(0)" onclick="goTo('chat')">Abrir demo →</a>
+      </div>
+      <div class="lnd-demo-screen">
+        <div class="lnd-demo-head">
+          <div class="lnd-dsh-logo">◉</div>
+          <div class="lnd-dsh-name">pulsando.ai</div>
+          <div class="lnd-dsh-status"><div class="lnd-dsh-dot"></div>Online</div>
+        </div>
+        <div class="lnd-demo-msg">
+          <div class="lnd-dm-row">
+            <div class="lnd-dm-av lnd-dm-user-av">M</div>
+            <div class="lnd-dm-bubble lnd-dm-user-bub">Quanto gastei em julho?</div>
+          </div>
+          <div class="lnd-dm-row">
+            <div class="lnd-dm-av lnd-dm-ai-av">◉</div>
+            <div>
+              <div class="lnd-dm-bubble">Analisando suas transações de julho 🔍</div>
+              <div class="lnd-dm-insight">
+                <div class="lnd-di-tag">Gastos · Julho 2026</div>
+                <div class="lnd-di-row"><span class="lnd-di-lbl">🍔 Alimentação</span><span class="lnd-di-val" style="color:var(--lnd-fina-l)">R$ 1.842</span></div>
+                <div class="lnd-di-row"><span class="lnd-di-lbl">🛒 Mercado</span><span class="lnd-di-val" style="color:var(--lnd-blue)">R$ 1.540</span></div>
+                <div class="lnd-di-row"><span class="lnd-di-lbl">🚗 Transporte</span><span class="lnd-di-val" style="color:var(--lnd-money)">R$ 712</span></div>
+                <div class="lnd-di-row" style="border-top:1px solid var(--lnd-b1);padding-top:8px;margin-top:4px"><span class="lnd-di-lbl">Total</span><span class="lnd-di-val">R$ 4.823</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- PRICING -->
+  <div id="lnd-pricing" class="lnd-sec">
+    <div class="lnd-stag">Planos</div>
+    <h2 class="lnd-stitle">Comece grátis, escale quando quiser</h2>
+    <p class="lnd-ssub">Sem contrato, sem taxa de setup. Cancele quando quiser.</p>
+    <div class="lnd-price-toggle">
+      <span class="lnd-pto lnd-pto-on" id="lptM" onclick="lndSetP('m')">Mensal</span>
+      <div class="lnd-ptswitch" id="lpts" onclick="lndTgP()"><div class="lnd-ptknob"></div></div>
+      <span class="lnd-pto" id="lptA" onclick="lndSetP('a')">Anual</span>
+      <span class="lnd-ptbadge">-17%</span>
+    </div>
+    <div class="lnd-pgrid">
+      <div class="lnd-pcard">
+        <div class="lnd-pc-n">Gratuito</div>
+        <div class="lnd-pc-price"><span class="lnd-pc-cur">R$</span><span class="lnd-pc-amt">0</span><span class="lnd-pc-per">/mês</span></div>
+        <div class="lnd-pc-d">Para explorar e testar a plataforma.</div>
+        <ul class="lnd-pc-feats">
+          <li><span class="lnd-ck">✓</span><span>50 perguntas / mês</span></li>
+          <li><span class="lnd-ck">✓</span><span>1 conta bancária</span></li>
+          <li><span class="lnd-ck">✓</span><span>Histórico de 30 dias</span></li>
+          <li><span class="lnd-ck">✓</span><span>Chat web</span></li>
+          <li><span class="lnd-nx">—</span><span>Análise multi-entidade</span></li>
+          <li><span class="lnd-nx">—</span><span>Alertas automáticos</span></li>
+        </ul>
+        <a class="lnd-pcbtn lnd-pcbtn-gh" href="javascript:void(0)" onclick="goTo('signup')">Começar grátis</a>
+      </div>
+      <div class="lnd-pcard lnd-pcard-pop">
+        <div class="lnd-pbadge">Mais popular</div>
+        <div class="lnd-pc-n">Pro</div>
+        <div class="lnd-pc-price"><span class="lnd-pc-cur">R$</span><span class="lnd-pc-amt" id="lndProP">29</span><span class="lnd-pc-per">/mês</span></div>
+        <div class="lnd-pc-d">Para quem quer controle financeiro real.</div>
+        <ul class="lnd-pc-feats">
+          <li><span class="lnd-ck">✓</span><span>Perguntas ilimitadas</span></li>
+          <li><span class="lnd-ck">✓</span><span>5 contas bancárias</span></li>
+          <li><span class="lnd-ck">✓</span><span>Histórico de 12 meses</span></li>
+          <li><span class="lnd-ck">✓</span><span>Claude Desktop + WhatsApp</span></li>
+          <li><span class="lnd-ck">✓</span><span>Análise PF + MEI</span></li>
+          <li><span class="lnd-ck">✓</span><span>Alertas e detecção de anomalias</span></li>
+        </ul>
+        <a class="lnd-pcbtn lnd-pcbtn-pri" href="javascript:void(0)" onclick="goTo('signup')">Começar Pro →</a>
+      </div>
+      <div class="lnd-pcard">
+        <div class="lnd-pc-n">Ultimate</div>
+        <div class="lnd-pc-price"><span class="lnd-pc-cur">R$</span><span class="lnd-pc-amt" id="lndUltP">99</span><span class="lnd-pc-per">/mês</span></div>
+        <div class="lnd-pc-d">Para empresas e contadores.</div>
+        <ul class="lnd-pc-feats">
+          <li><span class="lnd-ck">✓</span><span>Tudo do Pro</span></li>
+          <li><span class="lnd-ck">✓</span><span>Entidades ilimitadas (PF+MEI+PJ)</span></li>
+          <li><span class="lnd-ck">✓</span><span>API própria + webhooks</span></li>
+          <li><span class="lnd-ck">✓</span><span>Relatórios personalizados</span></li>
+          <li><span class="lnd-ck">✓</span><span>Suporte prioritário</span></li>
+          <li><span class="lnd-ck">✓</span><span>SLA 99,95%</span></li>
+        </ul>
+        <a class="lnd-pcbtn lnd-pcbtn-gh" href="javascript:void(0)" onclick="goTo('signup')">Falar com vendas →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECURITY -->
+  <div id="lnd-security" class="lnd-sec-wrap">
+    <div class="lnd-sec-inner">
+      <div>
+        <div class="lnd-stag">Segurança</div>
+        <h2 class="lnd-stitle">Segurança de nível<br>bancário em cada camada</h2>
+        <p class="lnd-ssub">Seus dados bancários nunca passam pelo modelo de IA. O bankJWT fica isolado e mascarado seguindo a LGPD.</p>
+      </div>
+      <div class="lnd-sec-grid">
+        <div class="lnd-sbadge"><div class="lnd-sb-ic">🏛</div><div><div class="lnd-sb-t">FAPI 2.0</div><div class="lnd-sb-b">Padrão de segurança Open Finance Brasil</div></div></div>
+        <div class="lnd-sbadge"><div class="lnd-sb-ic">🔐</div><div><div class="lnd-sb-t">OAuth 2.1 + PKCE</div><div class="lnd-sb-b">Autorização sem senha compartilhada</div></div></div>
+        <div class="lnd-sbadge"><div class="lnd-sb-ic">🔒</div><div><div class="lnd-sb-t">mTLS + ICP-Brasil</div><div class="lnd-sb-b">Canal criptografado com certificado nacional</div></div></div>
+        <div class="lnd-sbadge"><div class="lnd-sb-ic">🛡</div><div><div class="lnd-sb-t">LGPD</div><div class="lnd-sb-b">Dados mascarados e controlados pelo titular</div></div></div>
+        <div class="lnd-sbadge"><div class="lnd-sb-ic">⚡</div><div><div class="lnd-sb-t">bankJWT Isolado</div><div class="lnd-sb-b">Token bancário nunca exposto ao LLM</div></div></div>
+        <div class="lnd-sbadge"><div class="lnd-sb-ic">✅</div><div><div class="lnd-sb-t">Bacen OF</div><div class="lnd-sb-b">Regulamentado pelo Banco Central do Brasil</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="lnd-faq-wrap">
+    <div class="lnd-stag" style="text-align:center;margin-bottom:10px">Dúvidas</div>
+    <h2 class="lnd-stitle" style="text-align:center;margin-bottom:40px">Perguntas frequentes</h2>
+    <div class="lnd-faq-list">
+      <div class="lnd-faq-item lnd-op">
+        <button class="lnd-faq-q" onclick="lndTgFaq(this)">Como a Pulsando acessa minha conta bancária? <span class="lnd-faq-ch">+</span></button>
+        <div class="lnd-faq-a">Através do Open Finance Brasil, um sistema regulamentado pelo Banco Central. Você autoriza o acesso de forma segura pelo seu próprio banco, sem compartilhar senhas. O protocolo FAPI 2.0 garante que apenas os dados que você aprovar sejam acessados.</div>
+      </div>
+      <div class="lnd-faq-item">
+        <button class="lnd-faq-q" onclick="lndTgFaq(this)">Meus dados financeiros ficam armazenados? <span class="lnd-faq-ch">+</span></button>
+        <div class="lnd-faq-a">Os dados são buscados em tempo real diretamente do banco e não ficam armazenados permanentemente em nossos servidores. O token de acesso (bankJWT) fica isolado e nunca é exposto ao modelo de IA.</div>
+      </div>
+      <div class="lnd-faq-item">
+        <button class="lnd-faq-q" onclick="lndTgFaq(this)">Funciona com qualquer banco? <span class="lnd-faq-ch">+</span></button>
+        <div class="lnd-faq-a">Funciona com todos os bancos participantes do Open Finance Brasil — hoje mais de 100 instituições, incluindo Bradesco, Itaú, Nubank, Caixa, Santander, Inter, C6 Bank e muitos outros. A lista cresce continuamente.</div>
+      </div>
+      <div class="lnd-faq-item">
+        <button class="lnd-faq-q" onclick="lndTgFaq(this)">Posso usar no Claude Desktop ou WhatsApp? <span class="lnd-faq-ch">+</span></button>
+        <div class="lnd-faq-a">Sim. A Pulsando expõe um servidor MCP padrão que funciona com qualquer cliente compatível: Claude.ai, Claude Desktop, GPT-4, Gemini e WhatsApp Business. Configure uma vez e use em qualquer assistente.</div>
+      </div>
+      <div class="lnd-faq-item">
+        <button class="lnd-faq-q" onclick="lndTgFaq(this)">Posso cancelar quando quiser? <span class="lnd-faq-ch">+</span></button>
+        <div class="lnd-faq-a">Sim. Não há contrato mínimo nem taxa de cancelamento. Você pode encerrar a assinatura a qualquer momento pelo painel e revogar os acessos bancários individualmente dentro do seu banco.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA FINAL -->
+  <div class="lnd-cta-sec">
+    <div class="lnd-cta-glow"></div>
+    <div class="lnd-stag" style="margin-bottom:16px;position:relative">Comece hoje</div>
+    <h2 class="lnd-cta-h2">Pronto para entender suas<br>finanças de verdade?</h2>
+    <p class="lnd-cta-p">Conecte suas contas em menos de 2 minutos e faça sua primeira pergunta — grátis.</p>
+    <div class="lnd-cta-btns">
+      <a class="lnd-btn-primary" href="javascript:void(0)" onclick="goTo('signup')" style="font-size:15px;padding:14px 32px">Criar conta grátis →</a>
+      <a class="lnd-btn-outline" href="javascript:void(0)" onclick="goTo('chat')" style="font-size:15px;padding:14px 28px">▶ Ver demo primeiro</a>
+    </div>
+    <div style="display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-top:18px;position:relative">
+      <span style="font-size:12px;color:var(--lnd-muted)">✓ Sem cartão de crédito</span>
+      <span style="font-size:12px;color:var(--lnd-muted)">✓ Plano gratuito para sempre</span>
+      <span style="font-size:12px;color:var(--lnd-muted)">✓ Cancele quando quiser</span>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="lnd-footer">
+    <div class="lnd-ft-brand">pulsando<em>.ai</em></div>
+    <div class="lnd-ft-links">
+      <a href="javascript:void(0)" onclick="goTo('chat')">Demo</a>
+      <a href="#lnd-features">Funcionalidades</a>
+      <a href="#lnd-pricing">Preços</a>
+      <a href="#lnd-security">Segurança</a>
+      <a href="javascript:void(0)" onclick="goTo('login')">Entrar</a>
+      <a href="javascript:void(0)" onclick="goTo('signup')">Criar conta</a>
+    </div>
+    <div class="lnd-ft-legal">© 2026 Pulsando · Banking MCP v2.0 · Regulamentado pelo Banco Central do Brasil</div>
+  </footer>
+
 </div>
 
 <!-- ══ DASHBOARD ══ -->
@@ -1373,6 +1781,90 @@ function playSteps(steps, idx) {
     }, delay);
   }
 }
+
+/* ════ LANDING JS ════ */
+function lndTgFaq(el) {
+  var item = el.parentElement;
+  var was = item.classList.contains('lnd-op');
+  document.querySelectorAll('#scr-land .lnd-faq-item.lnd-op').forEach(function(i) { i.classList.remove('lnd-op'); });
+  if (!was) item.classList.add('lnd-op');
+}
+var lndIsAnn = false;
+var lndMP = { pro: 29, ult: 99 };
+var lndAP = { pro: 24, ult: 82 };
+function lndSetP(t) { lndIsAnn = t === 'a'; lndUpP(); }
+function lndTgP() { lndIsAnn = !lndIsAnn; lndUpP(); }
+function lndUpP() {
+  var p = lndIsAnn ? lndAP : lndMP;
+  var proEl = document.getElementById('lndProP');
+  var ultEl = document.getElementById('lndUltP');
+  if (proEl) proEl.textContent = p.pro;
+  if (ultEl) ultEl.textContent = p.ult;
+  var sw = document.getElementById('lpts');
+  if (sw) sw.classList.toggle('lnd-pts-a', lndIsAnn); /* .lnd-ptswitch.lnd-pts-a .lnd-ptknob slides */
+  var ptM = document.getElementById('lptM');
+  var ptA = document.getElementById('lptA');
+  if (ptM) ptM.classList.toggle('lnd-pto-on', !lndIsAnn);
+  if (ptA) ptA.classList.toggle('lnd-pto-on', lndIsAnn);
+}
+
+/* Hero chat animation */
+(function() {
+  var box = document.getElementById('heroChat');
+  var ph = document.getElementById('heroPh');
+  if (!box) return;
+  function wait(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
+  function addEl(cls, html) {
+    var el = document.createElement('div');
+    el.className = cls;
+    el.innerHTML = html;
+    box.appendChild(el);
+    box.scrollTop = box.scrollHeight;
+    return el;
+  }
+  var spendCard = '<div class="lhc-card"><div class="lhc-card-hd">Gastos · julho 2026</div>' +
+    '<div class="lhc-spend-row"><span class="lhc-spend-lbl">🍔 Alimentação</span><span class="lhc-spend-val" style="color:var(--lnd-fina-l)">R$ 1.842</span></div>' +
+    '<div class="lhc-bar"><div class="lhc-bar-f" style="width:38%;background:var(--lnd-fina)"></div></div>' +
+    '<div class="lhc-spend-row"><span class="lhc-spend-lbl">🛒 Mercado</span><span class="lhc-spend-val" style="color:var(--lnd-blue)">R$ 1.540</span></div>' +
+    '<div class="lhc-bar"><div class="lhc-bar-f" style="width:32%;background:var(--lnd-blue)"></div></div>' +
+    '<div class="lhc-spend-row"><span class="lhc-spend-lbl">🚗 Transporte</span><span class="lhc-spend-val" style="color:var(--lnd-money)">R$ 712</span></div>' +
+    '<div class="lhc-bar"><div class="lhc-bar-f" style="width:15%;background:var(--lnd-money)"></div></div>' +
+    '<div style="font-size:10px;color:var(--lnd-muted);margin-top:8px">Total: R$ 4.823,40</div></div>';
+  var balCard = '<div class="lhc-card"><div class="lhc-card-hd">Saldo total · 2 bancos</div>' +
+    '<div class="lhc-balance"><div class="lhc-balance-amt">R$ 10.767,63</div><div class="lhc-balance-lbl">Bradesco + Nubank</div></div></div>';
+  async function run() {
+    await wait(700);
+    addEl('lhc-m lhc-bot', '<div class="lhc-b">Oi! 👋 Sou a Pulsando. Me pergunte qualquer coisa sobre suas finanças.</div>');
+    await wait(2200); ph.textContent = 'Quanto gastei em julho?';
+    await wait(2800); addEl('lhc-m lhc-user', '<div class="lhc-b">Quanto gastei em julho?</div>'); ph.textContent = 'Pergunte sobre suas finanças...';
+    await wait(1200); var typing = addEl('lhc-typing', '<span></span><span></span><span></span>');
+    await wait(2000); typing.remove();
+    addEl('lhc-m lhc-bot', '<div class="lhc-b">Analisando julho… 🔍</div>');
+    addEl('lhc-m lhc-bot', spendCard);
+    await wait(1200); addEl('lhc-m lhc-bot', '<div class="lhc-b">Total: <strong>R$ 4.823</strong>. Alimentação liderou — R$ 357 a mais que junho 📈</div>');
+    await wait(3500); ph.textContent = 'Qual meu saldo agora?';
+    await wait(1000); addEl('lhc-m lhc-user', '<div class="lhc-b">Qual meu saldo agora?</div>'); ph.textContent = 'Pergunte sobre suas finanças...';
+    await wait(1200); var t2 = addEl('lhc-typing', '<span></span><span></span><span></span>');
+    await wait(1800); t2.remove();
+    addEl('lhc-m lhc-bot', balCard);
+    addEl('lhc-m lhc-bot', '<div class="lhc-b">Você tem <strong>R$ 10.767,63</strong> disponíveis no total 💰</div>');
+  }
+  run();
+})();
+
+/* Anchor scroll fix inside #scr-land */
+document.querySelectorAll('#scr-land a[href^="#"]').forEach(function(a) {
+  a.addEventListener('click', function(e) {
+    e.preventDefault();
+    var id = a.getAttribute('href').slice(1);
+    var target = document.getElementById(id);
+    var scrLand = document.getElementById('scr-land');
+    if (target && scrLand) {
+      var top = target.getBoundingClientRect().top - scrLand.getBoundingClientRect().top + scrLand.scrollTop;
+      scrLand.scrollTo({ top: top, behavior: 'smooth' });
+    }
+  });
+});
 </script>
 </body>
 </html>
