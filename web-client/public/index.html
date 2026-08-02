@@ -226,6 +226,27 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 .steps-ditem{font-size:11px;color:var(--tx2);font-family:var(--fm);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .steps-ditem-ok{color:#22C55E;flex-shrink:0}
 
+/* ── Fina invest card ── */
+.fina-invest-card{background:var(--sf2);border:1px solid var(--bd);border-radius:16px;padding:18px 20px;align-self:flex-start;width:100%;max-width:480px;margin:4px 0}
+.fina-invest-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.fina-invest-label{font-size:11.5px;font-weight:700;color:var(--tx2);letter-spacing:.06em;text-transform:uppercase}
+.fina-invest-total{margin-bottom:16px}
+.fina-invest-amt{font-size:26px;font-weight:900;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1.1}
+.fina-invest-period{font-size:11px;color:var(--tx2);margin-top:3px}
+.fina-invest-bar{display:flex;height:7px;border-radius:5px;overflow:hidden;gap:2px;margin-bottom:18px}
+.fina-invest-bar-seg{height:100%;min-width:4px}
+.fina-invest-items{display:flex;flex-direction:column}
+.fina-invest-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--bd2)}
+.fina-invest-row:last-child{border:none;padding-bottom:4px}
+.fina-invest-badge{font-size:9px;font-weight:800;padding:3px 8px;border-radius:5px;letter-spacing:.05em;font-family:var(--fm);flex-shrink:0;white-space:nowrap;min-width:42px;text-align:center}
+.fina-invest-info{flex:1;min-width:0}
+.fina-invest-name{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fina-invest-sub{font-size:11px;color:var(--tx2);margin-top:2px}
+.fina-invest-right{text-align:right;flex-shrink:0}
+.fina-invest-val{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
+.fina-invest-gross{font-size:10px;color:var(--tx2);margin-top:2px}
+.fina-invest-tax{font-size:10px;color:#10B981;font-weight:700;margin-top:2px}
+
 /* ── Fina rich card (spend breakdown) ── */
 .fina-card{background:var(--sf2);border:1px solid var(--bd);border-radius:16px;padding:18px 20px;align-self:flex-start;width:100%;max-width:480px;margin:4px 0}
 .fina-card-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
@@ -1569,7 +1590,7 @@ function sendMsg() {
       if (isChart === null && (textBuf.length >= 50 || !ev.chunk.includes('<'))) {
         var tb = textBuf.trimStart();
         if (tb.length > 0) {
-          isChart = tb.startsWith('<!--FINA_CHART') || tb.startsWith('<!--FINA_BILL');
+          isChart = tb.startsWith('<!--FINA_CHART') || tb.startsWith('<!--FINA_BILL') || tb.startsWith('<!--FINA_INVEST');
           if (!isChart) {
             // Flush buffered text to bubble
             if (!aiMsgObj) { aiMsgObj = makeAiMsgEl(); appendEl(aiMsgObj.wrap); }
@@ -1614,6 +1635,19 @@ function sendMsg() {
         }
       }
       fullText = fullText.replace(/<!--FINA_BILL:[\s\S]+?-->/g, '').trim();
+
+      // Parse ALL FINA_INVEST blocks — investment portfolio visual
+      var investRe = /<!--FINA_INVEST:([\s\S]+?)-->/g;
+      var im;
+      while ((im = investRe.exec(fullText)) !== null) {
+        try {
+          var rawInvest = im[1].replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+          appendEl(renderInvestCard(JSON.parse(rawInvest)));
+        } catch (e) {
+          console.warn('[fina] invest parse error:', e.message);
+        }
+      }
+      fullText = fullText.replace(/<!--FINA_INVEST:[\s\S]+?-->/g, '').trim();
 
       // Render remaining prose (or remove bubble if chart/bill was the whole response)
       if (fullText) {
@@ -1862,6 +1896,82 @@ function renderBillCard(data) {
         : '') +
     '</div>';
 
+  return el;
+}
+
+/* ════════════════════════════════════════════════════
+   FINA INVEST CARD — carteira de investimentos visual
+════════════════════════════════════════════════════ */
+var INVEST_COLORS = {
+  'CDB':'#3B82F6','LCI':'#10B981','LCA':'#10B981',
+  'SELIC':'#F59E0B','IPCA':'#D97706','PRFIX':'#D97706','TESOURO':'#D97706',
+  'FUND':'#FF9100','FI':'#FF9100',
+  'STOCK':'#c0020e','AÇÕES':'#c0020e','RV':'#c0020e',
+  'CRI':'#EC4899','CRA':'#EC4899','DEB':'#6366F1',
+};
+function investColor(type) {
+  return INVEST_COLORS[(type || '').toUpperCase()] || '#64748B';
+}
+
+function renderInvestCard(data) {
+  var items  = Array.isArray(data.items) ? data.items : [];
+  var total  = Number(data.total || 0);
+  var el     = document.createElement('div');
+  el.className = 'fina-invest-card msg-enter';
+
+  var hdHtml = '<div class="fina-invest-hd">' +
+    '<span class="fina-invest-label">Carteira de Investimentos</span>' +
+    '<span class="fina-card-arr">›</span></div>';
+
+  var totHtml = '<div class="fina-invest-total">' +
+    '<div class="fina-invest-amt">' + brl(total) + '</div>' +
+    (data.period ? '<div class="fina-invest-period">' + esc(data.period) + '</div>' : '') +
+    '</div>';
+
+  var barHtml = '<div class="fina-invest-bar">' +
+    items.map(function(it) {
+      var pct = total > 0 ? Math.max((Number(it.value || 0) / total) * 100, 1) : 1;
+      return '<div class="fina-invest-bar-seg" style="flex:' + pct.toFixed(1) +
+        ';background:' + investColor(it.type) + '"></div>';
+    }).join('') + '</div>';
+
+  var itemsHtml = '<div class="fina-invest-items">' +
+    items.map(function(it) {
+      var clr   = investColor(it.type);
+      var badge = (it.type || '').toUpperCase();
+      var sub   = '';
+      if (it.dueDate) {
+        var d = String(it.dueDate);
+        sub = 'Vence ' + d.slice(8,10) + '/' + d.slice(5,7) + '/' + d.slice(0,4);
+      } else if (it.shares) {
+        sub = Number(it.shares).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ' cotas';
+      }
+      var rightSub = it.taxFree
+        ? '<div class="fina-invest-tax">✓ Isento IR</div>'
+        : (it.gross && Number(it.gross) > Number(it.value)
+          ? '<div class="fina-invest-gross">bruto ' + brl(Number(it.gross)) + '</div>'
+          : '');
+      return '<div class="fina-invest-row">' +
+        '<div class="fina-invest-badge" style="background:' + clr + '22;color:' + clr + '">' + esc(badge) + '</div>' +
+        '<div class="fina-invest-info">' +
+          '<div class="fina-invest-name">' + esc(it.label || badge) + '</div>' +
+          (sub ? '<div class="fina-invest-sub">' + esc(sub) + '</div>' : '') +
+        '</div>' +
+        '<div class="fina-invest-right">' +
+          '<div class="fina-invest-val">' + brl(Number(it.value || 0)) + '</div>' +
+          rightSub +
+        '</div></div>';
+    }).join('') + '</div>';
+
+  var suggs = Array.isArray(data.suggestions) ? data.suggestions.slice(0, 3) : [];
+  var suggsHtml = suggs.length
+    ? '<div class="fina-suggs">' + suggs.map(function(s) {
+        return '<button class="fina-sugg" onclick="sendPreset(\'' +
+          String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\')">' + esc(s) + '</button>';
+      }).join('') + '</div>'
+    : '';
+
+  el.innerHTML = hdHtml + totHtml + barHtml + itemsHtml + suggsHtml;
   return el;
 }
 

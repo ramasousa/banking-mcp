@@ -80,6 +80,13 @@ const SYSTEM = [
   '(2) Emita um bloco estruturado NO INÍCIO da resposta, antes de qualquer texto, exatamente neste formato (sem quebras de linha dentro do bloco): <!--FINA_BILL:{"holder":"NOME EM MAIÚSCULAS","number":"últimos 4 dígitos","expiry":"12/28","brand":"VISA","product":"VISA INFINITE","amount":0.00,"dueDate":"YYYY-MM-DD","minDue":0.00,"limit":0,"available":0}-->',
   '(3) holder: nome civil do titular (of_get_personal_identifications) em MAIÚSCULAS. number: campo identificationNumber dos limites do cartão PF. brand: creditCardNetwork em maiúsculas (VISA ou MASTERCARD). product: nome do produto sem o prefixo "BRADESCO " (ex: VISA INFINITE, MASTERCARD PLATINUM). minDue: aproximadamente 15% do total da fatura.',
   '(4) Após o bloco <!--FINA_BILL:-->, escreva APENAS UMA frase curta de resumo da fatura (ex: "Sua fatura de agosto é R$ 12.450 — vencimento dia 10."). PROIBIDO: tabelas markdown, listas, separadores ---.',
+
+  'REGRA PARA CARTEIRA DE INVESTIMENTOS:',
+  'Quando o usuário pedir lista de investimentos, carteira, portfólio, títulos, aplicações ou rendimentos:',
+  '(1) Consulte of_list_bank_fixed_incomes para renda fixa bancária. Use outros tools disponíveis para fundos ou renda variável se existirem.',
+  '(2) Emita NO INÍCIO da resposta, antes de qualquer texto: <!--FINA_INVEST:{"total":0,"items":[{"type":"CDB","label":"CDB Bradesco","value":0,"gross":0,"dueDate":"YYYY-MM-DD"},{"type":"LCI","label":"LCI","value":0,"taxFree":true,"dueDate":"YYYY-MM-DD"},{"type":"SELIC","label":"Tesouro Selic","value":0,"dueDate":"YYYY-MM-DD"},{"type":"FUND","label":"Nome do Fundo","value":0,"shares":0}],"suggestions":["follow-up 1","follow-up 2","follow-up 3"]}-->',
+  '(3) Campos: type = um de CDB|LCI|LCA|SELIC|IPCA|PRFIX|FUND|STOCK|CRI|CRA|DEB. label = nome comercial limpo. value = valor líquido atual. gross = valor bruto antes de IR/IOF (omitir se igual a value ou não disponível). taxFree:true apenas para LCI/LCA/CRI/CRA. dueDate YYYY-MM-DD. shares para fundos quando disponível.',
+  '(4) Calcule total como soma dos values. Após o bloco <!--FINA_INVEST:-->, escreva APENAS UMA frase curta de resumo. PROIBIDO: tabelas markdown, listas com hífens, separadores ---.',
 ].join(' ');
 
 // ── Express ───────────────────────────────────────────────────
