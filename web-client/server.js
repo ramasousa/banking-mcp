@@ -33,7 +33,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const PORT   = process.env.PORT || 3300;
 const MODEL  = process.env.CLAUDE_MODEL || 'claude-sonnet-4-6';
-const PROFILE = process.env.BANK_PROFILE || 'default';
+let PROFILE = process.env.BANK_PROFILE || 'default';
 const hasKey = !!process.env.ANTHROPIC_API_KEY;
 
 // ── Conecta o MCP Server em processo via InMemoryTransport ────
@@ -72,6 +72,13 @@ const SYSTEM = [
   '(3) Máximo 8 categorias, ordenadas por valor decrescente. pct deve somar ~100.',
   '(4) As sugestões devem ser 3 perguntas curtas de follow-up contextuais ao que foi mostrado.',
   '(5) Após o bloco <!--FINA_CHART:-->, escreva APENAS UMA frase curta de resumo (ex: "Em julho você gastou R$ 23.118 — destaque para Cartão de Crédito (37%)."). PROIBIDO: tabelas markdown, listas com hífens, separadores ---, seções **Resumo por categoria**, sugestões em texto. Essas informações já estão no card visual — repeti-las é redundante e piora a experiência.',
+
+  'REGRA PARA FATURA DO CARTÃO DE CRÉDITO:',
+  'Quando o usuário pedir fatura, extrato do cartão, compras no cartão, bill ou quanto deve no cartão:',
+  '(1) Consulte of_list_credit_cards para identificar o cartão, of_get_credit_card_limits para limite/últimos 4 dígitos, of_get_credit_card_bills para faturas.',
+  '(2) Emita um bloco estruturado NO INÍCIO da resposta, antes de qualquer texto, exatamente neste formato (sem quebras de linha dentro do bloco): <!--FINA_BILL:{"holder":"NOME EM MAIÚSCULAS","number":"últimos 4 dígitos","expiry":"12/28","brand":"VISA","product":"VISA INFINITE","amount":0.00,"dueDate":"YYYY-MM-DD","minDue":0.00,"limit":0,"available":0}-->',
+  '(3) holder: nome civil do titular (of_get_personal_identifications) em MAIÚSCULAS. number: campo identificationNumber dos limites do cartão PF. brand: creditCardNetwork em maiúsculas (VISA ou MASTERCARD). product: nome do produto sem o prefixo "BRADESCO " (ex: VISA INFINITE, MASTERCARD PLATINUM). minDue: aproximadamente 15% do total da fatura.',
+  '(4) Após o bloco <!--FINA_BILL:-->, escreva APENAS UMA frase curta de resumo da fatura (ex: "Sua fatura de agosto é R$ 12.450 — vencimento dia 10."). PROIBIDO: tabelas markdown, listas, separadores ---.',
 ].join(' ');
 
 // ── Express ───────────────────────────────────────────────────
@@ -94,6 +101,31 @@ app.get('/api/health', async (_req, res) => {
     profile: PROFILE,
     tools: toolCount,
   });
+});
+
+// ─────────────────────────────────────────────────────────────
+// GET /api/profiles — lista os perfis mock disponíveis
+// POST /api/switch-profile — troca o perfil ativo (sem reiniciar)
+// ─────────────────────────────────────────────────────────────
+const PROFILE_META = [
+  { id: 'raul',   label: 'Raul S.',   desc: 'Empresário · PF + PJ' },
+  { id: 'heitor', label: 'Heitor A.', desc: 'Comércio · PF + PJ'   },
+  { id: 'cadimo', label: 'Cadimo P.', desc: 'Consultoria · PF + PJ' },
+  { id: 'patz',   label: 'Patz T.',   desc: 'CLT · PF'              },
+];
+
+app.get('/api/profiles', (_req, res) => {
+  res.json({ current: PROFILE, profiles: PROFILE_META });
+});
+
+app.post('/api/switch-profile', (req, res) => {
+  const allowed = PROFILE_META.map((p) => p.id);
+  const { profile } = req.body ?? {};
+  if (!profile || !allowed.includes(profile)) {
+    return res.status(400).json({ error: 'Invalid profile' });
+  }
+  PROFILE = profile;
+  res.json({ profile: PROFILE });
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -127,10 +159,12 @@ app.get('/api/dashboard', async (_req, res) => {
   if (!hasKey) return res.json({ demo: true });
 
   try {
-    const [analyticsRaw, identEnv, accountsEnv] = await Promise.all([
+    const [analyticsRaw, identEnv, accountsEnv, cardsEnv, bfiEnv] = await Promise.all([
       mcpCall('analytics_cross_pf_pj'),
       mcpCall('of_get_personal_identifications'),
       mcpCall('of_list_accounts'),
+      mcpCall('of_list_credit_cards'),
+      mcpCall('of_list_bank_fixed_incomes'),
     ]);
 
     const accounts = Array.isArray(accountsEnv.data) ? accountsEnv.data : [];
@@ -189,6 +223,43 @@ app.get('/api/dashboard', async (_req, res) => {
     const fmtDate = (d, opts) =>
       d.toLocaleDateString('pt-BR', opts);
 
+    // ── Cartão de crédito PF ──────────────────────────────────
+    const cardsList = Array.isArray(cardsEnv.data) ? cardsEnv.data : [];
+    const pfCard = cardsList.find((c) => c.ownerType === 'PESSOA_NATURAL') ?? cardsList[0] ?? null;
+    let card = null;
+    if (pfCard) {
+      const [billsEnv2, limitsEnv2] = await Promise.all([
+        mcpCall('of_get_credit_card_bills', { creditCardAccountId: pfCard.creditCardAccountId }),
+        mcpCall('of_get_credit_card_limits', { creditCardAccountId: pfCard.creditCardAccountId }),
+      ]);
+      const bills2   = Array.isArray(billsEnv2.data) ? billsEnv2.data : [];
+      const limits2  = Array.isArray(limitsEnv2.data) ? limitsEnv2.data : [];
+      const curBill  = bills2[0] ?? null;
+      const totLimit = limits2.find((l) => l.creditLineLimitType === 'LIMITE_CREDITO_TOTAL') ?? null;
+      const billTotal = Number(curBill?.billTotalAmount ?? 0);
+      const rawName   = pfCard.name ?? '';
+      card = {
+        name: rawName,
+        product: rawName.replace(/^BRADESCO\s*/i, ''),
+        network: pfCard.creditCardNetwork ?? 'VISA',
+        last4: totLimit?.identificationNumber ?? '????',
+        expiry: '12/28',
+        holder: (identity.civilName ?? '').toUpperCase(),
+        bill: curBill ? { total: billTotal, dueDate: curBill.dueDate ?? '' } : null,
+        limitTotal: Number(totLimit?.limitAmount ?? 0),
+        limitAvailable: Number(totLimit?.availableAmount ?? 0),
+      };
+    }
+
+    // ── Investimentos (renda fixa bancária) ───────────────────
+    const bfiList = Array.isArray(bfiEnv.data) ? bfiEnv.data : [];
+    const investTotal = bfiList.reduce((s, inv) => s + Number(inv.updatedValue?.amount ?? 0), 0);
+    const investItems = bfiList.slice(0, 5).map((inv) => ({
+      type: inv.investmentType ?? 'CDB',
+      value: Number(inv.updatedValue?.amount ?? 0),
+      dueDate: inv.dueDate ?? '',
+    }));
+
     res.json({
       identity: {
         name: identity.civilName ?? 'Usuário',
@@ -200,12 +271,14 @@ app.get('/api/dashboard', async (_req, res) => {
       entities: {
         pf: {
           label: pfEnt.titular ?? 'Conta PF',
+          name: pfEnt.titular ?? 'Conta PF',
           balance: pfEnt.saldo_disponivel_total ?? 0,
           type: 'CC + Poupança',
         },
         pj: pjEnt
           ? {
               label: pjEnt.titular ?? 'MEI',
+              name: pjEnt.titular ?? 'MEI',
               balance: pjEnt.saldo_disponivel_total ?? 0,
               type: 'CC PJ + CDB',
             }
@@ -218,6 +291,11 @@ app.get('/api/dashboard', async (_req, res) => {
       accounts: { count: accounts.length },
       categories,
       totalSpend,
+      card,
+      investments: {
+        total: Number(investTotal.toFixed(2)),
+        items: investItems,
+      },
       transactions: allTx.slice(0, 12).map((t) => ({
         name: t.transactionName ?? t.type ?? 'Transação',
         type: t.type ?? 'OUTROS',
