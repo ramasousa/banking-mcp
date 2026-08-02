@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fina · Assistente Financeiro</title>
+<style>
+/* ══════════════════════════════════════════════
+   DESIGN TOKENS — dois temas via data-t="n|v"
+══════════════════════════════════════════════ */
+:root{
+  --bg:#0B0B0B;--sf:#141414;--sf2:#1C1C1C;--sf3:#242424;
+  --bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.04);
+  --tx:#F2F2F2;--tx2:#717171;--tx3:#333;
+  --ac:#C8FF00;--ac-fg:#000;--ac-a:rgba(200,255,0,.10);--ac-ab:rgba(200,255,0,.18);
+  --badge:rgba(255,255,255,.06);--badge-tx:#888;
+  --logo-c:#C8FF00;
+  --s1:#E53E3E;--s2:#D53F8C;--s3:#ED8936;
+  --s4:#38A169;--s5:#3182CE;--s6:#805AD5;--s7:#718096;
+  --fs:system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+  --fm:'SF Mono','Fira Code',Cascadia,Menlo,'Courier New',monospace;
+}
+:root[data-t="v"]{
+  --bg:#07040A;--sf:#110910;--sf2:#1B1018;--sf3:#251520;
+  --bd:rgba(240,100,120,.10);--bd2:rgba(240,100,120,.05);
+  --tx:#F5EDF0;--tx2:#8A6070;--tx3:#3A1A28;
+  --ac:#E8102E;--ac-fg:#fff;--ac-a:rgba(232,16,46,.11);--ac-ab:rgba(232,16,46,.22);
+  --badge:rgba(232,16,46,.08);--badge-tx:#C07080;
+  --logo-c:#E8102E;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;-webkit-font-smoothing:antialiased}
+body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:background .3s,color .2s}
+.scr{position:absolute;inset:0;display:none;flex-direction:column}
+.scr.on{display:flex}
+.fade-in{animation:fi .22s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.btn{display:inline-flex;align-items:center;gap:7px;border-radius:var(--r,9999px);padding:10px 20px;font-size:13.5px;font-weight:700;cursor:pointer;border:none;font-family:var(--fs);transition:filter .15s,transform .1s}
+.btn:active{transform:scale(.97)}
+.btn-ac{background:var(--ac);color:var(--ac-fg)}
+.btn-ac:hover{filter:brightness(1.08)}
+.btn-ghost{background:transparent;border:1.5px solid var(--bd);color:var(--tx);padding:9px 18px}
+.btn-ghost:hover{border-color:rgba(255,255,255,.2);background:var(--sf)}
+.pill{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:999px;font-family:var(--fm);white-space:nowrap}
+.pill-ac{background:var(--ac-a);color:var(--ac)}
+.pill-muted{background:var(--badge);color:var(--badge-tx)}
+.card{background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:18px}
+.mono{font-family:var(--fm);font-variant-numeric:tabular-nums}
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tx2)}
+.amt{font-variant-numeric:tabular-nums}
+
+/* ── Landing ── */
+.l-nav{display:flex;align-items:center;gap:12px;padding:0 28px;height:58px;background:var(--bg);border-bottom:1px solid var(--bd);flex-shrink:0;position:relative;z-index:10}
+.logo{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:900;letter-spacing:-.03em;color:var(--tx)}
+.logo-dot{width:8px;height:8px;border-radius:50%;background:var(--logo-c);transition:background .3s;flex-shrink:0}
+.l-nav-links{display:flex;gap:6px;margin-left:20px}
+.l-nav-link{font-size:13px;color:var(--tx2);padding:6px 12px;border-radius:8px;cursor:pointer;transition:color .12s,background .12s}
+.l-nav-link:hover{color:var(--tx);background:var(--sf)}
+.l-nav-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.theme-tog{display:flex;align-items:center;gap:0;background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:3px;cursor:pointer}
+.tt-opt{width:26px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;letter-spacing:.04em;transition:background .2s,color .2s;color:var(--tx2)}
+.tt-opt.act{background:var(--ac);color:var(--ac-fg)}
+.l-hero{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;overflow:auto;position:relative}
+.hero-eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:18px}
+.hero-live{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx2)}
+.hero-live-dot{width:6px;height:6px;border-radius:50%;background:var(--ac);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.85)}}
+.hero-h{font-size:clamp(32px,5vw,56px);font-weight:900;letter-spacing:-.035em;text-align:center;line-height:1.06;max-width:800px;margin-bottom:14px}
+.hero-h em{font-style:normal;color:var(--ac)}
+.hero-sub{font-size:15px;color:var(--tx2);text-align:center;max-width:480px;line-height:1.65;margin-bottom:28px}
+.hero-ctas{display:flex;align-items:center;gap:10px;margin-bottom:44px;flex-wrap:wrap;justify-content:center}
+.hero-tags{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin-bottom:48px}
+.phone-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+.phone-outer{width:240px;height:490px;background:var(--sf);border:1.5px solid var(--bd);border-radius:38px;position:relative;overflow:hidden;box-shadow:0 0 0 8px var(--bg),0 40px 80px rgba(0,0,0,.7)}
+.phone-island{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:72px;height:22px;background:var(--bg);border-radius:12px;z-index:10}
+.phone-screen{position:absolute;inset:0;border-radius:37px;overflow:hidden;padding-top:42px;display:flex;flex-direction:column}
+.phone-chat-area{flex:1;overflow:hidden;padding:8px 10px;display:flex;flex-direction:column;gap:7px}
+.p-msg-in{background:var(--sf2);border-radius:12px 12px 12px 3px;padding:9px 11px;font-size:10px;line-height:1.5;align-self:flex-start;max-width:85%;color:var(--tx2)}
+.p-msg-out{background:var(--ac);border-radius:12px 12px 3px 12px;padding:9px 11px;font-size:10px;line-height:1.5;align-self:flex-end;max-width:85%;color:var(--ac-fg);font-weight:600}
+.p-tool{background:var(--sf3);border-radius:8px;padding:7px 10px;font-size:9.5px;font-family:var(--fm);color:var(--tx2);display:flex;align-items:center;gap:6px}
+.p-tool-spin{width:8px;height:8px;border:1.5px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.p-tool-ok{color:var(--ac);font-size:11px;flex-shrink:0}
+.phone-bottom{background:var(--sf);border-top:1px solid var(--bd);padding:8px 10px;display:flex;align-items:center;gap:7px;flex-shrink:0}
+.p-input{flex:1;background:var(--sf2);border-radius:20px;padding:7px 12px;font-size:10px;color:var(--tx2)}
+.p-send{width:30px;height:30px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.float-card{position:absolute;background:var(--sf2);border:1px solid var(--bd);border-radius:14px;padding:12px 16px;backdrop-filter:blur(8px)}
+.float-card.fc-left{right:calc(100% + 16px);top:50%;transform:translateY(-70%)}
+.float-card.fc-right{left:calc(100% + 16px);bottom:30%}
+.fc-label{font-size:9.5px;color:var(--tx2);margin-bottom:3px;font-family:var(--fm);text-transform:uppercase;letter-spacing:.06em}
+.fc-val{font-size:18px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.fc-delta{font-size:10px;font-weight:700;margin-left:5px;color:var(--ac)}
+.mini-bars{display:flex;align-items:flex-end;gap:3px;margin-top:6px;height:24px}
+.mbar{border-radius:2px 2px 0 0;background:var(--ac);opacity:.7;width:8px}
+.mbar:last-child{opacity:1}
+.l-features{padding:0 28px 48px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.feat-card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:20px;transition:border-color .15s}
+.feat-card:hover{border-color:var(--ac)}
+.feat-icon{font-size:22px;margin-bottom:10px}
+.feat-title{font-size:13.5px;font-weight:700;margin-bottom:5px}
+.feat-desc{font-size:12px;color:var(--tx2);line-height:1.55}
+.l-sec{border-top:1px solid var(--bd);padding:16px 28px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sec-label{font-size:10.5px;color:var(--tx2);margin-right:4px}
+.sec-badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--badge);color:var(--badge-tx);font-family:var(--fm)}
+
+/* ── Dashboard ── */
+.app-nav{display:flex;align-items:center;gap:12px;padding:0 20px;height:54px;background:var(--sf);border-bottom:1px solid var(--bd);flex-shrink:0}
+.app-logo{font-size:13px;font-weight:900;letter-spacing:-.03em}
+.app-logo span{color:var(--ac)}
+.app-user{margin-left:auto;display:flex;align-items:center;gap:9px}
+.app-avatar{width:30px;height:30px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--ac-fg)}
+.app-user-info{text-align:right}
+.app-user-name{font-size:12px;font-weight:700}
+.app-user-doc{font-size:10px;color:var(--tx2);font-family:var(--fm)}
+.dash-body{flex:1;overflow-y:auto;padding:20px}
+.dash-body::-webkit-scrollbar{width:4px}
+.dash-body::-webkit-scrollbar-track{background:transparent}
+.dash-body::-webkit-scrollbar-thumb{background:var(--sf3);border-radius:2px}
+.pos-card{background:var(--sf2);border:1px solid var(--bd);border-radius:16px;padding:20px;margin-bottom:14px}
+.pos-period{font-size:10.5px;color:var(--tx2);font-family:var(--fm);margin-bottom:8px}
+.pos-amount{font-size:clamp(28px,4vw,38px);font-weight:900;letter-spacing:-.035em;font-variant-numeric:tabular-nums;margin-bottom:4px}
+.pos-sub{font-size:12px;color:var(--tx2);margin-bottom:16px}
+.spend-bar{display:flex;height:8px;border-radius:6px;overflow:hidden;gap:2px;margin-bottom:16px}
+.sb-seg{height:100%;border-radius:3px;transition:flex .6s ease}
+.cat-list{display:flex;flex-direction:column;gap:10px}
+.cat-item{display:flex;align-items:center;gap:10px}
+.cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cat-info{flex:1;min-width:0}
+.cat-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cat-pct{font-size:10px;color:var(--tx2)}
+.cat-bar-wrap{flex:1;height:3px;background:var(--sf3);border-radius:2px;overflow:hidden}
+.cat-bar-fill{height:100%;border-radius:2px;transition:width .7s ease}
+.cat-amt{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;flex-shrink:0;min-width:72px}
+.stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px}
+.stat-card{background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:14px}
+.stat-label{font-size:10px;color:var(--tx2);margin-bottom:5px;display:flex;align-items:center;gap:4px}
+.stat-label-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.stat-val{font-size:18px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat-type{font-size:10px;color:var(--tx2);margin-top:2px}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;margin:20px 0 12px}
+.sec-hd-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--tx2)}
+.sec-hd-link{font-size:11.5px;font-weight:600;color:var(--ac);cursor:pointer}
+.tx-date{font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:.07em;text-transform:uppercase;margin:12px 0 8px;font-family:var(--fm)}
+.tx-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd2)}
+.tx-item:last-child{border:none}
+.tx-icon{width:36px;height:36px;border-radius:10px;background:var(--sf3);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.tx-info{flex:1;min-width:0}
+.tx-name{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-cat{font-size:10.5px;color:var(--tx2);margin-top:2px}
+.tx-amt{font-size:13px;font-weight:700;color:#E53E3E;font-variant-numeric:tabular-nums;flex-shrink:0}
+.sub-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bd2)}
+.sub-item:last-child{border:none}
+.sub-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sub-info{flex:1}
+.sub-name{font-size:12.5px;font-weight:600}
+.sub-date{font-size:10.5px;color:var(--tx2);margin-top:1px}
+.sub-amt{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;flex-shrink:0}
+.sub-total-bar{background:var(--ac-a);border:1px solid var(--ac-ab);border-radius:10px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-top:10px}
+.sub-total-label{font-size:11px;color:var(--tx2)}
+.sub-total-val{font-size:14px;font-weight:800;color:var(--ac);font-variant-numeric:tabular-nums}
+.sub-total-cycle{font-size:10px;color:var(--tx2)}
+.chat-fab{position:sticky;bottom:0;padding:12px 0 4px;background:linear-gradient(to top,var(--bg) 60%,transparent)}
+.chat-fab-btn{width:100%;background:var(--ac);color:var(--ac-fg);border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--fs);letter-spacing:-.01em;transition:filter .15s,transform .1s}
+.chat-fab-btn:hover{filter:brightness(1.06)}
+.chat-fab-btn:active{transform:scale(.98)}
+
+/* ── Chat ── */
+.chat-nav{display:flex;align-items:center;gap:12px;padding:0 16px;height:54px;background:var(--sf);border-bottom:1px solid var(--bd);flex-shrink:0}
+.chat-back{background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;color:var(--tx);cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--fs)}
+.chat-back:hover{background:var(--sf3)}
+.chat-id{display:flex;flex-direction:column}
+.chat-title{font-size:13px;font-weight:700}
+.chat-subtitle{font-size:10.5px;color:var(--tx2)}
+.chat-status{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx2)}
+.chat-online-dot{width:6px;height:6px;border-radius:50%;background:#22C55E}
+.chat-msgs{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.chat-msgs::-webkit-scrollbar{width:3px}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--sf3);border-radius:2px}
+.msg-user{align-self:flex-end;max-width:80%}
+.msg-user .bubble{background:var(--ac);color:var(--ac-fg);border-radius:14px 14px 3px 14px;padding:10px 14px;font-size:13px;line-height:1.5;font-weight:600}
+.msg-ai{align-self:flex-start;max-width:88%}
+.msg-ai .bubble{background:var(--sf2);border:1px solid var(--bd);border-radius:14px 14px 14px 3px;padding:10px 14px;font-size:13px;line-height:1.6;color:var(--tx);white-space:pre-wrap}
+.reasoning-block{background:var(--sf2);border:1px solid var(--bd);border-left:3px solid var(--tx3);border-radius:8px;overflow:hidden;margin-bottom:2px;align-self:flex-start;max-width:88%}
+.rb-header{display:flex;align-items:center;gap:7px;padding:8px 12px;cursor:pointer;user-select:none}
+.rb-icon{font-size:12px;color:var(--tx2)}
+.rb-label{font-size:11px;font-weight:700;color:var(--tx2);flex:1}
+.rb-chevron{font-size:10px;color:var(--tx3);transition:transform .15s}
+.rb-chevron.open{transform:rotate(180deg)}
+.rb-body{max-height:0;overflow:hidden;transition:max-height .2s ease}
+.rb-body.open{max-height:400px;overflow-y:auto}
+.rb-text{padding:0 12px 10px;font-size:11.5px;color:var(--tx2);line-height:1.6;font-style:italic;white-space:pre-wrap}
+.tool-call{background:var(--sf2);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:9px;font-family:var(--fm);font-size:11.5px;align-self:flex-start;max-width:90%}
+.tc-spin{width:10px;height:10px;border:1.5px solid var(--sf3);border-top-color:var(--ac);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.tc-ok{color:#22C55E;font-size:13px;flex-shrink:0}
+.tc-name{color:var(--ac);font-weight:700}
+.tc-desc{color:var(--tx2)}
+.suggestions{display:flex;gap:7px;flex-wrap:wrap;padding:0 2px}
+.sug{background:var(--sf2);border:1px solid var(--bd);border-radius:999px;padding:7px 14px;font-size:12px;color:var(--tx2);cursor:pointer;transition:border-color .12s,color .12s,background .12s;font-family:var(--fs)}
+.sug:hover{border-color:var(--ac);color:var(--ac);background:var(--ac-a)}
+.chat-input-area{padding:10px 14px;background:var(--sf);border-top:1px solid var(--bd);display:flex;align-items:center;gap:9px;flex-shrink:0}
+.chat-input{flex:1;background:var(--sf2);border:1px solid var(--bd);border-radius:12px;padding:10px 14px;font-size:13px;color:var(--tx);outline:none;font-family:var(--fs);transition:border-color .12s}
+.chat-input:focus{border-color:var(--ac)}
+.chat-input::placeholder{color:var(--tx2)}
+.send-btn{width:40px;height:40px;border-radius:10px;background:var(--ac);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:filter .12s;color:var(--ac-fg);font-weight:900}
+.send-btn:hover{filter:brightness(1.08)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed}
+.msg-enter{animation:msgIn .2s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Mode badge — real vs simulated */
+.mode-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:999px;font-family:var(--fm)}
+.mode-badge.real{background:rgba(34,197,94,.12);color:#22C55E}
+.mode-badge.sim{background:var(--badge);color:var(--badge-tx)}
+
+@media(max-width:600px){
+  .float-card{display:none}
+  .l-features{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .hero-h{font-size:28px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- ══ LANDING ══ -->
+<div id="scr-land" class="scr on fade-in">
+  <nav class="l-nav">
+    <div class="logo"><div class="logo-dot"></div>fina</div>
+    <div class="l-nav-links">
+      <span class="l-nav-link">Recursos</span>
+      <span class="l-nav-link">Segurança</span>
+      <span class="l-nav-link">Open Finance</span>
+    </div>
+    <div class="l-nav-right">
+      <div class="theme-tog" title="Alternar identidade visual" onclick="toggleTheme()">
+        <div class="tt-opt act" id="tt-n">N</div>
+        <div class="tt-opt" id="tt-v">V</div>
+      </div>
+      <button class="btn btn-ac" style="padding:8px 18px;font-size:12.5px" onclick="goTo('app')">Entrar</button>
+    </div>
+  </nav>
+  <div class="l-hero">
+    <div class="hero-eyebrow">
+      <div class="hero-live"><span class="hero-live-dot"></span>Ao vivo · Banking MCP</div>
+      <span class="pill pill-muted" style="font-size:10px" id="mode-badge-land">a verificar...</span>
+    </div>
+    <h1 class="hero-h">Seu banco.<br><em>Sua linguagem.</em></h1>
+    <p class="hero-sub">Converse naturalmente com suas finanças — conta PF, MEI e PJ em uma única conversa. Via Claude.ai, WhatsApp ou aqui.</p>
+    <div class="hero-ctas">
+      <button class="btn btn-ac" style="font-size:14px;padding:13px 28px" onclick="goTo('app')">Começar agora</button>
+      <button class="btn btn-ghost" onclick="goTo('chat')">Ver demo ↗</button>
+    </div>
+    <div class="hero-tags">
+      <span class="pill pill-ac">Open Finance</span>
+      <span class="pill pill-ac">Claude.ai</span>
+      <span class="pill pill-ac">WhatsApp</span>
+      <span class="pill pill-ac">Claude Desktop</span>
+      <span class="pill pill-muted">FAPI 2.0</span>
+      <span class="pill pill-muted">LGPD</span>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone-outer">
+        <div class="phone-island"></div>
+        <div class="phone-screen">
+          <div class="phone-chat-area" id="phone-chat">
+            <div class="p-msg-in">Olá! Como posso ajudar com suas finanças hoje?</div>
+          </div>
+          <div class="phone-bottom">
+            <div class="p-input">Mensagem...</div>
+            <div class="p-send">↑</div>
+          </div>
+        </div>
+      </div>
+      <div class="float-card fc-left">
+        <div class="fc-label">Total consolidado</div>
+        <div class="fc-val amt">R$ 39.637<span class="fc-delta">+12%</span></div>
+        <div class="mini-bars">
+          <div class="mbar" style="height:60%"></div>
+          <div class="mbar" style="height:75%"></div>
+          <div class="mbar" style="height:55%"></div>
+          <div class="mbar" style="height:85%"></div>
+          <div class="mbar" style="height:70%"></div>
+          <div class="mbar" style="height:100%"></div>
+        </div>
+      </div>
+      <div class="float-card fc-right">
+        <div class="fc-label">MEI · TechMei Ltda.</div>
+        <div class="fc-val amt" style="font-size:14px;color:var(--ac)">R$ 23.590</div>
+        <div style="font-size:10px;color:var(--tx2);margin-top:2px">CC + CDB · saldo real-time</div>
+      </div>
+    </div>
+  </div>
+  <div class="l-features">
+    <div class="feat-card">
+      <div class="feat-icon">🔌</div>
+      <div class="feat-title">Open Finance nativo</div>
+      <div class="feat-desc">27 ferramentas conectadas via MCP. Contas, cartões, crédito, investimentos e PIX — tudo em uma conversa.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🤖</div>
+      <div class="feat-title">Multi-LLM via MCP</div>
+      <div class="feat-desc">Claude.ai, Claude Desktop, GPT-4, Gemini e WhatsApp. Um único servidor MCP. Qualquer assistente que suporte o protocolo.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🛡</div>
+      <div class="feat-title">Segurança financeira</div>
+      <div class="feat-desc">FAPI 2.0, PKCE, mTLS com ICP-Brasil. bankJWT isolado do LLM. LGPD com mascaramento em todas as respostas.</div>
+    </div>
+  </div>
+  <div class="l-sec">
+    <span class="sec-label">Certificado:</span>
+    <span class="sec-badge">FAPI 2.0</span>
+    <span class="sec-badge">LGPD</span>
+    <span class="sec-badge">ICP-Brasil</span>
+    <span class="sec-badge">Bacen OF</span>
+    <span class="sec-badge">OAuth 2.1 · PKCE</span>
+    <span class="sec-badge">mTLS</span>
+    <span style="margin-left:auto;font-size:11px;color:var(--tx2)">fina · Banking MCP · v2.0</span>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ══ -->
+<div id="scr-app" class="scr">
+  <nav class="app-nav">
+    <div class="logo-dot" style="width:7px;height:7px"></div>
+    <div class="app-logo">f<span>i</span>na</div>
+    <div style="height:28px;width:1px;background:var(--bd);margin:0 4px"></div>
+    <div style="font-size:11px;color:var(--tx2)">Painel financeiro</div>
+    <div class="theme-tog" onclick="toggleTheme()" style="margin-left:auto;margin-right:10px">
+      <div class="tt-opt act" id="tt-n2">N</div>
+      <div class="tt-opt" id="tt-v2">V</div>
+    </div>
+    <div class="app-user">
+      <div class="app-user-info">
+        <div class="app-user-name">Maria S.</div>
+        <div class="app-user-doc mono">***.***.102-34</div>
+      </div>
+      <div class="app-avatar">M</div>
+    </div>
+  </nav>
+  <div class="dash-body">
+    <div class="pos-card">
+      <div class="pos-period mono">2 mai — 2 ago 2026</div>
+      <div class="pos-amount amt">R$ 39.637<span style="font-size:50%;color:var(--tx2)">,00</span></div>
+      <div class="pos-sub">Posição consolidada · PF + MEI · 4 contas</div>
+      <div class="spend-bar">
+        <div class="sb-seg" style="flex:24;background:var(--s1)"></div>
+        <div class="sb-seg" style="flex:17;background:var(--s2)"></div>
+        <div class="sb-seg" style="flex:14;background:var(--s3)"></div>
+        <div class="sb-seg" style="flex:12;background:var(--s4)"></div>
+        <div class="sb-seg" style="flex:11;background:var(--s5)"></div>
+        <div class="sb-seg" style="flex:9;background:var(--s6)"></div>
+        <div class="sb-seg" style="flex:13;background:var(--s7)"></div>
+      </div>
+      <div class="cat-list">
+        <div class="cat-item"><div class="cat-dot" style="background:var(--s1)"></div><div class="cat-info"><div class="cat-name">Cheque especial e atraso</div><div class="cat-pct">24% dos gastos</div></div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:24%;background:var(--s1)"></div></div><div class="cat-amt amt">R$ 3.120</div></div>
+        <div class="cat-item"><div class="cat-dot" style="background:var(--s2)"></div><div class="cat-info"><div class="cat-name">Vestuário</div><div class="cat-pct">17% dos gastos</div></div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:17%;background:var(--s2)"></div></div><div class="cat-amt amt">R$ 2.210</div></div>
+        <div class="cat-item"><div class="cat-dot" style="background:var(--s3)"></div><div class="cat-info"><div class="cat-name">Compras online</div><div class="cat-pct">14% dos gastos</div></div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:14%;background:var(--s3)"></div></div><div class="cat-amt amt">R$ 1.820</div></div>
+        <div class="cat-item"><div class="cat-dot" style="background:var(--s4)"></div><div class="cat-info"><div class="cat-name">Alimentação</div><div class="cat-pct">12% dos gastos</div></div><div class="cat-bar-wrap"><div class="cat-bar-fill" style="width:12%;background:var(--s4)"></div></div><div class="cat-amt amt">R$ 1.560</div></div>
+      </div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label"><span class="stat-label-dot" style="background:#3D7FEE"></span>Conta PF</div>
+        <div class="stat-val amt">R$ 16.047</div>
+        <div class="stat-type">CC + Poupança</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label"><span class="stat-label-dot" style="background:var(--ac)"></span>MEI · TechMei</div>
+        <div class="stat-val amt">R$ 23.590</div>
+        <div class="stat-type">CC PJ + CDB</div>
+      </div>
+    </div>
+    <div class="sec-hd">
+      <div class="sec-hd-title">Transações recentes</div>
+      <span class="sec-hd-link">ver todas ↗</span>
+    </div>
+    <div class="tx-date mono">SEX, 1 AGO</div>
+    <div class="tx-item">
+      <div class="tx-icon">🚗</div>
+      <div class="tx-info"><div class="tx-name">STELLANTIS FINANCIAM.</div><div class="tx-cat">Transferências</div></div>
+      <div class="tx-amt amt">−R$ 355,51</div>
+    </div>
+    <div class="tx-item">
+      <div class="tx-icon">🛍️</div>
+      <div class="tx-info"><div class="tx-name">Suli Presentes 1/2</div><div class="tx-cat">Vestuário</div></div>
+      <div class="tx-amt amt">−R$ 36,25</div>
+    </div>
+    <div class="tx-date mono" style="margin-top:16px">QUI, 31 JUL</div>
+    <div class="tx-item">
+      <div class="tx-icon" style="background:#0A0A0A;font-size:14px;font-weight:900;color:#fff">An</div>
+      <div class="tx-info"><div class="tx-name">Anthropic</div><div class="tx-cat">Eletrônicos</div></div>
+      <div class="tx-amt amt">−R$ 26,38</div>
+    </div>
+    <div class="tx-item">
+      <div class="tx-icon">💸</div>
+      <div class="tx-info"><div class="tx-name">Transferência enviada</div><div class="tx-cat">Serviços automotivos</div></div>
+      <div class="tx-amt amt">−R$ 25,00</div>
+    </div>
+    <div class="sec-hd">
+      <div class="sec-hd-title">Assinaturas</div>
+      <span class="sec-hd-link">ver todas ↗</span>
+    </div>
+    <div class="sub-total-bar" style="margin-bottom:12px">
+      <div><div class="sub-total-label">Total mensal</div><div class="sub-total-val amt">R$ 123,30<span class="sub-total-cycle"> /mês · 3 ativas</span></div></div>
+    </div>
+    <div class="sub-item">
+      <div class="sub-icon" style="background:#00C4CC20;color:#00C4CC">Cv</div>
+      <div class="sub-info"><div class="sub-name">Canva</div><div class="sub-date">Próximo: 9 Ago</div></div>
+      <div class="sub-amt amt">R$ 67,50</div>
+    </div>
+    <div class="sub-item">
+      <div class="sub-icon" style="background:#1DB95420;color:#1DB954">♫</div>
+      <div class="sub-info"><div class="sub-name">Spotify</div><div class="sub-date">Próximo: 11 Ago</div></div>
+      <div class="sub-amt amt">R$ 40,90</div>
+    </div>
+    <div class="sub-item">
+      <div class="sub-icon" style="background:#FF980020;color:#FF9800">▶</div>
+      <div class="sub-info"><div class="sub-name">Amazon Prime</div><div class="sub-date">Próximo: 14 Ago</div></div>
+      <div class="sub-amt amt">R$ 14,90</div>
+    </div>
+    <div class="chat-fab">
+      <button class="chat-fab-btn" onclick="goTo('chat')">✦ Conversar com Fina</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CHAT ══ -->
+<div id="scr-chat" class="scr">
+  <nav class="chat-nav">
+    <button class="chat-back" onclick="goTo('app')">← Voltar</button>
+    <div class="chat-id">
+      <div class="chat-title">Fina · Assistente Financeiro</div>
+      <div class="chat-subtitle">Open Finance · MCP · Fase 2</div>
+    </div>
+    <div class="chat-status" id="chat-status"><span class="chat-online-dot"></span><span id="status-txt">online</span></div>
+    <div class="theme-tog" onclick="toggleTheme()" style="margin-left:10px">
+      <div class="tt-opt act" id="tt-n3">N</div>
+      <div class="tt-opt" id="tt-v3">V</div>
+    </div>
+  </nav>
+  <div class="chat-msgs" id="chat-msgs">
+    <div class="msg-ai msg-enter">
+      <div class="bubble">Olá, Maria! 👋<br><br>Tenho acesso às suas contas <strong>PF</strong> e <strong>MEI (TechMei Ltda.)</strong> via Open Finance. Posso ajudar com saldos, extratos, análise de gastos e muito mais.<br><br>O que gostaria de saber?</div>
+    </div>
+    <div class="suggestions" id="suggestions">
+      <button class="sug" onclick="sendPreset('Quero uma análise financeira completa. Tenho conta PF e MEI.')">Análise completa dos meus gastos</button>
+      <button class="sug" onclick="sendPreset('Como está meu extrato da conta MEI do último mês?')">Extrato MEI do mês</button>
+      <button class="sug" onclick="sendPreset('Tenho algum gasto duplicado ou assinatura que posso cancelar?')">Gastos duplicados?</button>
+      <button class="sug" onclick="sendPreset('Consolide minha posição total PF + MEI com análise de saúde financeira.')">Consolidar PF + MEI</button>
+    </div>
+  </div>
+  <div class="chat-input-area">
+    <input class="chat-input" id="chat-inp" placeholder="Pergunte sobre suas finanças..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}">
+    <button class="send-btn" id="send-btn" onclick="sendMsg()">↑</button>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════ */
+var theme = 'n';
+var chatHistory = []; // { role, content } enviado ao backend
+var chatBusy = false;
+var backendReady = false;
+
+/* ════════════════════════════════════════════════════
+   THEME
+════════════════════════════════════════════════════ */
+function toggleTheme() {
+  theme = theme === 'n' ? 'v' : 'n';
+  document.documentElement.setAttribute('data-t', theme === 'v' ? 'v' : '');
+  ['tt-n','tt-n2','tt-n3'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('act', theme === 'n');
+  });
+  ['tt-v','tt-v2','tt-v3'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('act', theme === 'v');
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   NAVIGATION
+════════════════════════════════════════════════════ */
+function goTo(id) {
+  ['land','app','chat'].forEach(function(s) {
+    var el = document.getElementById('scr-' + s);
+    if (el) {
+      el.classList.toggle('on', s === id);
+      if (s === id) { el.classList.add('fade-in'); }
+    }
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   PHONE MOCKUP ANIMATION
+════════════════════════════════════════════════════ */
+var phoneSteps = [
+  { type:'out', text:'Qual meu saldo total?' },
+  { type:'tool', text:'of_get_account_balances', done:false },
+  { type:'tool', text:'of_get_account_balances', done:true },
+  { type:'in', text:'PF: R$ 16.047 · MEI: R$ 23.590\nTotal: R$ 39.637 ✓' },
+  { type:'out', text:'E minhas assinaturas?' },
+  { type:'tool', text:'of_list_accounts', done:false },
+  { type:'tool', text:'of_list_accounts', done:true },
+  { type:'in', text:'3 ativas · R$ 123,30/mês\nCanva · Spotify · Amazon' },
+];
+var phoneIdx = 0;
+function runPhoneAnim() {
+  var container = document.getElementById('phone-chat');
+  if (!container) return;
+  var step = phoneSteps[phoneIdx % phoneSteps.length];
+  var el = document.createElement('div');
+  if (step.type === 'out') {
+    el.className = 'p-msg-out';
+    el.textContent = step.text;
+  } else if (step.type === 'in') {
+    el.className = 'p-msg-in';
+    el.textContent = step.text;
+  } else {
+    el.className = 'p-tool';
+    el.innerHTML = step.done
+      ? '<span class="p-tool-ok">✓</span>' + step.text
+      : '<span class="p-tool-spin"></span>' + step.text;
+  }
+  while (container.children.length >= 5) container.removeChild(container.firstChild);
+  container.appendChild(el);
+  container.scrollTop = container.scrollHeight;
+  phoneIdx++;
+  var delay = step.type === 'tool' && !step.done ? 900 : (step.type === 'in' ? 2200 : 1600);
+  setTimeout(runPhoneAnim, delay);
+}
+setTimeout(runPhoneAnim, 1400);
+
+/* ════════════════════════════════════════════════════
+   HEALTH CHECK — real vs. simulated mode
+════════════════════════════════════════════════════ */
+function checkHealth() {
+  fetch('/api/health').then(function(r) { return r.json(); }).then(function(data) {
+    backendReady = !!data.ready;
+    var badge = document.getElementById('mode-badge-land');
+    if (badge) {
+      badge.textContent = backendReady
+        ? 'Banking MCP · Open Finance Fase 2 · ' + (data.tools || 0) + ' tools'
+        : 'Modo demo (sem ANTHROPIC_API_KEY)';
+      badge.className = backendReady ? 'mode-badge real' : 'mode-badge sim';
+    }
+    var statusTxt = document.getElementById('status-txt');
+    if (statusTxt) statusTxt.textContent = backendReady ? 'Claude + MCP' : 'demo';
+  }).catch(function() {
+    backendReady = false;
+  });
+}
+checkHealth();
+
+/* ════════════════════════════════════════════════════
+   DOM HELPERS
+════════════════════════════════════════════════════ */
+function getContainer() { return document.getElementById('chat-msgs'); }
+
+function scrollBottom() {
+  var c = getContainer();
+  if (c) c.scrollTop = c.scrollHeight;
+}
+
+function appendEl(el) {
+  var c = getContainer();
+  if (c) {
+    c.appendChild(el);
+    scrollBottom();
+  }
+}
+
+/* Raciocínio — bloco colapsível */
+function makeReasoningEl(text) {
+  var wrap = document.createElement('div');
+  wrap.className = 'reasoning-block msg-enter';
+  var hd = document.createElement('div');
+  hd.className = 'rb-header';
+  hd.innerHTML = '<span class="rb-icon">💭</span><span class="rb-label">Raciocínio</span><span class="rb-chevron" id="rbchev">▾</span>';
+  var body = document.createElement('div');
+  body.className = 'rb-body';
+  var txt = document.createElement('div');
+  txt.className = 'rb-text';
+  txt.textContent = text;
+  body.appendChild(txt);
+  wrap.appendChild(hd);
+  wrap.appendChild(body);
+  hd.addEventListener('click', function() {
+    body.classList.toggle('open');
+    var chev = hd.querySelector('.rb-chevron');
+    if (chev) chev.classList.toggle('open');
+  });
+  return wrap;
+}
+
+/* Tool call — spin → checkmark */
+function makeToolCallEl(name, desc, done) {
+  var el = document.createElement('div');
+  el.className = 'tool-call msg-enter';
+  el.innerHTML = done
+    ? '<span class="tc-ok">✓</span><span class="tc-name">' + esc(name) + '</span><span class="tc-desc">' + esc(desc) + '</span>'
+    : '<span class="tc-spin"></span><span class="tc-name">' + esc(name) + '</span><span class="tc-desc">' + esc(desc) + '</span>';
+  return el;
+}
+
+/* Mensagem do usuário */
+function makeUserMsg(text) {
+  var wrap = document.createElement('div');
+  wrap.className = 'msg-user msg-enter';
+  var bub = document.createElement('div');
+  bub.className = 'bubble';
+  bub.textContent = text;
+  wrap.appendChild(bub);
+  return wrap;
+}
+
+/* Mensagem da IA — retorna { wrap, bubble } para streaming */
+function makeAiMsgEl() {
+  var wrap = document.createElement('div');
+  wrap.className = 'msg-ai msg-enter';
+  var bub = document.createElement('div');
+  bub.className = 'bubble';
+  bub.textContent = '';
+  wrap.appendChild(bub);
+  return { wrap: wrap, bubble: bub };
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function setSendBusy(busy) {
+  chatBusy = busy;
+  var btn = document.getElementById('send-btn');
+  if (btn) btn.disabled = busy;
+  var inp = document.getElementById('chat-inp');
+  if (inp) inp.disabled = busy;
+}
+
+function hideSuggestions() {
+  var s = document.getElementById('suggestions');
+  if (s) s.style.display = 'none';
+}
+
+/* ════════════════════════════════════════════════════
+   SEND — SSE streaming from /api/chat
+════════════════════════════════════════════════════ */
+function sendPreset(text) {
+  var inp = document.getElementById('chat-inp');
+  if (inp) inp.value = text;
+  sendMsg();
+}
+
+function sendMsg() {
+  if (chatBusy) return;
+  var inp = document.getElementById('chat-inp');
+  var text = inp ? inp.value.trim() : '';
+  if (!text) return;
+  if (inp) inp.value = '';
+
+  hideSuggestions();
+  setSendBusy(true);
+
+  // Push user turn
+  chatHistory.push({ role: 'user', content: text });
+  appendEl(makeUserMsg(text));
+
+  if (!backendReady) {
+    // Simulated fallback when server has no API key.
+    runSimulated(text);
+    return;
+  }
+
+  // Real mode — SSE
+  var toolEls = {}; // name → DOM el (to update spin → checkmark)
+  var aiMsgObj = null;
+  var hasResponse = false;
+
+  fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages: chatHistory }),
+  }).then(function(resp) {
+    if (!resp.ok || !resp.body) throw new Error('HTTP ' + resp.status);
+
+    var reader = resp.body.getReader();
+    var decoder = new TextDecoder();
+    var buf = '';
+
+    function pump() {
+      return reader.read().then(function(chunk) {
+        if (chunk.done) {
+          setSendBusy(false);
+          return;
+        }
+        buf += decoder.decode(chunk.value, { stream: true });
+        var lines = buf.split('\n');
+        buf = lines.pop();
+        lines.forEach(function(line) {
+          if (!line.startsWith('data: ')) return;
+          var raw = line.slice(6).trim();
+          if (!raw) return;
+          try {
+            var ev = JSON.parse(raw);
+            handleSSE(ev);
+          } catch (_) {}
+        });
+        return pump();
+      });
+    }
+
+    return pump();
+  }).catch(function(err) {
+    appendEl((function(){
+      var w = document.createElement('div');
+      w.className = 'msg-ai msg-enter';
+      w.innerHTML = '<div class="bubble" style="color:#E53E3E">Erro ao conectar ao servidor: ' + esc(err.message) + '</div>';
+      return w;
+    })());
+    setSendBusy(false);
+  });
+
+  function handleSSE(ev) {
+    if (ev.type === 'reasoning') {
+      appendEl(makeReasoningEl(ev.text));
+
+    } else if (ev.type === 'tool_start') {
+      var el = makeToolCallEl(ev.name, ev.desc, false);
+      toolEls[ev.name] = el;
+      appendEl(el);
+
+    } else if (ev.type === 'tool_done') {
+      // Replace spinner with checkmark in-place.
+      var prev = toolEls[ev.name];
+      if (prev) {
+        var next = makeToolCallEl(ev.name, ev.summary, true);
+        prev.parentNode.replaceChild(next, prev);
+        toolEls[ev.name] = next;
+      } else {
+        appendEl(makeToolCallEl(ev.name, ev.summary, true));
+      }
+
+    } else if (ev.type === 'text') {
+      if (!aiMsgObj) {
+        aiMsgObj = makeAiMsgEl();
+        appendEl(aiMsgObj.wrap);
+        hasResponse = true;
+      }
+      aiMsgObj.bubble.textContent += ev.chunk;
+      scrollBottom();
+
+    } else if (ev.type === 'done') {
+      if (!hasResponse && ev.text) {
+        if (!aiMsgObj) {
+          aiMsgObj = makeAiMsgEl();
+          appendEl(aiMsgObj.wrap);
+        }
+        aiMsgObj.bubble.textContent = ev.text;
+      }
+      // Push assistant turn to history.
+      var finalText = aiMsgObj ? aiMsgObj.bubble.textContent : (ev.text || '');
+      chatHistory.push({ role: 'assistant', content: finalText });
+      setSendBusy(false);
+
+    } else if (ev.type === 'error') {
+      var w = document.createElement('div');
+      w.className = 'msg-ai msg-enter';
+      w.innerHTML = '<div class="bubble" style="color:#E53E3E">⚠ ' + esc(ev.message) + '</div>';
+      appendEl(w);
+      setSendBusy(false);
+    }
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   SIMULATED FALLBACK — when no API key is configured.
+   Replays a canned sequence so the UI is still demonstrable.
+════════════════════════════════════════════════════ */
+var SIM = [
+  { q: 'análise', steps: [
+    { t:'reason', text:'A usuária quer uma análise completa. Vou buscar as contas PF e depois o consolidado MEI.' },
+    { t:'tool', name:'of_list_accounts', desc:'listando contas PF…', delay:700 },
+    { t:'done', name:'of_list_accounts', summary:'2 contas PF encontradas' },
+    { t:'tool', name:'analytics_cross_pf_pj', desc:'consolidando PF + MEI…', delay:900 },
+    { t:'done', name:'analytics_cross_pf_pj', summary:'Posição total: R$ 39.637,00' },
+    { t:'ai', text:'Aqui está seu panorama financeiro completo:\n\n• PF: CC R$ 3.847 + Poupança R$ 12.200 = **R$ 16.047**\n• MEI (TechMei Ltda.): CC PJ R$ 8.590 + CDB R$ 15.000 = **R$ 23.590**\n• **Total consolidado: R$ 39.637**\n\nSua saúde financeira está em 92/100. Quer uma análise de gastos por categoria?', delay:800 },
+  ]},
+  { q: '', steps: [
+    { t:'reason', text:'Vou buscar as transações da conta MEI do último mês.' },
+    { t:'tool', name:'of_get_account_transactions', desc:'buscando extrato MEI…', delay:700 },
+    { t:'done', name:'of_get_account_transactions', summary:'18 transações encontradas' },
+    { t:'ai', text:'Extrato da conta MEI — julho 2026:\n\n• 3 entradas: R$ 12.400 (serviços prestados)\n• 15 saídas: R$ 6.830 (fornecedores, impostos, operacional)\n• Saldo atual: **R$ 8.590**\n\nDestaques: maior débito foi uma nota fiscal para TOTVS S.A. (R$ 2.100). Quer ver as transações completas ou analisar por categoria?', delay:900 },
+  ]},
+  { q: 'duplicado', steps: [
+    { t:'reason', text:'Vou verificar transações repetidas e assinaturas sobrepostas.' },
+    { t:'tool', name:'of_get_account_transactions', desc:'analisando padrões de gasto…', delay:600 },
+    { t:'done', name:'of_get_account_transactions', summary:'32 transações analisadas' },
+    { t:'ai', text:'Encontrei 2 possíveis duplicidades:\n\n1. **Streaming**: você tem Spotify (R$ 40,90) e Amazon Prime (R$ 14,90) — avaliar se usa os dois\n2. **Parcelamento Suli Presentes**: lançamentos 1/2 e 2/2 mapeados — não é duplicidade, é parcela\n\nTotal de assinaturas: **R$ 123,30/mês**. Quer cancelar alguma? Posso simular a economia anual.', delay:800 },
+  ]},
+  { q: '', steps: [
+    { t:'reason', text:'Preciso consolidar PF e MEI. Vou usar analytics_cross_pf_pj.' },
+    { t:'tool', name:'of_list_accounts', desc:'listando contas PF…', delay:700 },
+    { t:'done', name:'of_list_accounts', summary:'2 contas PF encontradas' },
+    { t:'tool', name:'analytics_cross_pf_pj', desc:'consolidando posição total…', delay:1000 },
+    { t:'done', name:'analytics_cross_pf_pj', summary:'Posição total: R$ 39.637,00' },
+    { t:'ai', text:'Posição consolidada PF + MEI:\n\n**Pessoa Física**\n• CC: R$ 3.847,00\n• Poupança: R$ 12.200,00\n\n**MEI — TechMei Ltda.**\n• CC PJ: R$ 8.590,00\n• CDB: R$ 15.000,00\n\n**Total: R$ 39.637,00** ✓\n\nSaúde financeira: 92/100 · Crédito utilizado: R$ 0. Quer uma projeção para os próximos 3 meses?', delay:800 },
+  ]},
+];
+var simIdx = 0;
+
+function runSimulated(query) {
+  var lower = query.toLowerCase();
+  var pick = SIM[simIdx % SIM.length];
+  simIdx++;
+  // Try to match by keyword first.
+  for (var i = 0; i < SIM.length; i++) {
+    if (SIM[i].q && lower.indexOf(SIM[i].q) !== -1) { pick = SIM[i]; break; }
+  }
+  playSteps(pick.steps, 0);
+}
+
+function playSteps(steps, idx) {
+  if (idx >= steps.length) {
+    setSendBusy(false);
+    return;
+  }
+  var s = steps[idx];
+  var delay = s.delay || 500;
+
+  if (s.t === 'reason') {
+    appendEl(makeReasoningEl(s.text));
+    playSteps(steps, idx + 1);
+  } else if (s.t === 'tool') {
+    appendEl(makeToolCallEl(s.name, s.desc, false));
+    // Store reference — we'll replace it later.
+    steps[idx]._el = getContainer().lastElementChild;
+    setTimeout(function() { playSteps(steps, idx + 1); }, delay);
+  } else if (s.t === 'done') {
+    // Find the matching tool_start el (previous sibling that is a tool-call with this name).
+    var prev = null;
+    var container = getContainer();
+    var children = container.querySelectorAll('.tool-call');
+    for (var i = children.length - 1; i >= 0; i--) {
+      if (children[i].querySelector('.tc-name') && children[i].querySelector('.tc-name').textContent === s.name) {
+        prev = children[i]; break;
+      }
+    }
+    var next = makeToolCallEl(s.name, s.summary, true);
+    if (prev && prev.parentNode) {
+      prev.parentNode.replaceChild(next, prev);
+    } else {
+      appendEl(next);
+    }
+    playSteps(steps, idx + 1);
+  } else if (s.t === 'ai') {
+    setTimeout(function() {
+      var obj = makeAiMsgEl();
+      appendEl(obj.wrap);
+      var txt = s.text;
+      var ci = 0;
+      var CHUNK = 12;
+      function tick() {
+        if (ci >= txt.length) {
+          chatHistory.push({ role: 'assistant', content: txt });
+          playSteps(steps, idx + 1);
+          return;
+        }
+        obj.bubble.textContent += txt.slice(ci, ci + CHUNK);
+        ci += CHUNK;
+        scrollBottom();
+        setTimeout(tick, 18);
+      }
+      tick();
+    }, delay);
+  }
+}
+</script>
+</body>
+</html>
