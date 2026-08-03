@@ -479,6 +479,7 @@ let _pluggyTimer = null;
 export async function initPluggy() {
   const clientId     = process.env.PLUGGY_CLIENT_ID;
   const clientSecret = process.env.PLUGGY_CLIENT_SECRET;
+  const itemId       = process.env.PLUGGY_ITEM_ID || null;
   if (!clientId || !clientSecret) {
     console.log('[Pluggy] desabilitado — PLUGGY_CLIENT_ID não configurado, usando perfis mock');
     return;
@@ -488,7 +489,7 @@ export async function initPluggy() {
 
   async function refresh() {
     try {
-      _pluggyProfile = await buildPluggyProfile(clientId, clientSecret);
+      _pluggyProfile = await buildPluggyProfile(clientId, clientSecret, itemId);
       console.log('[Pluggy] perfil carregado — contas:', _pluggyProfile.ACCOUNTS.length);
     } catch (err) {
       console.error('[Pluggy] erro ao carregar perfil:', err.message);

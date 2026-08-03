@@ -27,12 +27,18 @@ function mapTxType(tx) {
   return 'OUTROS';
 }
 
-export async function buildPluggyProfile(clientId, clientSecret) {
+export async function buildPluggyProfile(clientId, clientSecret, forcedItemId = null) {
   const client = new PluggyClient(clientId, clientSecret);
 
-  const items = await client.getItems();
-  if (!items.length) {
-    throw new Error('Nenhum item (instituição) encontrado no Pluggy sandbox. Conecte uma instituição em app.pluggy.ai.');
+  let items;
+  if (forcedItemId) {
+    console.log('[Pluggy] usando PLUGGY_ITEM_ID diretamente:', forcedItemId);
+    items = [{ id: forcedItemId }];
+  } else {
+    items = await client.getItems();
+    if (!items.length) {
+      throw new Error('Nenhum item (instituição) encontrado no Pluggy sandbox. Conecte uma instituição em app.pluggy.ai.');
+    }
   }
 
   // Busca dados de todos os itens em paralelo
