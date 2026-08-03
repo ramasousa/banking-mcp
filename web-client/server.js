@@ -28,13 +28,13 @@ import Anthropic from '@anthropic-ai/sdk';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { createBankingServer } from '../mcp/core.js';
-import { initPluggy } from '../mcp/openfinance/of-data.js';
+import { initPluggy, listProfiles } from '../mcp/openfinance/of-data.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const PORT   = process.env.PORT || 3300;
 const MODEL  = process.env.CLAUDE_MODEL || 'claude-sonnet-4-6';
-let PROFILE = process.env.BANK_PROFILE || 'default';
+let PROFILE = process.env.BANK_PROFILE || (process.env.PLUGGY_CLIENT_ID ? 'pluggy' : 'raul');
 const hasKey = !!process.env.ANTHROPIC_API_KEY;
 
 // ── Conecta o MCP Server em processo via InMemoryTransport ────
@@ -189,22 +189,24 @@ app.get('/api/health', async (_req, res) => {
 });
 
 // ─────────────────────────────────────────────────────────────
-// GET /api/profiles — lista os perfis mock disponíveis
+// GET /api/profiles — lista perfis disponíveis (Pluggy real + mocks)
 // POST /api/switch-profile — troca o perfil ativo (sem reiniciar)
 // ─────────────────────────────────────────────────────────────
-const PROFILE_META = [
-  { id: 'raul',   label: 'Raul S.',   desc: 'Empresário · PF + PJ' },
-  { id: 'heitor', label: 'Heitor A.', desc: 'Comércio · PF + PJ'   },
-  { id: 'cadimo', label: 'Cadimo P.', desc: 'Consultoria · PF + PJ' },
-  { id: 'patz',   label: 'Patz T.',   desc: 'CLT · PF'              },
-];
-
 app.get('/api/profiles', (_req, res) => {
-  res.json({ current: PROFILE, profiles: PROFILE_META });
+  const all = listProfiles();
+  const profiles = all.map((p) => ({
+    id: p.id,
+    label: p.primeiro ?? p.nome,
+    desc: p.real
+      ? `${p.nome} · dados reais Open Finance`
+      : `${p.nome} · ${p.tipo}`,
+    real: p.real ?? false,
+  }));
+  res.json({ current: PROFILE, profiles });
 });
 
 app.post('/api/switch-profile', (req, res) => {
-  const allowed = PROFILE_META.map((p) => p.id);
+  const allowed = listProfiles().map((p) => p.id);
   const { profile } = req.body ?? {};
   if (!profile || !allowed.includes(profile)) {
     return res.status(400).json({ error: 'Invalid profile' });
