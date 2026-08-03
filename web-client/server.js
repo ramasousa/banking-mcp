@@ -591,6 +591,81 @@ function buildSummary(name, rawJson) {
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+// POST /api/agents/run
+// Body: { agentId: 'revenue-monitor' }
+// ─────────────────────────────────────────────────────────────
+app.post('/api/agents/run', async (req, res) => {
+  const { agentId } = req.body ?? {};
+  if (agentId === 'revenue-monitor') {
+    try {
+      const result = await runRevenueMonitor();
+      res.json(result);
+    } catch (err) {
+      console.error('[agent:revenue-monitor]', err?.message);
+      res.status(500).json({ error: err?.message ?? 'Erro interno' });
+    }
+  } else {
+    res.status(400).json({ error: 'Agente não encontrado: ' + agentId });
+  }
+});
+
+const MEI_LIMIT_2025 = 130500;
+
+async function runRevenueMonitor() {
+  const currentYear = new Date().getFullYear();
+  const fromDate = `${currentYear}-01-01`;
+
+  const accountsEnv = await mcpCall('of_list_accounts');
+  const accounts = Array.isArray(accountsEnv.data) ? accountsEnv.data : [];
+
+  // Prefer PJ accounts; fall back to all accounts
+  const pjAccounts = accounts.filter((a) => a.ownerType === 'PESSOA_JURIDICA');
+  const targets = pjAccounts.length > 0 ? pjAccounts : accounts;
+
+  let totalRevenue = 0;
+  for (const account of targets) {
+    const txEnv = await mcpCall('of_get_account_transactions', {
+      accountId: account.accountId,
+      fromBookingDate: fromDate,
+      pageSize: 200,
+    });
+    const txs = Array.isArray(txEnv.data) ? txEnv.data : [];
+    const credits = txs
+      .filter((t) => t.creditDebitType === 'CREDITO')
+      .reduce((sum, t) => sum + Number(t.transactionAmount?.amount ?? 0), 0);
+    totalRevenue += credits;
+  }
+
+  const pct = Math.round((totalRevenue / MEI_LIMIT_2025) * 100);
+  const remaining = MEI_LIMIT_2025 - totalRevenue;
+
+  let level, title, message;
+  if (pct >= 100) {
+    level = 'crit';
+    title = 'Limite ultrapassado!';
+    message = `Faturamento acumulado em ${currentYear}: ${agFmt(totalRevenue)}. O limite do MEI é ${agFmt(MEI_LIMIT_2025)} e você está ${agFmt(totalRevenue - MEI_LIMIT_2025)} acima. Consulte um contador para regularizar e avaliar a migração para ME.`;
+  } else if (pct >= 85) {
+    level = 'crit';
+    title = `${pct}% do limite atingido`;
+    message = `Faturamento em ${currentYear}: ${agFmt(totalRevenue)}. Restam apenas ${agFmt(remaining)} até o teto (${agFmt(MEI_LIMIT_2025)}). Recomendamos consultar um contador para planejar a migração para ME.`;
+  } else if (pct >= 70) {
+    level = 'warn';
+    title = `${pct}% do limite atingido`;
+    message = `Faturamento em ${currentYear}: ${agFmt(totalRevenue)}. Restam ${agFmt(remaining)} até o limite anual. Atenção: se ultrapassar 20% do limite no mês, o enquadramento no MEI é encerrado retroativamente.`;
+  } else {
+    level = 'ok';
+    title = `${pct}% do limite utilizado`;
+    message = `Faturamento acumulado em ${currentYear}: ${agFmt(totalRevenue)}. Você ainda tem ${agFmt(remaining)} de margem até o teto anual do MEI (${agFmt(MEI_LIMIT_2025)}).`;
+  }
+
+  return { level, title, message, pct, revenue: totalRevenue, limit: MEI_LIMIT_2025, remaining };
+}
+
+function agFmt(value) {
+  return Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
 app.listen(PORT, () => {
   console.log(`\nFina Web Client rodando em http://localhost:${PORT}`);
   console.log(`  Modelo  : ${MODEL}`);
