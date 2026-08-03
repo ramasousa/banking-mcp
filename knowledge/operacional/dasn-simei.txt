@@ -1,0 +1,77 @@
+ASSUNTO: DASN-SIMEI — Declaração Anual do Simples Nacional para o MEI
+FONTE: Resolução CGSN nº 140/2018, art. 106; Portal do Empreendedor
+
+---
+
+O QUE É A DASN-SIMEI
+
+A DASN-SIMEI (Declaração Anual do Simples Nacional — MEI) é a obrigação acessória anual do Microempreendedor Individual. Nela, o MEI informa à Receita Federal o total do faturamento bruto obtido no ano-calendário anterior e se teve empregado durante o ano. É equivalente à declaração de imposto de renda, mas voltada para a pessoa jurídica MEI. Não deve ser confundida com a declaração de Imposto de Renda da Pessoa Física (IRPF), que é separada e também obrigatória se o MEI recebeu rendimentos acima do limite de isenção como pessoa física.
+
+---
+
+PRAZO DE ENTREGA
+
+Prazo anual: até 31 de maio de cada ano.
+Referência: o faturamento declarado é o do ano-calendário anterior (janeiro a dezembro).
+Exemplo: a DASN-SIMEI entregue em maio de 2025 declara o faturamento de janeiro a dezembro de 2024.
+
+Se o MEI encerrar suas atividades durante o ano, deve entregar a DASN-SIMEI até o último dia útil do mês seguinte ao encerramento (declaração de extinção).
+
+---
+
+COMO ENTREGAR A DASN-SIMEI
+
+Acesso: gov.br/mei → "Declaração Anual de Faturamento (DASN-SIMEI)" ou diretamente em: www8.receita.fazenda.gov.br/simplesnacional/aplicacoes.
+Autenticação: CPF e senha gov.br (conta prata ou ouro).
+Dados necessários: faturamento bruto total do ano; faturamento de exportações (se houver); se teve empregado no ano (sim/não).
+Após a entrega, o sistema gera o recibo de entrega (protocolo) — guarde-o.
+
+A declaração é gratuita, online, e geralmente leva menos de 5 minutos para ser preenchida.
+
+---
+
+MULTA POR NÃO ENTREGA OU ATRASO
+
+Multa mínima: R$ 50,00 por declaração não entregue ou entregue em atraso (mesmo que o faturamento seja zero).
+A multa é gerada automaticamente pelo sistema da Receita Federal.
+MEI com DASN-SIMEI em atraso fica em situação irregular e pode ter o CNPJ cancelado.
+A regularização é feita entregando a declaração em atraso (retificadora ou originária) e pagando a multa gerada, que consta em DARF separado.
+
+---
+
+DECLARAÇÃO COM FATURAMENTO ZERO
+
+O MEI que não teve nenhum faturamento no ano ainda assim deve entregar a DASN-SIMEI, informando faturamento igual a R$ 0,00. A não entrega gera multa independentemente do faturamento.
+
+---
+
+RETIFICAÇÃO DA DASN-SIMEI
+
+Se o MEI informou o faturamento errado, pode retificar a declaração acessando o mesmo sistema e entregando uma nova DASN-SIMEI com o dado correto. A retificação substitui a declaração anterior. Não há prazo limite para retificação, mas quanto antes for feita, menor o risco de autuação. A retificação não gera multa adicional além da que já estiver pendente.
+
+---
+
+DASN-SIMEI E IMPOSTO DE RENDA PESSOA FÍSICA
+
+O MEI enquadrado no SIMEI está isento de IRPJ pela empresa. No entanto, o titular do MEI como pessoa física deve entregar a DIRPF (declaração de IR pessoa física) se:
+— Os rendimentos totais da pessoa física ultrapassarem o limite de isenção anual da tabela progressiva do IR (consulte o valor vigente);
+— O lucro retirado do negócio (pró-labore/retirada) somado a outros rendimentos superar o limite.
+
+O rendimento do MEI isento de IR é o lucro calculado pela fórmula:
+— MEI Comércio: faturamento bruto × 8% = base de cálculo do IR (restante é isento)
+— MEI Serviços: faturamento bruto × 32% = base de cálculo do IR
+— MEI Indústria: faturamento bruto × 8% = base de cálculo do IR
+O restante acima desses percentuais é isento de IR para o titular.
+
+Exemplo: MEI de serviços com faturamento de R$ 80.000.
+— Base tributável: R$ 80.000 × 32% = R$ 25.600
+— Isento: R$ 54.400
+— Se a base tributável (R$ 25.600) ultrapassar o limite de isenção do IR PF no ano, o MEI deve declarar o IRPF e recolher o imposto.
+
+---
+
+CALENDÁRIO ANUAL DASN-SIMEI
+
+Janeiro–Dezembro: período de apuração do faturamento bruto.
+Até 31 de maio: entrega obrigatória da DASN-SIMEI no portal.
+Após 31 de maio: declaração em atraso sujeita a multa de R$ 50,00.

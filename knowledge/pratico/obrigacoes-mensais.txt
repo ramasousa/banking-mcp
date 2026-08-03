@@ -1,0 +1,113 @@
+ASSUNTO: Calendário de obrigações mensais e anuais do MEI
+FONTE: Resolução CGSN nº 140/2018; Portal do Empreendedor; Receita Federal
+
+---
+
+VISÃO GERAL DAS OBRIGAÇÕES DO MEI
+
+O MEI tem obrigações muito simplificadas em comparação a outros regimes. As principais são: pagar o DAS todo mês (até dia 20), entregar a DASN-SIMEI uma vez por ano (até 31 de maio) e manter um relatório simples de receitas. Tudo o mais que uma empresa maior precisa fazer (declarações mensais de PIS/COFINS, escrituração contábil, livros fiscais, relatórios ao IBGE, Caged) está dispensado para o MEI.
+
+---
+
+CALENDÁRIO MENSAL
+
+DIA 1 a 5 — início do mês:
+Conferir o saldo da conta PJ e fazer a retirada planejada para a conta PF.
+Atualizar o relatório de receitas do mês anterior.
+Verificar se há notas fiscais do mês anterior pendentes de emissão (para clientes PJ — é obrigatório).
+
+ATÉ DIA 7 (se tiver funcionário CLT):
+Pagar o salário do funcionário (prazo legal: até o 5º dia útil após o mês trabalhado — confirme com contador).
+Recolher o FGTS do funcionário (código de recolhimento GEFIP/eSocial) até o dia 7 do mês seguinte.
+Recolher o INSS do funcionário (3% patronal + desconto do trabalhador) via GPS.
+
+ATÉ DIA 20 — pagamento do DAS:
+Emitir o DAS pelo portal gov.br/mei ou app MEI.
+Pagar em qualquer banco, lotérica, internet banking, ou via PIX (código de barras).
+Guardar o comprovante de pagamento.
+Atenção: se dia 20 cair no fim de semana ou feriado, o vencimento é antecipado para o dia útil anterior.
+
+AO LONGO DO MÊS:
+Emitir nota fiscal para todos os clientes pessoas jurídicas.
+Registrar todas as receitas no relatório mensal.
+Guardar notas fiscais de compras e despesas (para comprovação se necessário).
+
+---
+
+CALENDÁRIO ANUAL
+
+JANEIRO:
+Emitir e pagar o DAS de janeiro até dia 20 (referente a dezembro do ano anterior).
+Verificar se houve mudança no valor do DAS (ajuste do salário mínimo em janeiro).
+Se for migrar para ME: confirmar opção pelo Simples Nacional até o último dia útil de janeiro.
+
+FEVEREIRO:
+DAS de fevereiro até dia 20 (referente a janeiro).
+Iniciar levantamento do faturamento total do ano anterior para a DASN-SIMEI.
+
+MARÇO:
+DAS de março até dia 20 (referente a fevereiro).
+Verificar se precisa entregar declaração de IR Pessoa Física (DIRPF) — prazo geralmente em abril/maio.
+
+ABRIL:
+DAS de abril (referente a março).
+Atenção ao prazo da DIRPF (geralmente 30 de abril ou última semana de abril) — verificar portaria anual.
+Preparar os dados para a DASN-SIMEI com o total do faturamento do ano anterior.
+
+ATÉ 31 DE MAIO:
+Entregar a DASN-SIMEI pelo Portal do Empreendedor.
+Informar: faturamento bruto total do ano anterior; se teve empregado; valor do faturamento de exportações (se aplicável).
+Guardar o recibo de entrega (protocolo gerado pelo sistema).
+ATENÇÃO: multa de R$ 50,00 por atraso ou não entrega, mesmo com faturamento zero.
+
+JUNHO a DEZEMBRO:
+DAS mensal até o dia 20 de cada mês.
+Monitoramento mensal do faturamento acumulado vs. limite anual.
+Caso o faturamento esteja próximo do limite (85%+): consultar contador e planejar migração.
+
+DEZEMBRO:
+DAS de dezembro (referente a novembro) até dia 20.
+Fechamento do faturamento anual: somar todos os recebimentos do ano.
+Verificar se o limite foi atingido ou ultrapassado e qual a situação (regra dos 20%).
+Planejar ações para o próximo ano (migração, reajuste de preços, novos serviços).
+
+---
+
+OBRIGAÇÕES ESPECÍFICAS SE O MEI TEM FUNCIONÁRIO CLT
+
+Mensal:
+Folha de pagamento (pode ser planilha simples).
+Recolhimento do FGTS (8% do salário) — via eSocial/SEFIP.
+Recolhimento do INSS do funcionário (desconto na folha + 3% patronal via GPS).
+Pagamento do salário até o 5º dia útil do mês seguinte.
+
+Anual:
+RAIS (Relação Anual de Informações Sociais) — declaração obrigatória até março (verificar portaria).
+Informe de Rendimentos para o funcionário (até fevereiro — para DIRPF do empregado).
+Férias: o funcionário tem direito a 30 dias de férias a cada 12 meses de trabalho, com acréscimo de 1/3 do salário.
+13º salário: pagar a 1ª parcela até 30 de novembro e a 2ª parcela até 20 de dezembro.
+Rescisão: se demitir o funcionário, calcular verbas rescisórias com um contador.
+
+---
+
+RESUMO DOS PRAZOS CRÍTICOS (não perca estas datas)
+
+Dia 20 de cada mês: pagamento do DAS.
+Até 31 de maio: entrega da DASN-SIMEI.
+Último dia útil de janeiro: prazo para opção pelo Simples Nacional como ME (se for migrar).
+Último dia útil de janeiro: prazo para desenquadramento voluntário do SIMEI com efeito retroativo a 01/01.
+Até 30 de abril (verificar): entrega da DIRPF se obrigado.
+7 de cada mês: recolhimento do FGTS do funcionário (se tiver empregado CLT).
+
+---
+
+DOCUMENTOS QUE O MEI DEVE GUARDAR (por 5 anos)
+
+Comprovantes de pagamento do DAS.
+Relatório mensal de receitas.
+Notas fiscais emitidas e recebidas.
+Contratos com clientes.
+Comprovantes de pagamento do funcionário (se tiver).
+Recibos da DASN-SIMEI.
+Recibos da DIRPF.
+Comprovantes de abertura e eventuais alterações do MEI.

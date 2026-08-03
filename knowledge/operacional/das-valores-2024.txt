@@ -1,0 +1,92 @@
+ASSUNTO: DAS — Documento de Arrecadação do Simples Nacional (MEI)
+FONTE: PGMEI / Portal do Empreendedor / Resolução CGSN nº 140/2018
+
+---
+
+O QUE É O DAS
+
+O DAS (Documento de Arrecadação do Simples Nacional) é a guia de pagamento mensal obrigatória do MEI. Ele consolida em um único boleto: a contribuição previdenciária (INSS) para garantir benefícios ao empreendedor; o ICMS (Imposto sobre Circulação de Mercadorias) para MEI que exerce atividade de comércio ou indústria; e o ISS (Imposto sobre Serviços) para MEI que exerce atividade de prestação de serviços. O DAS não inclui IRPJ, CSLL, PIS ou COFINS — o MEI é isento desses tributos.
+
+---
+
+COMPOSIÇÃO DO DAS POR TIPO DE ATIVIDADE
+
+O valor do DAS varia conforme o tipo de atividade exercida pelo MEI:
+
+SOMENTE COMÉRCIO ou INDÚSTRIA:
+— INSS: 5% sobre o salário mínimo vigente
+— ICMS: R$ 1,00 fixo por mês (conforme estado — pode variar)
+— ISS: não se aplica
+— TOTAL 2024: R$ 71,60/mês | TOTAL 2025: R$ 76,90/mês
+
+SOMENTE SERVIÇOS:
+— INSS: 5% sobre o salário mínimo vigente
+— ICMS: não se aplica
+— ISS: R$ 5,00 fixo por mês (conforme município — pode variar)
+— TOTAL 2024: R$ 75,60/mês | TOTAL 2025: R$ 80,90/mês
+
+COMÉRCIO + SERVIÇOS (atividades mistas):
+— INSS: 5% sobre o salário mínimo vigente
+— ICMS: R$ 1,00
+— ISS: R$ 5,00
+— TOTAL 2024: R$ 76,60/mês | TOTAL 2025: R$ 81,90/mês
+
+MEI CAMINHONEIRO (transporte de cargas):
+— INSS: 12% sobre o salário mínimo vigente (alíquota diferenciada)
+— ICMS: R$ 1,00
+— ISS: não se aplica
+— TOTAL 2024: R$ 170,44/mês | TOTAL 2025: R$ 183,16/mês
+
+NOTA: O portal PGMEI (pgmei.camara.leg.br ou gov.br/mei) sempre gera o DAS com os valores corretos atualizados. Os valores acima são referência — sempre emita pelo sistema oficial.
+
+---
+
+COMO EMITIR O DAS
+
+O DAS deve ser emitido pelo Portal do Empreendedor (gov.br/mei) ou pelo aplicativo MEI da Receita Federal. Acesse com CPF e senha gov.br; selecione "Pagar DAS"; escolha a competência (mês de referência); o sistema gera o código de barras para pagamento. O DAS pode ser pago em qualquer banco, lotérica, ou pelo internet banking/PIX (utilize o código de barras ou chave do documento).
+
+---
+
+VENCIMENTO E MULTA POR ATRASO
+
+Vencimento mensal: dia 20 de cada mês.
+Competência de referência: o DAS pago em maio, por exemplo, é referente à competência de abril.
+Se o dia 20 cair em sábado, domingo ou feriado, o vencimento é antecipado para o dia útil anterior.
+
+Multa por atraso: 0,33% ao dia de atraso, limitada a 20% do valor do documento.
+Juros de mora: taxa SELIC acumulada desde o mês seguinte ao vencimento.
+
+Exemplo: DAS de R$ 80,90 com 30 dias de atraso:
+— Multa: 0,33% × 30 dias = 9,9% → R$ 8,01
+— Juros SELIC: estimativa ~1,0% ao mês → R$ 0,81
+— Total a pagar: aproximadamente R$ 89,72
+
+---
+
+DAS COM DESCONTO — INCENTIVO PARA PAGAMENTO ANTECIPADO
+
+Não existe desconto por pagamento antecipado no DAS padrão. O valor é fixo independente da data de pagamento (desde que dentro do prazo). O desconto só ocorre quando há parcelamento negociado de débitos em atraso com redução de multas.
+
+---
+
+PARCELAMENTO DE DÉBITOS DO DAS
+
+MEI com DAS em atraso pode parcelar pelo sistema PGMEI:
+— Até 60 parcelas mensais
+— Valor mínimo por parcela: R$ 50,00
+— Redução da multa conforme o número de parcelas negociadas
+— Acesso: gov.br/mei → "Parcelamento de débitos"
+
+ATENÇÃO: MEI inadimplente por mais de 12 meses pode ter o CNPJ cancelado de ofício pela Receita Federal. Regularize os débitos para evitar a baixa involuntária do CNPJ.
+
+---
+
+DAS E BENEFÍCIOS PREVIDENCIÁRIOS
+
+O recolhimento do DAS em dia é o que garante os benefícios previdenciários do MEI:
+— Para ter direito a auxílio-doença: 12 meses de contribuição em dia (carência)
+— Para ter direito a salário-maternidade: 10 meses de contribuição em dia
+— Para ter direito a aposentadoria por idade: 180 meses de contribuição + 65 anos (homem) ou 62 anos (mulher)
+— Para aposentadoria por tempo de contribuição: precisa complementar para alíquota de 11% (diferença paga em guia separada)
+
+MEI com 3 ou mais meses de DAS em atraso no ano pode perder o direito à aposentadoria pelo MEI naquele período — esses meses podem não ser contados como tempo de contribuição.

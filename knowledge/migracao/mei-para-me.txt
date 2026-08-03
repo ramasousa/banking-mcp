@@ -1,0 +1,84 @@
+ASSUNTO: Migração MEI para ME (Microempresa) — passo a passo completo
+FONTE: LC 123/2006; Resolução CGSN nº 140/2018; Portal do Empreendedor
+
+---
+
+QUANDO MIGRAR DO MEI PARA ME
+
+A migração do MEI para ME é necessária quando:
+1. O faturamento atingiu ou está projetado para atingir o limite anual do MEI.
+2. A atividade desejada não é permitida para MEI.
+3. O empreendedor precisa ter mais de um funcionário.
+4. O empreendedor deseja ter sócios (é necessário transformar o EI em Ltda. ou outra forma societária).
+5. A empresa precisa ter mais de um estabelecimento.
+6. O empreendedor quer maior credibilidade perante o mercado (bancos, grandes clientes, licitações).
+
+A migração não é um fracasso — é um sinal de crescimento e consolidação do negócio.
+
+---
+
+PASSO A PASSO DA MIGRAÇÃO
+
+ETAPA 1 — PLANEJAMENTO (2 a 3 meses antes)
+Contratar um contador ou escritório de contabilidade. No Simples Nacional (ME), o contador é legalmente obrigatório.
+O contador irá: analisar o CNAE e o Anexo do Simples Nacional aplicável; estimar a carga tributária pós-migração; orientar sobre livros fiscais e escrituração; verificar obrigações estaduais e municipais (ICMS, ISS).
+Custo médio de honorários de contador para ME: R$ 200 a R$ 600/mês, variando por estado e complexidade.
+
+ETAPA 2 — DESENQUADRAMENTO DO SIMEI
+Acesse gov.br/mei → "Solicitar Desenquadramento do SIMEI".
+O CNPJ permanece o mesmo — apenas o regime tributário é alterado.
+O desenquadramento voluntário tem efeito a partir de 1º de janeiro do ano seguinte (se solicitado após o início do ano) ou retroativo a 1º de janeiro se solicitado até o último dia útil de janeiro.
+
+ETAPA 3 — OPÇÃO PELO SIMPLES NACIONAL COMO ME
+Após o desenquadramento do SIMEI, o empreendedor continua como pessoa jurídica no Simples Nacional, mas agora como ME (sem o SIMEI).
+Se o enquadramento como ME for automático (ex: excesso de faturamento), a opção pelo Simples Nacional como ME ocorre de forma automática pelo sistema.
+Se for migração voluntária, deve-se confirmar a opção pelo Simples Nacional em janeiro, pelo Portal do Simples Nacional.
+
+ETAPA 4 — REGULARIZAÇÕES ESTADUAIS E MUNICIPAIS
+Alguns estados exigem inscrição estadual ativa para ME (o MEI tem inscrição simplificada).
+Verificar com o contador se é necessário atualizar a inscrição estadual (para ICMS) e/ou a inscrição municipal (para ISS).
+Abrir o Livro Caixa ou iniciar escrituração contábil com o contador.
+
+ETAPA 5 — ABERTURA DE CONTA BANCÁRIA PJ (se necessário)
+Muitos bancos permitem que o MEI mantenha a conta após a migração para ME.
+Verifique com o banco se é necessário atualizar o tipo de conta ou a documentação.
+
+ETAPA 6 — ADAPTAÇÃO DAS EMISSÕES DE NOTA FISCAL
+Verificar com o município/estado se o sistema de NF-e ou NFS-e precisará ser atualizado.
+O contador pode auxiliar na configuração do emissor de notas.
+
+---
+
+DOCUMENTOS NECESSÁRIOS PARA A MIGRAÇÃO
+
+O processo de desenquadramento é majoritariamente digital (gov.br/mei). Documentos que podem ser solicitados pelo contador ou pela Junta Comercial:
+— CNPJ ativo (já existente)
+— CPF e RG do titular
+— Comprovante de endereço comercial
+— Contrato de locação ou declaração de uso do endereço (se aplicável)
+— CCMEI (Certificado de Condição de Microempreendedor Individual) — obtido no portal
+
+---
+
+CUSTOS DA MIGRAÇÃO
+
+Contador: R$ 200 a R$ 600/mês (honorários mensais contínuos).
+Inscrição estadual (se necessária): gratuita na maioria dos estados.
+Eventuais taxas da Junta Comercial (se houver alteração de natureza jurídica): R$ 50 a R$ 200, variando por estado.
+Emissor de NF-e (se necessário): gratuito pela SEFAZ ou planos pagos de sistemas privados (~R$ 50/mês).
+Conta bancária PJ para ME: verifique taxas do banco (muitos oferecem conta gratuita para ME).
+
+---
+
+IMPACTO TRIBUTÁRIO PÓS-MIGRAÇÃO
+
+Como ME no Simples Nacional, a tributação deixa de ser um valor fixo (DAS) e passa a ser um percentual sobre o faturamento:
+— MEI paga valor fixo: ~R$ 77 a R$ 82/mês independente do faturamento.
+— ME no Simples paga: % variável sobre o faturamento mensal.
+
+Exemplo comparativo (serviços, Anexo III, faturamento R$ 8.000/mês):
+— Como MEI: ~R$ 80/mês
+— Como ME no Simples (Faixa 1, 6%): R$ 8.000 × 6% = R$ 480/mês
+— Diferença: ~R$ 400/mês a mais em tributos
+
+Por isso, o planejamento financeiro antes da migração é essencial para ajustar preços e margens.

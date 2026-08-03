@@ -1,0 +1,65 @@
+ASSUNTO: Atividades (CNAEs) permitidas para o MEI — principais categorias
+FONTE: Resolução CGSN nº 140/2018 e atualizações; gov.br/mei
+NOTA: A lista oficial completa e atualizada está em: https://www.gov.br/empresas-e-negocios/pt-br/empreendedor/quero-ser-mei/atividades-permitidas
+
+---
+
+COMO FUNCIONAM OS CNAEs NO MEI
+
+O MEI só pode exercer atividades que estejam na lista oficial de ocupações permitidas, definidas por Código Nacional de Atividade Econômica (CNAE). A lista é atualizada periodicamente e pode ser consultada no Portal do Empreendedor. O MEI pode ter mais de uma atividade, desde que todas estejam na lista permitida. A atividade principal deve ser a de maior faturamento.
+
+Importante: o CNAE determina o tipo de DAS a pagar (Comércio, Serviços ou ambos) e as obrigações tributárias estaduais/municipais aplicáveis.
+
+---
+
+CATEGORIAS DE ATIVIDADES PERMITIDAS
+
+ALIMENTAÇÃO E BEBIDAS (COMÉRCIO/SERVIÇOS)
+Ambulante de alimentos, bar, barraca de feira, bufê, cantina, casa de festas (sem bebida alcoólica), confeitaria, doceria, food truck, lanchonete, marmitaria, padaria (sem industrialização), pastelaria, pizzaria, restaurante, sorveteria, vendedor de açaí, vendedor de bolos e salgados.
+
+BELEZA, ESTÉTICA E BEM-ESTAR (SERVIÇOS)
+Barbeiro, barbearia, cabeleireiro, depilação, designer de sobrancelhas, estética, manicure, pedicure, maquiagem, micropigmentação, nail designer, salão de beleza, tatuador, tricologia.
+
+COMÉRCIO VAREJISTA (COMÉRCIO)
+Artesanato, bijuteria, brechó, calçados, cosméticos, eletrodomésticos usados, flores, hortifrutigranjeiros (quitanda), joias folheadas, livros e revistas, moda, perfumaria, produtos naturais, roupas, sapatos.
+
+CONSTRUÇÃO CIVIL E REFORMAS (SERVIÇOS)
+Assentador de cerâmica, azulejista, bombeiro hidráulico, calceteiro, carpinteiro, eletricista residencial, encanador, gesseiro, instalador de equipamentos, mestre de obras, pedreiro, pintor (predial), piscineiro, serralheiro, vidraceiro.
+
+EDUCAÇÃO E TREINAMENTO (SERVIÇOS)
+Aulas particulares, cursos livres, instrutor de autoescola, instrutor fitness, instrutor de música, pedagogo autônomo, personal trainer, professor particular, treinador esportivo.
+
+EVENTOS E ENTRETENIMENTO (SERVIÇOS)
+Animador de festas, DJ, fotógrafo, filmagem, mágico, mestre de cerimônias, músico, organizador de eventos, produtor de vídeo, sonorização e iluminação para eventos.
+
+LIMPEZA E CONSERVAÇÃO (SERVIÇOS)
+Auxiliar de limpeza, faxineiro, lavador de veículos (sem estrutura de lava-jato industrial), limpador de piscinas, passadeira de roupas.
+
+MANUTENÇÃO E REPARAÇÃO (SERVIÇOS)
+Conserto de bicicletas, conserto de calçados (sapateiro), conserto de eletrodomésticos, conserto de instrumentos musicais, funileiro, instalador de ar-condicionado (split residencial), mecânico de veículos, rebobinador de motores, técnico de informática, técnico de celular.
+
+SAÚDE E CUIDADOS (SERVIÇOS)
+Cuidador de idosos, enfermeiro (com restrições — verificar habilitação), esteticista, fisioterapeuta (autônomo sem equipe), massoterapeuta, técnico em enfermagem (autônomo).
+
+TECNOLOGIA E INFORMÁTICA (SERVIÇOS)
+Criação de aplicativos (desenvolvimento autônomo), desenvolvedor de software (autônomo), designer gráfico, designer de interiores, edição de vídeo, manutenção de computadores, programador, suporte técnico em informática, web designer.
+
+TRANSPORTE (SERVIÇOS/COMÉRCIO)
+Condutor de aplicativo (Uber, 99, etc.), freteiro, guincheiro, mototaxista, taxista, transportador de cargas (caminhoneiro MEI).
+
+OUTROS SERVIÇOS
+Agente funerário, bordadeira, costureira, diarista (doméstica autônoma), lavador de roupas, marceneiro, revendedor de produtos (desde que pessoa jurídica revendedora autorizada), sapateiro, servente de obras.
+
+---
+
+ATIVIDADES VEDADAS AO MEI (exemplos principais)
+
+Produção ou venda de bebidas alcoólicas (exceto produção artesanal com limite legal).
+Venda de armas, munições ou explosivos.
+Profissões regulamentadas em conselho federal que exijam pessoa jurídica específica (médico, advogado, engenheiro, contador — com exceções por tipo de serviço; verificar caso a caso).
+Franquias que exijam sociedade.
+Atividades financeiras (agente de crédito, factoring, correspondente bancário em algumas modalidades).
+Produção industrial de grande escala.
+Qualquer atividade que exija mais de um sócio.
+
+NOTA IMPORTANTE: A lista de CNAEs permitidos para o MEI é extensa e atualizada com frequência. Antes de abrir ou alterar uma atividade MEI, sempre consulte a lista oficial em gov.br/mei. O enquadramento incorreto de CNAE pode levar ao desenquadramento retroativo.

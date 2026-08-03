@@ -1,0 +1,79 @@
+ASSUNTO: Pró-labore e retirada do MEI — quanto o empreendedor pode retirar do negócio
+FONTE: Boas práticas de gestão financeira para MEI/EI; orientações do SEBRAE
+
+---
+
+O QUE É PRÓ-LABORE PARA O MEI
+
+O MEI não tem pró-labore no sentido formal (como em uma Ltda.), mas pode fazer retiradas do caixa da empresa para uso pessoal. Essas retiradas são chamadas de "retirada do sócio" ou "retirada do titular". A diferença fundamental: o MEI não tem folha de pagamento para si mesmo — o empreendedor retira o que o negócio pode suportar, desde que mantenha capital de giro suficiente para operar.
+
+No Simples Nacional (após migração para ME), o pró-labore formal passa a existir e é tributado pelo INSS como empregado do titular (11% a 14% descontados na fonte, mais a contribuição patronal dependendo do Anexo).
+
+---
+
+QUANTO O MEI PODE RETIRAR
+
+Não existe um limite legal para a retirada do MEI — o empreendedor pode retirar qualquer valor desde que o negócio tenha caixa disponível. No entanto, do ponto de vista financeiro saudável, recomenda-se calcular a retirada com base na seguinte lógica:
+
+Retirada saudável = Receita do mês - Despesas operacionais - DAS - Reserva de emergência - Reserva para investimento
+
+Onde:
+Despesas operacionais: aluguel, insumos, fornecedores, energia, internet, etc.
+DAS: valor mensal do DAS (R$ 77 a R$ 82 em 2025).
+Reserva de emergência: idealmente 10 a 20% da receita, para cobrir meses de baixa.
+Reserva para investimento: 5 a 10% da receita, para crescimento do negócio.
+
+---
+
+EXEMPLO PRÁTICO
+
+MEI prestador de serviços (cabeleireiro), faturamento de R$ 5.000/mês:
+— Despesas operacionais: R$ 1.200 (aluguel R$ 800 + materiais R$ 300 + energia R$ 100)
+— DAS: R$ 81/mês
+— Reserva de emergência (15%): R$ 750
+— Reserva para investimento (5%): R$ 250
+— Retirada disponível: R$ 5.000 - R$ 1.200 - R$ 81 - R$ 750 - R$ 250 = R$ 2.719/mês
+
+O titular pode retirar até R$ 2.719/mês de forma sustentável. Retirar mais do que isso corrói as reservas e compromete a saúde financeira do negócio.
+
+---
+
+ISENÇÃO DE IMPOSTO DE RENDA SOBRE A RETIRADA DO MEI
+
+A retirada do MEI é parcialmente isenta de Imposto de Renda Pessoa Física (IRPF):
+MEI de comércio ou indústria: 8% do faturamento = base tributável | restante = isento
+MEI de serviços: 32% do faturamento = base tributável | restante = isento
+MEI de serviços hospitalares/transporte: 16% = base tributável
+
+Exemplo: MEI de serviços com faturamento de R$ 80.000 no ano.
+— Base tributável: R$ 80.000 × 32% = R$ 25.600
+— Valor isento: R$ 54.400
+— O titular só paga IR sobre R$ 25.600 (se esse valor ultrapassar o limite de isenção da tabela progressiva do IRPF — verificar valor vigente).
+
+Para registrar essa isenção corretamente, o titular deve:
+Preencher a DIRPF (declaração anual do IR pessoa física) se obrigado a declarar.
+Informar os rendimentos isentos do MEI na ficha específica de rendimentos isentos e não tributáveis.
+Informar os rendimentos tributáveis separadamente (percentual sobre o faturamento).
+
+---
+
+ERRO COMUM: MISTURAR CONTA PESSOAL COM CONTA DO NEGÓCIO
+
+Um dos maiores problemas do MEI é usar a conta bancária pessoal para receber pagamentos do negócio e pagar despesas pessoais com o dinheiro do negócio — e vice-versa. Isso causa:
+— Dificuldade de apurar o lucro real do negócio.
+— Risco de incluir receitas ou despesas pessoais no faturamento da empresa.
+— Problema com a Receita Federal em caso de fiscalização.
+— Impossibilidade de calcular a retirada sustentável.
+
+Solução: manter uma conta corrente ou conta de pagamentos separada exclusivamente para o CNPJ. Transferir a retirada mensalmente da conta PJ para a conta PF como um "salário" planejado.
+
+---
+
+RESERVA DE EMERGÊNCIA PARA O MEI
+
+O MEI não tem acesso a seguro-desemprego nem a FGTS para si mesmo. Por isso, a reserva de emergência é ainda mais crítica do que para um empregado CLT:
+Objetivo mínimo: 3 a 6 meses de despesas pessoais e operacionais do negócio.
+Onde guardar: conta de rendimento automático (CDB de liquidez diária, Tesouro Selic) separada da conta corrente do negócio.
+Como construir: separar 10 a 20% de cada receita recebida até atingir o objetivo.
+
+Um MEI com faturamento de R$ 5.000/mês e despesas totais (pessoais + negócio) de R$ 3.500/mês deve ter reserva de R$ 10.500 a R$ 21.000 guardada antes de investir no crescimento do negócio.

@@ -1,0 +1,100 @@
+ASSUNTO: Guia de decisão — quando migrar do MEI e para qual regime
+FONTE: análise estratégica baseada em LC 123/2006 e LC 128/2008
+
+---
+
+FLUXO DE DECISÃO DE MIGRAÇÃO
+
+Este guia ajuda o MEI a identificar o melhor momento e destino para a migração do seu regime tributário. A decisão depende do faturamento atual, da projeção futura e das características da atividade.
+
+---
+
+CENÁRIO 1 — FATURAMENTO ABAIXO DE 60% DO LIMITE MEI
+
+Situação: crescimento saudável, sem risco imediato.
+Ação: monitorar mensalmente; manter DAS em dia; guardar relatório de receitas.
+Projeção: calcular média dos últimos 3 meses e projetar o fechamento do ano.
+Nenhuma ação tributária urgente é necessária.
+
+---
+
+CENÁRIO 2 — FATURAMENTO ENTRE 60% E 75% DO LIMITE MEI
+
+Situação: atenção crescente ao ritmo de crescimento.
+Ação: intensificar monitoramento mensal; começar a pesquisar contadores; entender qual Anexo do Simples Nacional se aplica à sua atividade; estimar o impacto tributário da migração para ajustar preços com antecedência.
+Não é urgente, mas é o momento ideal para se informar sem pressão.
+
+---
+
+CENÁRIO 3 — FATURAMENTO ENTRE 75% E 85% DO LIMITE MEI
+
+Situação: risco real de estouro do limite dentro dos próximos meses.
+Ação: contratar um contador agora; fazer simulação de impacto tributário pós-migração; rever precificação para absorver o aumento de tributos; verificar obrigações acessórias que passará a ter (livro caixa, PGDAS-D, DEFIS).
+O ideal é que a migração seja planejada, não forçada.
+
+---
+
+CENÁRIO 4 — FATURAMENTO ENTRE 85% E 95% DO LIMITE MEI
+
+Situação: migração iminente — não há mais tempo para esperar.
+Ação imediata: solicitar desenquadramento voluntário pelo Portal do Empreendedor se o ano ainda não terminou; confirmar com o contador a opção pelo Simples Nacional como ME; emitir o primeiro PGDAS-D a partir do mês seguinte ao desenquadramento.
+Risco: adiar aqui pode resultar em ultrapassagem do limite em mais de 20%, gerando retroatividade e multa.
+
+---
+
+CENÁRIO 5 — FATURAMENTO ULTRAPASSOU O LIMITE EM ATÉ 20%
+
+Situação: atenção, mas controlável.
+Efeito legal: permanece MEI até 31/12 do ano corrente; migração obrigatória em 01/01 do ano seguinte.
+Ação: contratar contador imediatamente; confirmar a opção pelo Simples Nacional até o último dia útil de janeiro do ano seguinte; não deixar para a última hora — sistemas da Receita ficam congestionados em janeiro.
+Sem retroatividade: os DAS pagos ao longo do ano são válidos.
+
+---
+
+CENÁRIO 6 — FATURAMENTO ULTRAPASSOU O LIMITE EM MAIS DE 20%
+
+Situação: crítica — desenquadramento retroativo.
+Efeito legal: o MEI é tratado como ME desde 01/01 do ano corrente. Toda a tributação do ano deve ser refeita pelo Simples Nacional, gerando diferença de tributos a pagar com multa e juros.
+Ação urgente: procure um contador imediatamente; levante o faturamento mês a mês do ano inteiro; calcule a diferença tributária com o contador; regularize o passivo pela PGFN ou negociar parcelamento se necessário.
+Esta situação tem custo financeiro relevante — evite a todo custo chegando aqui.
+
+---
+
+PARA QUAL REGIME MIGRAR
+
+OPÇÃO A — SIMPLES NACIONAL (recomendado para a maioria dos MEIs que migram)
+Quem: MEI com faturamento anual entre R$ 81.000 (ou R$ 130.500) e R$ 360.000.
+Vantagem: tributação ainda simplificada, guia única mensal, menor burocracia.
+Desvantagem: alíquota aumenta muito (de fixo para % do faturamento); contador obrigatório.
+Como fazer: desenquadrar do SIMEI + confirmar opção pelo Simples Nacional em janeiro.
+
+OPÇÃO B — LUCRO PRESUMIDO (para negócios com margens altas)
+Quem: ME ou EPP com faturamento acima de R$ 360.000 ou que tenha atividade vetada no Simples.
+Vantagem: pode ser vantajoso quando a margem líquida é muito alta (reduz base de cálculo do IRPJ e CSLL).
+Desvantagem: maior complexidade contábil; exige contador mais especializado; mais obrigações acessórias.
+Quando considerar: se a alíquota efetiva do Simples superar 15%, simule o Lucro Presumido com o contador.
+
+OPÇÃO C — LUCRO REAL (para negócios com margens baixas)
+Quem: empresas com prejuízo ou margens operacionais muito apertadas.
+Vantagem: IRPJ e CSLL são calculados sobre o lucro real (pode ser zero se houver prejuízo).
+Desvantagem: máxima complexidade contábil; exige equipe de contabilidade robusta.
+Raramente indicado para negócios que acabaram de sair do MEI.
+
+---
+
+CHECKLIST DE PREPARAÇÃO PARA MIGRAÇÃO
+
+Antes de migrar:
+[ ] Contratei um contador/escritório de contabilidade de confiança
+[ ] Sei em qual Anexo do Simples minha atividade se enquadra
+[ ] Simulei o impacto tributário no meu faturamento médio mensal
+[ ] Reajustei (ou planejei reajustar) meus preços para absorver o aumento de tributos
+[ ] Verifiquei se preciso de inscrição estadual ou municipal atualizada
+[ ] Tenho o relatório de receitas de todos os meses do ano corrente
+[ ] Sei a data limite para solicitar o desenquadramento e a opção pelo Simples
+
+Após migrar:
+[ ] Emito o PGDAS-D mensalmente (contador faz isso)
+[ ] Entreguei a DASN-SIMEI do último ano como MEI (até 31 de maio)
+[ ] Mantenho o Livro Caixa ou escrituração contábil atualizada
+[ ] Verifico o RBT12 mensalmente para acompanhar a faixa e a alíquota efetiva

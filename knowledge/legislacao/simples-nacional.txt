@@ -1,0 +1,69 @@
+FONTE: Lei Complementar nº 123, de 14 de dezembro de 2006 (Estatuto Nacional da ME e EPP)
+ASSUNTO: Simples Nacional — regime tributário para ME e EPP
+ABRANGÊNCIA: Microempresas (ME) e Empresas de Pequeno Porte (EPP)
+
+---
+
+O QUE É O SIMPLES NACIONAL
+
+O Simples Nacional é um regime tributário diferenciado, simplificado e favorecido, criado pela LC 123/2006 para microempresas (ME) e empresas de pequeno porte (EPP). Permite o recolhimento unificado de até 8 tributos em uma única guia mensal (PGDAS-D): IRPJ, CSLL, PIS, COFINS, IPI, ICMS, ISS e CPP (Contribuição Previdenciária Patronal). O MEI é uma categoria dentro do Simples Nacional, tratada com regras ainda mais simplificadas (SIMEI).
+
+---
+
+LIMITES DE FATURAMENTO — SIMPLES NACIONAL
+
+Microempresa (ME): faturamento bruto anual de até R$ 360.000,00 (R$ 30.000,00/mês).
+Empresa de Pequeno Porte (EPP): faturamento bruto anual entre R$ 360.000,01 e R$ 4.800.000,00.
+MEI: subcategoria da ME com limite próprio e tributação ainda mais simplificada (ver arquivo lc-128-2008.txt).
+
+Quando o MEI ultrapassa seu limite anual, migra automaticamente para a categoria ME dentro do Simples Nacional, desde que a atividade seja permitida.
+
+---
+
+ANEXOS DO SIMPLES NACIONAL
+
+A alíquota efetiva no Simples Nacional varia conforme o Anexo da atividade e a faixa de faturamento dos últimos 12 meses. Existem 5 Anexos:
+
+ANEXO I — Comércio (varejista, atacadista)
+Faixa 1 (até R$ 180.000): alíquota nominal 4%, alíquota efetiva ~4%
+Faixa 2 (R$ 180.001 a R$ 360.000): alíquota nominal 7,3%, efetiva ~5,47% a 6,84%
+Faixa 3 (R$ 360.001 a R$ 720.000): alíquota nominal 9,5%, efetiva ~6,84% a 8,28%
+Faixa 4 (R$ 720.001 a R$ 1.800.000): alíquota nominal 10,7%, efetiva ~8,28% a 10,06%
+Faixa 5 (R$ 1.800.001 a R$ 3.600.000): alíquota nominal 14,3%, efetiva ~10,06% a 13,64%
+Faixa 6 (R$ 3.600.001 a R$ 4.800.000): alíquota nominal 19%, efetiva ~13,64% a 19%
+
+ANEXO II — Indústria (fabricação de produtos)
+Faixa 1 (até R$ 180.000): alíquota nominal 4,5%, efetiva ~4,5%
+As demais faixas seguem progressão similar ao Anexo I com valores ligeiramente superiores.
+
+ANEXO III — Serviços em geral (instalação, reparos, creches, academias, agências de viagem, laboratórios, escritórios de serviços, etc.)
+Faixa 1 (até R$ 180.000): alíquota nominal 6%, efetiva ~6%
+Faixa 2 (R$ 180.001 a R$ 360.000): alíquota nominal 11,2%
+Faixa 3 a 6: progressão crescente até 33%.
+
+ANEXO IV — Serviços com tributação previdenciária diferenciada (construção civil, limpeza, vigilância, serviços advocatícios, odontologia, etc.)
+A CPP (contribuição previdenciária) não está incluída no DAS — deve ser recolhida separadamente (20% sobre a folha).
+Faixa 1 (até R$ 180.000): alíquota nominal 4,5%
+
+ANEXO V — Serviços intelectuais de alta especialização (auditoria, jornalismo, tecnologia, engenharia, medicina quando enquadrada, etc.)
+Faixa 1 (até R$ 180.000): alíquota nominal 15,5%
+
+NOTA: A alíquota efetiva é calculada pela fórmula: (RBT12 × Alíquota Nominal − Parcela a Deduzir) / RBT12, onde RBT12 = receita bruta dos últimos 12 meses.
+
+---
+
+QUEM NÃO PODE OPTAR PELO SIMPLES NACIONAL
+
+Empresas que: tenham outra pessoa jurídica no quadro societário; sejam filial ou sucursal de empresa estrangeira; tenham débitos não parcelados com a Receita Federal, PGFN ou com o INSS; exerçam atividade financeira (bancos, financeiras, seguradoras, factoring); sejam resultantes de cisão ou qualquer desmembramento de pessoa jurídica ocorrido em um dos 5 anos-calendário anteriores; gerem receitas com exportação acima dos limites; sejam sociedades por ações (S.A.). A lista completa está no art. 17 da LC 123/2006.
+
+---
+
+EXCLUSÃO DO SIMPLES NACIONAL
+
+A exclusão ocorre quando: o faturamento ultrapassa R$ 4.800.000,00 no ano; a empresa incorre em alguma vedação legal; há débitos tributários não regularizados após notificação. A exclusão tem efeitos a partir do 1º de janeiro do ano seguinte (quando o excesso foi igual ou inferior a 20% do limite) ou retroativa ao primeiro mês de excesso (quando superior a 20%).
+
+---
+
+OPÇÃO PELO SIMPLES NACIONAL
+
+A opção é realizada somente em janeiro de cada ano (até o último dia útil), com efeitos a partir do dia 1º de janeiro. Para empresas novas, a opção deve ser feita em até 30 dias da inscrição estadual/municipal ou do início da atividade (o que ocorrer por último), com efeitos retroativos à abertura. A opção é irretratável para aquele ano-calendário.

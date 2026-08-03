@@ -1,0 +1,94 @@
+ASSUNTO: Desenquadramento do MEI — causas, efeitos e procedimentos
+FONTE: LC 123/2006, art. 18-A; Resolução CGSN nº 140/2018
+
+---
+
+O QUE É O DESENQUADRAMENTO
+
+Desenquadramento é a saída involuntária ou voluntária do MEI do SIMEI (Sistema de Recolhimento em Valores Fixos do Simples Nacional). Após o desenquadramento, o empreendedor passa a ser tratado como Microempresa (ME) ou Empresário Individual (EI) fora do SIMEI, devendo adotar as obrigações tributárias correspondentes.
+
+---
+
+CAUSAS DE DESENQUADRAMENTO
+
+1. EXCESSO DE FATURAMENTO (causa mais comum)
+O faturamento bruto anual ultrapassou o limite legal do MEI. Ver regra dos 20% em limites-vigentes.txt.
+
+2. EXERCER ATIVIDADE NÃO PERMITIDA
+O MEI passou a exercer atividade que não consta na lista oficial de ocupações permitidas para o MEI (CNAE vedado). A lista é atualizada periodicamente e pode ser consultada em gov.br/mei.
+
+3. TER MAIS DE UM EMPREGADO
+Contratar um segundo funcionário ou ter funcionário com salário acima do mínimo/piso.
+
+4. PARTICIPAÇÃO EM OUTRA EMPRESA
+Abrir ou entrar como sócio em outra pessoa jurídica, seja como sócio, administrador ou titular.
+
+5. DÉBITOS NÃO REGULARIZADOS
+Acúmulo de DAS em atraso por período prolongado. A Receita pode baixar o CNPJ de ofício após 12 meses de inadimplência.
+
+6. OPÇÃO VOLUNTÁRIA
+O próprio MEI pode solicitar o desenquadramento quando quiser migrar para ME voluntariamente, por exemplo ao perceber que o crescimento do negócio tornará inevitável a saída.
+
+---
+
+EFEITOS DO DESENQUADRAMENTO POR EXCESSO DE FATURAMENTO
+
+CASO A — Excesso de até 20% do limite:
+— Efeito: a partir do dia 1º de janeiro do ano seguinte.
+— O MEI continua no SIMEI até 31 de dezembro do ano corrente.
+— Os DAS pagos no ano são válidos e não há retroatividade.
+— A partir de janeiro seguinte: passa a ser ME no Simples Nacional.
+— Deve contratar contador (obrigatório no Simples).
+— Deve emitir PGDAS-D no lugar do DAS.
+
+CASO B — Excesso superior a 20% do limite:
+— Efeito: retroativo ao dia 1º de janeiro do ano corrente.
+— Os tributos do SIMEI (DAS) pagos ao longo do ano não cobrem a diferença tributária.
+— O empreendedor deve recolher a diferença como ME pelo Simples Nacional, desde janeiro, com multas e juros sobre os valores não pagos.
+— Situação crítica: pode gerar passivo tributário significativo.
+
+---
+
+EFEITOS DO DESENQUADRAMENTO POR OUTRAS CAUSAS
+
+Exercício de atividade vedada: retroativo ao mês em que a atividade vedada foi iniciada.
+Participação em outra empresa: retroativo à data de abertura/entrada na outra empresa.
+Mais de um empregado: retroativo ao mês de contratação do segundo funcionário.
+
+---
+
+PROCEDIMENTO DE DESENQUADRAMENTO VOLUNTÁRIO
+
+O MEI pode solicitar o desenquadramento voluntário pelo Portal do Empreendedor:
+1. Acesse gov.br/mei com CPF e senha gov.br.
+2. Selecione "Solicitar Desenquadramento do SIMEI".
+3. O sistema registra a data e gera o número de protocolo.
+4. O desenquadramento voluntário tem efeito a partir do 1º de janeiro do ano seguinte se solicitado após o início do ano.
+5. Se solicitado até o último dia útil de janeiro, tem efeito retroativo a 1º de janeiro do mesmo ano.
+
+---
+
+O QUE ACONTECE APÓS O DESENQUADRAMENTO
+
+Após sair do SIMEI, o empreendedor passa a ser classificado como Empresário Individual (EI) na categoria ME (Microempresa) se continuar dentro do limite do Simples Nacional (até R$ 360.000/ano). As principais mudanças:
+
+— O CNPJ permanece o mesmo — não é cancelado.
+— Passa a emitir PGDAS-D no lugar do DAS.
+— A tributação aumenta (percentual sobre faturamento em vez de valor fixo).
+— É obrigatória a contratação de um contador/escritório de contabilidade.
+— Deve escriturar o Livro Caixa ou adotar contabilidade simplificada.
+— Passa a ter obrigações de entrega de declarações adicionais (DEFIS, por exemplo).
+— Pode ter mais de um empregado.
+— Pode ter sócios (se transformar de EI para EIRELI ou Ltda., via alteração contratual).
+
+---
+
+COMO EVITAR O DESENQUADRAMENTO INVOLUNTÁRIO
+
+Monitoramento mensal do faturamento acumulado versus o limite anual.
+Projeção de faturamento para os meses restantes do ano.
+Ao atingir 75% do limite, procurar um contador para planejar a migração com antecedência.
+Ao atingir 85%, iniciar o processo de migração planejada para ME no Simples Nacional.
+Nunca esperar o limite ser ultrapassado para agir — o custo do desenquadramento retroativo é muito maior.
+
+Lembre-se: ultrapassar o limite do MEI não é necessariamente um problema — é um sinal de crescimento do negócio. O desafio é fazer a transição de forma planejada e sem passivo tributário.
