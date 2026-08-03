@@ -30,6 +30,7 @@ export class PluggyClient {
     if (!this._apiKey) {
       throw new Error(`Pluggy auth: campo apiKey não encontrado. Resposta: ${JSON.stringify(data)}`);
     }
+    console.log('[Pluggy] apiKey obtido, tamanho:', this._apiKey.length);
     this._keyExpiry = Date.now() + 110 * 60 * 1000;
     return this._apiKey;
   }
@@ -45,6 +46,12 @@ export class PluggyClient {
     });
     if (!res.ok) {
       const txt = await res.text();
+      // Se /items retornar 401, pode ser que nenhuma instituição foi conectada no sandbox
+      if (path === '/items' && res.status === 401) {
+        throw new Error(
+          `Pluggy GET /items (401): Unauthorized. Verifique se conectou uma instituição de teste em app.pluggy.ai. Detalhes: ${txt}`
+        );
+      }
       throw new Error(`Pluggy GET ${path} (${res.status}): ${txt}`);
     }
     return res.json();
