@@ -28,6 +28,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { createBankingServer } from '../mcp/core.js';
+import { initPluggy } from '../mcp/openfinance/of-data.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -42,6 +43,9 @@ const hasKey = !!process.env.ANTHROPIC_API_KEY;
 const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
 const mcpServer = createBankingServer(() => ({ profile: PROFILE }));
 await mcpServer.connect(serverTransport);
+
+// Inicializa Pluggy (no-op quando PLUGGY_CLIENT_ID não está definido)
+await initPluggy();
 
 const mcp = new Client({ name: 'fina-web-client', version: '1.0.0' }, { capabilities: {} });
 await mcp.connect(clientTransport);
