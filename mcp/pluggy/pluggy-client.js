@@ -67,9 +67,19 @@ export class PluggyClient {
     return data.results ?? [];
   }
 
-  async getTransactions(accountId, { from, to, pageSize = 500 } = {}) {
-    const data = await this._get('/transactions', { accountId, from, to, pageSize });
-    return data.results ?? [];
+  async getTransactions(accountId, { from, to, pageSize = 200 } = {}) {
+    const results = [];
+    let cursor = null;
+    do {
+      const params = { accountId, pageSize };
+      if (from) params.from = from;
+      if (to) params.to = to;
+      if (cursor) params.cursor = cursor;
+      const data = await this._get('/v2/transactions', params);
+      results.push(...(data.results ?? []));
+      cursor = data.nextCursor ?? null;
+    } while (cursor && results.length < 1000);
+    return results;
   }
 
   async getIdentity(itemId) {
