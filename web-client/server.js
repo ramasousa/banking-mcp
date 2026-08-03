@@ -28,7 +28,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { createBankingServer } from '../mcp/core.js';
-import { initPluggy, listProfiles } from '../mcp/openfinance/of-data.js';
+import { initPluggy, listProfiles, refreshPluggy } from '../mcp/openfinance/of-data.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -185,6 +185,7 @@ app.get('/api/health', async (_req, res) => {
     model: MODEL,
     profile: PROFILE,
     tools: toolCount,
+    pluggyEnabled: !!process.env.PLUGGY_CLIENT_ID,
   });
 });
 
@@ -213,6 +214,46 @@ app.post('/api/switch-profile', (req, res) => {
   }
   PROFILE = profile;
   res.json({ profile: PROFILE });
+});
+
+// ─────────────────────────────────────────────────────────────
+// GET /api/pluggy/connect-token
+// Retorna um connect token temporário para abrir o Pluggy Connect Widget.
+// ─────────────────────────────────────────────────────────────
+app.get('/api/pluggy/connect-token', async (_req, res) => {
+  const clientId     = process.env.PLUGGY_CLIENT_ID;
+  const clientSecret = process.env.PLUGGY_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
+    return res.status(404).json({ error: 'Pluggy não configurado neste ambiente' });
+  }
+  try {
+    const { PluggyClient } = await import('../mcp/pluggy/pluggy-client.js');
+    const client = new PluggyClient(clientId, clientSecret);
+    const connectToken = await client.getConnectToken();
+    res.json({ connectToken });
+  } catch (err) {
+    console.error('[pluggy/connect-token]', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────
+// POST /api/pluggy/connect
+// Body: { itemId: string }
+// Chamado após o usuário autorizar no Pluggy Connect Widget.
+// Atualiza o perfil Pluggy em cache e troca para o perfil 'pluggy'.
+// ─────────────────────────────────────────────────────────────
+app.post('/api/pluggy/connect', async (req, res) => {
+  const { itemId } = req.body ?? {};
+  if (!itemId) return res.status(400).json({ error: 'itemId obrigatório' });
+  try {
+    await refreshPluggy(itemId);
+    PROFILE = 'pluggy';
+    res.json({ ok: true, profile: 'pluggy' });
+  } catch (err) {
+    console.error('[pluggy/connect]', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ─────────────────────────────────────────────────────────────

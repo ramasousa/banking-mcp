@@ -712,6 +712,21 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 /* ── Agents nav button ── */
 .agent-nav-btn{background:var(--ac-a);border:1px solid var(--ac-ab);color:var(--ac);font-size:11.5px;font-weight:700;padding:5px 13px;border-radius:999px;cursor:pointer;margin-left:8px;transition:background .15s,border-color .15s;font-family:var(--fs)}
 .agent-nav-btn:hover{background:var(--ac-ab)}
+/* ── Connect bank button ── */
+.connect-bank-btn{display:flex;align-items:center;gap:5px;background:transparent;border:1px solid var(--bd);color:var(--tx2);font-size:11.5px;font-weight:700;padding:5px 13px;border-radius:999px;cursor:pointer;margin-left:6px;transition:background .15s,border-color .15s,color .15s;font-family:var(--fs)}
+.connect-bank-btn:hover{background:var(--sf2);border-color:var(--tx2);color:var(--tx)}
+/* ── Pluggy Connect modal ── */
+.pluggy-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);z-index:9000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.pluggy-modal-overlay.open{opacity:1;pointer-events:all}
+.pluggy-modal-box{background:var(--sf);border:1px solid var(--bd);border-radius:20px;width:min(440px,92vw);max-height:90vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.4);position:relative;display:flex;flex-direction:column}
+.pluggy-modal-hd{padding:20px 22px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd)}
+.pluggy-modal-title{font-size:15px;font-weight:800;color:var(--tx)}
+.pluggy-modal-close{width:30px;height:30px;border-radius:50%;border:none;background:var(--sf2);color:var(--tx2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.pluggy-modal-close:hover{background:var(--sf3)}
+.pluggy-modal-body{padding:20px 22px;flex:1}
+.pluggy-modal-status{font-size:13px;color:var(--tx2);text-align:center;padding:32px 0;line-height:1.6}
+.pluggy-modal-err{font-size:13px;color:#FC8181;text-align:center;padding:16px;background:rgba(229,62,62,.08);border-radius:10px;border:1px solid rgba(229,62,62,.22)}
+#pluggy-widget-root{min-height:400px}
 /* ── Agents page ── */
 .agents-body{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:28px}
 .agents-section-title{font-size:10px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
@@ -1095,6 +1110,10 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
     <div style="height:28px;width:1px;background:var(--bd);margin:0 4px"></div>
     <div style="font-size:11px;color:var(--tx2)">Painel financeiro</div>
     <button class="agent-nav-btn" onclick="goTo('agents')">⚡ Agentes</button>
+    <button class="connect-bank-btn" id="connect-bank-btn" onclick="openPluggyConnect()" style="display:none" title="Conectar nova instituição via Open Finance">
+      <svg width="13" height="13" viewBox="0 0 14 14" fill="none" style="flex-shrink:0"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Conectar banco
+    </button>
     <div class="profile-sel" id="profile-sel">
       <!-- populated by loadProfiles() -->
     </div>
@@ -1601,6 +1620,9 @@ function checkHealth() {
     }
     var statusTxt = document.getElementById('status-txt');
     if (statusTxt) statusTxt.textContent = backendReady ? 'Claude + MCP' : 'demo';
+    // Show "Conectar banco" button only when Pluggy is configured
+    var connectBtn = document.getElementById('connect-bank-btn');
+    if (connectBtn) connectBtn.style.display = data.pluggyEnabled ? '' : 'none';
   }).catch(function() {
     backendReady = false;
   });
@@ -2650,6 +2672,114 @@ document.querySelectorAll('#scr-land a[href^="#"]').forEach(function(a) {
     }
   });
 });
+</script>
+
+<!-- ══ PLUGGY CONNECT MODAL ══ -->
+<div class="pluggy-modal-overlay" id="pluggy-modal-overlay" onclick="closePluggyModal(event)">
+  <div class="pluggy-modal-box" onclick="event.stopPropagation()">
+    <div class="pluggy-modal-hd">
+      <div class="pluggy-modal-title">Conectar instituição financeira</div>
+      <button class="pluggy-modal-close" onclick="closePluggyModal()" title="Fechar">✕</button>
+    </div>
+    <div class="pluggy-modal-body">
+      <div id="pluggy-modal-status" class="pluggy-modal-status">Carregando widget…</div>
+      <div id="pluggy-widget-root"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.pluggy.ai/pluggy-connect/v2/pluggy-connect.min.js"></script>
+<script>
+/* ════════════════════════════════════════════════════
+   PLUGGY CONNECT — consent journey
+════════════════════════════════════════════════════ */
+var _pluggyInstance = null;
+
+function openPluggyConnect() {
+  var overlay = document.getElementById('pluggy-modal-overlay');
+  var statusEl = document.getElementById('pluggy-modal-status');
+  var rootEl   = document.getElementById('pluggy-widget-root');
+  if (!overlay) return;
+
+  // Reset state
+  if (statusEl) { statusEl.style.display = ''; statusEl.textContent = 'Carregando widget…'; }
+  if (rootEl) rootEl.innerHTML = '';
+  if (_pluggyInstance) { try { _pluggyInstance.destroy(); } catch (_) {} _pluggyInstance = null; }
+
+  overlay.classList.add('open');
+
+  fetch('/api/pluggy/connect-token')
+    .then(function(r) {
+      if (!r.ok) return r.json().then(function(e) { throw new Error(e.error || 'Erro ao obter token'); });
+      return r.json();
+    })
+    .then(function(d) {
+      if (!d.connectToken) throw new Error('Token não retornado pelo servidor');
+      if (statusEl) statusEl.style.display = 'none';
+
+      _pluggyInstance = new PluggyConnect({
+        connectToken: d.connectToken,
+        includeSandbox: true,
+        onSuccess: function(ev) {
+          var itemId = ev.item && (ev.item.id || ev.item.itemId);
+          if (!itemId) {
+            showPluggyError('Conexão realizada, mas o itemId não foi retornado. Tente recarregar a página.');
+            return;
+          }
+          if (statusEl) { statusEl.style.display = ''; statusEl.textContent = 'Sincronizando dados…'; }
+          if (rootEl) rootEl.innerHTML = '';
+
+          fetch('/api/pluggy/connect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ itemId: itemId }),
+          })
+          .then(function(r) { return r.json(); })
+          .then(function(res) {
+            if (res.ok) {
+              closePluggyModal();
+              // Switch to real profile and reload dashboard
+              dashLoaded = false;
+              dashData = null;
+              chatHistory = [];
+              loadProfiles();
+              loadDashboard();
+            } else {
+              showPluggyError(res.error || 'Erro ao sincronizar dados.');
+            }
+          })
+          .catch(function(err) { showPluggyError('Erro de rede: ' + err.message); });
+        },
+        onError: function(err) {
+          showPluggyError('Erro no widget: ' + (err && err.message ? err.message : String(err)));
+        },
+        onClose: function() {
+          closePluggyModal();
+        },
+      });
+    })
+    .catch(function(err) {
+      showPluggyError(err.message || 'Não foi possível inicializar o widget.');
+    });
+}
+
+function showPluggyError(msg) {
+  var rootEl   = document.getElementById('pluggy-widget-root');
+  var statusEl = document.getElementById('pluggy-modal-status');
+  if (statusEl) statusEl.style.display = 'none';
+  if (rootEl) {
+    rootEl.innerHTML = '<div class="pluggy-modal-err">' + esc(msg) + '</div>';
+  }
+}
+
+function closePluggyModal(ev) {
+  if (ev && ev.target !== document.getElementById('pluggy-modal-overlay')) return;
+  var overlay = document.getElementById('pluggy-modal-overlay');
+  if (overlay) overlay.classList.remove('open');
+  if (_pluggyInstance) { try { _pluggyInstance.destroy(); } catch (_) {} _pluggyInstance = null; }
+  var rootEl = document.getElementById('pluggy-widget-root');
+  if (rootEl) rootEl.innerHTML = '';
+}
 </script>
 </body>
 </html>

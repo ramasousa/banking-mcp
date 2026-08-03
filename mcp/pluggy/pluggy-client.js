@@ -57,6 +57,20 @@ export class PluggyClient {
     return res.json();
   }
 
+  async getConnectToken() {
+    const res = await fetch(`${PLUGGY_BASE}/connect_token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientId: this.clientId, clientSecret: this.clientSecret }),
+    });
+    if (!res.ok) {
+      const txt = await res.text();
+      throw new Error(`Pluggy connect_token falhou (${res.status}): ${txt}`);
+    }
+    const data = await res.json();
+    return data.accessToken ?? data.connectToken ?? data.token;
+  }
+
   async getItems() {
     const data = await this._get('/items');
     return data.results ?? [];

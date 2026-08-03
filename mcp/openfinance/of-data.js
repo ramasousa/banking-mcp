@@ -487,9 +487,9 @@ export async function initPluggy() {
 
   const { buildPluggyProfile } = await import('../pluggy/pluggy-profile.js');
 
-  async function refresh() {
+  async function refresh(forcedItem = itemId) {
     try {
-      _pluggyProfile = await buildPluggyProfile(clientId, clientSecret, itemId);
+      _pluggyProfile = await buildPluggyProfile(clientId, clientSecret, forcedItem);
       console.log('[Pluggy] perfil carregado — contas:', _pluggyProfile.ACCOUNTS.length);
     } catch (err) {
       console.error('[Pluggy] erro ao carregar perfil:', err.message);
@@ -497,8 +497,17 @@ export async function initPluggy() {
   }
 
   await refresh();
-  // Refresh every 10 minutes to keep data reasonably fresh
   _pluggyTimer = setInterval(refresh, 10 * 60 * 1000);
+}
+
+/** Reconecta o Pluggy com um novo itemId (chamado após jornada de consentimento). */
+export async function refreshPluggy(newItemId) {
+  const clientId     = process.env.PLUGGY_CLIENT_ID;
+  const clientSecret = process.env.PLUGGY_CLIENT_SECRET;
+  if (!clientId || !clientSecret) throw new Error('Pluggy não configurado');
+  const { buildPluggyProfile } = await import('../pluggy/pluggy-profile.js');
+  _pluggyProfile = await buildPluggyProfile(clientId, clientSecret, newItemId || process.env.PLUGGY_ITEM_ID || null);
+  console.log('[Pluggy] perfil atualizado via Connect — contas:', _pluggyProfile.ACCOUNTS.length);
 }
 
 /** Devolve o bundle de dados do perfil (ou o default se id inválido/ausente). */
