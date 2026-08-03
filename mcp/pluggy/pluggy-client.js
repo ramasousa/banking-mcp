@@ -25,8 +25,12 @@ export class PluggyClient {
       throw new Error(`Pluggy auth falhou (${res.status}): ${txt}`);
     }
     const data = await res.json();
-    this._apiKey = data.apiKey;
-    this._keyExpiry = Date.now() + 110 * 60 * 1000; // 110 min (buffer de 10 min)
+    console.log('[Pluggy] auth response campos:', Object.keys(data));
+    this._apiKey = data.apiKey ?? data.token ?? data.access_token ?? data.accessToken;
+    if (!this._apiKey) {
+      throw new Error(`Pluggy auth: campo apiKey não encontrado. Resposta: ${JSON.stringify(data)}`);
+    }
+    this._keyExpiry = Date.now() + 110 * 60 * 1000;
     return this._apiKey;
   }
 

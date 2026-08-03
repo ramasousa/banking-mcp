@@ -479,7 +479,10 @@ let _pluggyTimer = null;
 export async function initPluggy() {
   const clientId     = process.env.PLUGGY_CLIENT_ID;
   const clientSecret = process.env.PLUGGY_CLIENT_SECRET;
-  if (!clientId || !clientSecret) return;
+  if (!clientId || !clientSecret) {
+    console.log('[Pluggy] desabilitado — PLUGGY_CLIENT_ID não configurado, usando perfis mock');
+    return;
+  }
 
   const { buildPluggyProfile } = await import('../pluggy/pluggy-profile.js');
 
