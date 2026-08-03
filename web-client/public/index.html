@@ -2688,24 +2688,50 @@ document.querySelectorAll('#scr-land a[href^="#"]').forEach(function(a) {
   </div>
 </div>
 
-<script src="https://cdn.pluggy.ai/pluggy-connect/v2/pluggy-connect.min.js"></script>
 <script>
 /* ════════════════════════════════════════════════════
-   PLUGGY CONNECT — consent journey
+   PLUGGY CONNECT — consent journey (iframe + postMessage)
 ════════════════════════════════════════════════════ */
-var _pluggyInstance = null;
+var _pluggyMsgHandler = null;
+
+function _pluggyAfterSuccess(itemId) {
+  var overlay  = document.getElementById('pluggy-modal-overlay');
+  var statusEl = document.getElementById('pluggy-modal-status');
+  var rootEl   = document.getElementById('pluggy-widget-root');
+  if (statusEl) { statusEl.style.display = ''; statusEl.textContent = 'Sincronizando dados…'; }
+  if (rootEl) rootEl.innerHTML = '';
+
+  fetch('/api/pluggy/connect', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ itemId: itemId }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(res) {
+    if (res.ok) {
+      closePluggyModal();
+      dashLoaded = false;
+      dashData = null;
+      chatHistory = [];
+      loadProfiles();
+      loadDashboard();
+    } else {
+      showPluggyError(res.error || 'Erro ao sincronizar dados.');
+    }
+  })
+  .catch(function(err) { showPluggyError('Erro de rede: ' + err.message); });
+}
 
 function openPluggyConnect() {
-  var overlay = document.getElementById('pluggy-modal-overlay');
+  var overlay  = document.getElementById('pluggy-modal-overlay');
   var statusEl = document.getElementById('pluggy-modal-status');
   var rootEl   = document.getElementById('pluggy-widget-root');
   if (!overlay) return;
 
-  // Reset state
+  // Reset
   if (statusEl) { statusEl.style.display = ''; statusEl.textContent = 'Carregando widget…'; }
   if (rootEl) rootEl.innerHTML = '';
-  if (_pluggyInstance) { try { _pluggyInstance.destroy(); } catch (_) {} _pluggyInstance = null; }
-
+  if (_pluggyMsgHandler) { window.removeEventListener('message', _pluggyMsgHandler); _pluggyMsgHandler = null; }
   overlay.classList.add('open');
 
   fetch('/api/pluggy/connect-token')
@@ -2717,46 +2743,39 @@ function openPluggyConnect() {
       if (!d.connectToken) throw new Error('Token não retornado pelo servidor');
       if (statusEl) statusEl.style.display = 'none';
 
-      _pluggyInstance = new PluggyConnect({
-        connectToken: d.connectToken,
-        includeSandbox: true,
-        onSuccess: function(ev) {
-          var itemId = ev.item && (ev.item.id || ev.item.itemId);
-          if (!itemId) {
-            showPluggyError('Conexão realizada, mas o itemId não foi retornado. Tente recarregar a página.');
-            return;
-          }
-          if (statusEl) { statusEl.style.display = ''; statusEl.textContent = 'Sincronizando dados…'; }
-          if (rootEl) rootEl.innerHTML = '';
+      // Embed via iframe — avoids CDN dependency
+      var iframe = document.createElement('iframe');
+      iframe.src = 'https://connect.pluggy.ai/?accessToken=' + encodeURIComponent(d.connectToken) + '&includeSandbox=true';
+      iframe.style.cssText = 'width:100%;height:520px;border:none;border-radius:10px;display:block';
+      iframe.allow = 'camera; microphone';
+      if (rootEl) rootEl.appendChild(iframe);
 
-          fetch('/api/pluggy/connect', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ itemId: itemId }),
-          })
-          .then(function(r) { return r.json(); })
-          .then(function(res) {
-            if (res.ok) {
-              closePluggyModal();
-              // Switch to real profile and reload dashboard
-              dashLoaded = false;
-              dashData = null;
-              chatHistory = [];
-              loadProfiles();
-              loadDashboard();
-            } else {
-              showPluggyError(res.error || 'Erro ao sincronizar dados.');
-            }
-          })
-          .catch(function(err) { showPluggyError('Erro de rede: ' + err.message); });
-        },
-        onError: function(err) {
-          showPluggyError('Erro no widget: ' + (err && err.message ? err.message : String(err)));
-        },
-        onClose: function() {
+      // Listen for events from the widget
+      _pluggyMsgHandler = function(ev) {
+        if (ev.origin !== 'https://connect.pluggy.ai') return;
+        var data   = ev.data || {};
+        // Pluggy emits { action, payload } or { type, payload }
+        var action = data.action || data.type || '';
+        var payload = data.payload || data;
+
+        if (action === 'pluggyConnect/pluggySuccess' || action === 'SUCCESS') {
+          window.removeEventListener('message', _pluggyMsgHandler); _pluggyMsgHandler = null;
+          var item   = payload.item || payload;
+          var itemId = item.id || item.itemId;
+          if (!itemId) { showPluggyError('Conexão realizada, mas itemId não retornado. Recarregue a página.'); return; }
+          _pluggyAfterSuccess(itemId);
+
+        } else if (action === 'pluggyConnect/pluggyCanceled' || action === 'CLOSE' || action === 'CANCELED') {
+          window.removeEventListener('message', _pluggyMsgHandler); _pluggyMsgHandler = null;
           closePluggyModal();
-        },
-      });
+
+        } else if (action === 'pluggyConnect/pluggyError' || action === 'ERROR') {
+          window.removeEventListener('message', _pluggyMsgHandler); _pluggyMsgHandler = null;
+          var msg = (payload && payload.message) || 'Erro no widget da Pluggy.';
+          showPluggyError(msg);
+        }
+      };
+      window.addEventListener('message', _pluggyMsgHandler);
     })
     .catch(function(err) {
       showPluggyError(err.message || 'Não foi possível inicializar o widget.');
@@ -2767,16 +2786,14 @@ function showPluggyError(msg) {
   var rootEl   = document.getElementById('pluggy-widget-root');
   var statusEl = document.getElementById('pluggy-modal-status');
   if (statusEl) statusEl.style.display = 'none';
-  if (rootEl) {
-    rootEl.innerHTML = '<div class="pluggy-modal-err">' + esc(msg) + '</div>';
-  }
+  if (rootEl) rootEl.innerHTML = '<div class="pluggy-modal-err">' + esc(msg) + '</div>';
 }
 
 function closePluggyModal(ev) {
   if (ev && ev.target !== document.getElementById('pluggy-modal-overlay')) return;
   var overlay = document.getElementById('pluggy-modal-overlay');
   if (overlay) overlay.classList.remove('open');
-  if (_pluggyInstance) { try { _pluggyInstance.destroy(); } catch (_) {} _pluggyInstance = null; }
+  if (_pluggyMsgHandler) { window.removeEventListener('message', _pluggyMsgHandler); _pluggyMsgHandler = null; }
   var rootEl = document.getElementById('pluggy-widget-root');
   if (rootEl) rootEl.innerHTML = '';
 }
