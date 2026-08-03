@@ -467,11 +467,47 @@ const EXTRA_CFGS = loadExtraSpecs()
 const ALL_CFGS = [...PROFILE_CFGS, ...EXTRA_CFGS];
 const PROFILES = Object.fromEntries(ALL_CFGS.map((c) => [c.id, buildProfile(c)]));
 
+// ── Pluggy Open Finance integration ──────────────────────────────────────────
+// When PLUGGY_CLIENT_ID is set, initPluggy() pre-fetches real account data and
+// caches it. getProfile() then returns the live Pluggy profile transparently.
+// The MCP core.js calls executors synchronously, so this pre-fetch + cache
+// pattern is the only way to inject async data without touching core.js.
+
+let _pluggyProfile = null;
+let _pluggyTimer = null;
+
+export async function initPluggy() {
+  const clientId     = process.env.PLUGGY_CLIENT_ID;
+  const clientSecret = process.env.PLUGGY_CLIENT_SECRET;
+  if (!clientId || !clientSecret) return;
+
+  const { buildPluggyProfile } = await import('../pluggy/pluggy-profile.js');
+
+  async function refresh() {
+    try {
+      _pluggyProfile = await buildPluggyProfile(clientId, clientSecret);
+      console.log('[Pluggy] perfil carregado — contas:', _pluggyProfile.ACCOUNTS.length);
+    } catch (err) {
+      console.error('[Pluggy] erro ao carregar perfil:', err.message);
+    }
+  }
+
+  await refresh();
+  // Refresh every 10 minutes to keep data reasonably fresh
+  _pluggyTimer = setInterval(refresh, 10 * 60 * 1000);
+}
+
 /** Devolve o bundle de dados do perfil (ou o default se id inválido/ausente). */
-export function getProfile(id) { return PROFILES[id] || PROFILES[DEFAULT_PROFILE]; }
+export function getProfile(id) {
+  if (_pluggyProfile) return _pluggyProfile;
+  return PROFILES[id] || PROFILES[DEFAULT_PROFILE];
+}
 
 /** Metadados dos perfis (para o seletor no WhatsApp). Id repetido → último vence. */
 export function listProfiles() {
+  if (_pluggyProfile) {
+    return [{ id: 'pluggy', primeiro: _pluggyProfile.PERSONAL_IDENTIFICATION?.civilName?.split(' ')[0] ?? 'Usuário', nome: _pluggyProfile.PERSONAL_IDENTIFICATION?.civilName ?? 'Usuário Pluggy', tipo: _pluggyProfile.hasPJ ? 'PF + PJ' : 'PF', empresa: _pluggyProfile.BUSINESS_IDENTIFICATION?.companyName ?? null }];
+  }
   const byId = new Map(ALL_CFGS.map((c) => [c.id, { id: c.id, primeiro: c.primeiro, nome: c.nome, tipo: c.hasPJ ? 'PF + PJ' : 'PF', empresa: c.hasPJ ? c.empresa : null }]));
   return [...byId.values()];
 }
