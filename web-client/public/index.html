@@ -709,6 +709,42 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
 .dash-card-mini-amt{text-align:right;flex-shrink:0}
 .dash-card-mini-val{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums}
 .dash-card-mini-lbl{font-size:10px;color:var(--tx2)}
+/* ── Agents nav button ── */
+.agent-nav-btn{background:var(--ac-a);border:1px solid var(--ac-ab);color:var(--ac);font-size:11.5px;font-weight:700;padding:5px 13px;border-radius:999px;cursor:pointer;margin-left:8px;transition:background .15s,border-color .15s;font-family:var(--fs)}
+.agent-nav-btn:hover{background:var(--ac-ab)}
+/* ── Agents page ── */
+.agents-body{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:28px}
+.agents-section-title{font-size:10px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
+.agents-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.agent-card{background:var(--sf2);border:1px solid var(--bd);border-radius:16px;padding:20px;display:flex;flex-direction:column;gap:14px;transition:border-color .2s}
+.agent-card.enabled{border-color:var(--ac-ab)}
+.agent-icon{width:50px;height:50px;border-radius:13px;background:var(--ac-a);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.agent-header{display:flex;align-items:flex-start;gap:14px}
+.agent-info{flex:1;min-width:0}
+.agent-name{font-size:14.5px;font-weight:700;color:var(--tx);margin-bottom:5px;line-height:1.3}
+.agent-desc{font-size:12px;color:var(--tx2);line-height:1.6}
+.agent-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.agent-freq{font-size:11px;color:var(--tx2);background:var(--sf3);padding:3px 9px;border-radius:999px}
+.agent-badge-trial{font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--ac-a);color:var(--ac);border:1px solid var(--ac-ab)}
+.agent-badge-soon{font-size:10px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--sf3);color:var(--tx2);border:1px solid var(--bd)}
+.agent-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px}
+.agent-last-run{font-size:11px;color:var(--tx2)}
+.agent-actions{display:flex;align-items:center;gap:10px}
+.toggle-wrap{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none}
+.toggle-track{width:40px;height:22px;border-radius:999px;background:var(--sf3);border:1px solid var(--bd);position:relative;transition:background .2s,border-color .2s}
+.toggle-track.on{background:var(--ac);border-color:var(--ac)}
+.toggle-thumb{width:16px;height:16px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .18s;box-shadow:0 1px 3px rgba(0,0,0,.35)}
+.toggle-track.on .toggle-thumb{transform:translateX(18px)}
+.agent-run-btn{font-size:11.5px;font-weight:700;padding:6px 14px;border-radius:999px;background:var(--ac-a);color:var(--ac);border:1px solid var(--ac-ab);cursor:pointer;transition:background .15s;font-family:var(--fs)}
+.agent-run-btn:hover{background:var(--ac-ab)}
+.agent-run-btn:disabled{opacity:.4;cursor:default}
+.agent-result{margin-top:2px;padding:13px 15px;border-radius:10px;font-size:12px;line-height:1.6}
+.agent-result.ok{background:rgba(56,161,105,.08);border:1px solid rgba(56,161,105,.18);color:#68D391}
+.agent-result.warn{background:rgba(237,137,54,.08);border:1px solid rgba(237,137,54,.22);color:#F6AD55}
+.agent-result.crit{background:rgba(229,62,62,.08);border:1px solid rgba(229,62,62,.22);color:#FC8181}
+.agent-result-title{font-weight:700;margin-bottom:8px;font-size:12.5px}
+.agent-meter{height:5px;border-radius:999px;background:var(--sf3);overflow:hidden;margin:6px 0 10px}
+.agent-meter-fill{height:100%;border-radius:999px;transition:width .7s ease}
 </style>
 </head>
 <body>
@@ -1058,6 +1094,7 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
     <div class="app-logo">pulsando<em class="logo-ai">.ai</em></div>
     <div style="height:28px;width:1px;background:var(--bd);margin:0 4px"></div>
     <div style="font-size:11px;color:var(--tx2)">Painel financeiro</div>
+    <button class="agent-nav-btn" onclick="goTo('agents')">⚡ Agentes</button>
     <div class="profile-sel" id="profile-sel">
       <!-- populated by loadProfiles() -->
     </div>
@@ -1177,6 +1214,31 @@ body{font-family:var(--fs);background:var(--bg);color:var(--tx);transition:backg
     <div class="chat-fab">
       <button class="chat-fab-btn" onclick="goTo('chat')">✦ Conversar com Pulsando</button>
     </div>
+  </div>
+</div>
+
+<!-- ══ AGENTS ══ -->
+<div id="scr-agents" class="scr">
+  <nav class="app-nav">
+    <button class="chat-back" onclick="goTo('app')" style="margin-right:6px">← Voltar</button>
+    <div class="logo-dot" style="width:7px;height:7px"></div>
+    <div class="app-logo">pulsando<em class="logo-ai">.ai</em></div>
+    <div style="height:28px;width:1px;background:var(--bd);margin:0 8px"></div>
+    <div style="font-size:11px;color:var(--tx2)">Agentes</div>
+    <div style="flex:1"></div>
+    <div class="theme-tog" onclick="toggleTheme()" style="margin-right:10px">
+      <div class="tt-opt act" id="tt-n3">N</div>
+      <div class="tt-opt" id="tt-v3">V</div>
+    </div>
+    <div class="app-user">
+      <div class="app-user-info">
+        <div class="app-user-name" id="ag-user-name">–</div>
+      </div>
+      <div class="app-avatar" id="ag-avatar">–</div>
+    </div>
+  </nav>
+  <div class="agents-body" id="agents-body">
+    <!-- populated by renderAgentsPage() -->
   </div>
 </div>
 
@@ -1320,7 +1382,7 @@ function toggleTheme() {
    NAVIGATION
 ════════════════════════════════════════════════════ */
 function goTo(id) {
-  ['land','app','chat','login','signup'].forEach(function(s) {
+  ['land','app','chat','login','signup','agents'].forEach(function(s) {
     var el = document.getElementById('scr-' + s);
     if (el) {
       el.classList.toggle('on', s === id);
@@ -1328,6 +1390,160 @@ function goTo(id) {
     }
   });
   if (id === 'app') { loadDashboard(); loadProfiles(); }
+  if (id === 'agents') { renderAgentsPage(); }
+}
+
+/* ════════════════════════════════════════════════════
+   AGENTS
+════════════════════════════════════════════════════ */
+var AGENT_CATALOG = [
+  {
+    id: 'revenue-monitor',
+    icon: '📊',
+    name: 'Monitor de Faturamento MEI',
+    desc: 'Analisa seu faturamento acumulado e alerta quando se aproximar do limite anual do MEI (R$ 130.500).',
+    freq: 'Mensal',
+    trial: true,
+  },
+  {
+    id: 'dasn-assistant',
+    icon: '📋',
+    name: 'Preparador DASN-SIMEI',
+    desc: 'Em abril/maio, analisa o extrato anual, calcula o faturamento bruto e entrega um resumo pronto para preencher a declaração.',
+    freq: 'Anual',
+    trial: true,
+    comingSoon: true,
+  },
+  {
+    id: 'das-reminder',
+    icon: '🔔',
+    name: 'Lembrete do DAS',
+    desc: 'Todo dia 15, avisa sobre o vencimento do DAS no dia 20 via WhatsApp.',
+    freq: 'Mensal',
+    trial: true,
+    comingSoon: true,
+  },
+];
+
+function getAgentState() {
+  try { return JSON.parse(localStorage.getItem('fina-agents') || '{}'); } catch(_) { return {}; }
+}
+function saveAgentState(s) { localStorage.setItem('fina-agents', JSON.stringify(s)); }
+
+function renderAgentsPage() {
+  var body = document.getElementById('agents-body');
+  if (!body) return;
+
+  // Sync user info from dashData
+  if (dashData && dashData.identity) {
+    var first = (dashData.identity.name || 'Usuário').split(' ')[0];
+    var el = document.getElementById('ag-user-name');
+    if (el) el.textContent = first;
+    var av = document.getElementById('ag-avatar');
+    if (av) av.textContent = first[0].toUpperCase();
+  }
+
+  var state = getAgentState();
+  var active = AGENT_CATALOG.filter(function(a) { return state[a.id] && state[a.id].enabled; });
+  var available = AGENT_CATALOG.filter(function(a) { return !state[a.id] || !state[a.id].enabled; });
+
+  var html = '';
+
+  if (active.length > 0) {
+    html += '<div><div class="agents-section-title">Meus Agentes</div><div class="agents-grid">';
+    active.forEach(function(a) { html += buildAgentCard(a, state[a.id] || {}); });
+    html += '</div></div>';
+  }
+
+  html += '<div><div class="agents-section-title">Disponíveis</div><div class="agents-grid">';
+  available.forEach(function(a) { html += buildAgentCard(a, state[a.id] || {}); });
+  html += '</div></div>';
+
+  body.innerHTML = html;
+}
+
+function buildAgentCard(agent, st) {
+  var enabled = !!st.enabled;
+  var lastRunTxt = st.lastRun ? 'Última execução: ' + st.lastRun : '';
+
+  var resultHTML = '';
+  if (st.lastResult) {
+    var r = st.lastResult;
+    var fillColor = r.level === 'ok' ? '#68D391' : r.level === 'warn' ? '#F6AD55' : '#FC8181';
+    resultHTML =
+      '<div class="agent-result ' + r.level + '">' +
+        '<div class="agent-result-title">' + (r.title || '') + '</div>' +
+        '<div class="agent-meter"><div class="agent-meter-fill" style="width:' + Math.min(r.pct || 0, 100) + '%;background:' + fillColor + '"></div></div>' +
+        '<div>' + (r.message || '') + '</div>' +
+      '</div>';
+  }
+
+  var metaHTML =
+    '<div class="agent-meta">' +
+      '<span class="agent-freq">🕐 ' + agent.freq + '</span>' +
+      (agent.trial ? '<span class="agent-badge-trial">Grátis 30 dias</span>' : '') +
+      (agent.comingSoon ? '<span class="agent-badge-soon">Em breve</span>' : '') +
+    '</div>';
+
+  var footerHTML =
+    '<div class="agent-footer">' +
+      '<div class="agent-last-run">' + lastRunTxt + '</div>' +
+      '<div class="agent-actions">' +
+        (enabled && !agent.comingSoon ?
+          '<button class="agent-run-btn" id="run-btn-' + agent.id + '" onclick="runAgent(\'' + agent.id + '\')">▶ Executar</button>' : '') +
+        '<div class="toggle-wrap" onclick="toggleAgent(\'' + agent.id + '\')">' +
+          '<div class="toggle-track' + (enabled ? ' on' : '') + '" id="tg-' + agent.id + '">' +
+            '<div class="toggle-thumb"></div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  return '<div class="agent-card' + (enabled ? ' enabled' : '') + '" id="ac-' + agent.id + '">' +
+    '<div class="agent-header">' +
+      '<div class="agent-icon">' + agent.icon + '</div>' +
+      '<div class="agent-info">' +
+        '<div class="agent-name">' + agent.name + '</div>' +
+        '<div class="agent-desc">' + agent.desc + '</div>' +
+      '</div>' +
+    '</div>' +
+    metaHTML +
+    resultHTML +
+    footerHTML +
+  '</div>';
+}
+
+function toggleAgent(id) {
+  var state = getAgentState();
+  if (!state[id]) state[id] = {};
+  state[id].enabled = !state[id].enabled;
+  saveAgentState(state);
+  renderAgentsPage();
+}
+
+function runAgent(id) {
+  var btn = document.getElementById('run-btn-' + id);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Executando…'; }
+
+  fetch('/api/agents/run', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ agentId: id }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    var state = getAgentState();
+    if (!state[id]) state[id] = {};
+    var now = new Date();
+    state[id].lastRun = now.toLocaleDateString('pt-BR', { day: 'numeric', month: 'short', year: 'numeric' });
+    state[id].lastResult = data;
+    saveAgentState(state);
+    renderAgentsPage();
+  })
+  .catch(function(err) {
+    if (btn) { btn.disabled = false; btn.textContent = '▶ Executar'; }
+    alert('Erro ao executar agente: ' + (err.message || 'Falha na requisição'));
+  });
 }
 
 /* ════════════════════════════════════════════════════
