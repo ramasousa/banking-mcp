@@ -71,9 +71,9 @@ export class PluggyClient {
     const results = [];
     let cursor = null;
     do {
-      const params = { accountId, pageSize };
-      if (from) params.from = from;
-      if (to) params.to = to;
+      const params = { accountId, limit: pageSize };
+      if (from) params.startDate = from;
+      if (to) params.endDate = to;
       if (cursor) params.cursor = cursor;
       const data = await this._get('/v2/transactions', params);
       results.push(...(data.results ?? []));
