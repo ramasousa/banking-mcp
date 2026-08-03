@@ -132,8 +132,9 @@ export async function buildPluggyProfile(clientId, clientSecret, forcedItemId = 
   const txMap = {};
   await Promise.all(ACCOUNTS.map(async (acc) => {
     const rawTxs = await client.getTransactions(acc.accountId, { from: fromStr });
-    txMap[acc.accountId] = rawTxs.map((t) => ({
-      transactionId: t.id ?? `tx-${acc.accountId}-${Date.now()}`,
+    txMap[acc.accountId] = rawTxs.map((t, idx) => ({
+      _accountId: acc.accountId,
+      transactionId: t.id ?? `tx-${acc.accountId}-${idx}`,
       completedAuthorisedPaymentType: 'TRANSACAO_EFETIVADA',
       creditDebitType: t.type === 'CREDIT' ? 'CREDITO' : 'DEBITO',
       transactionName: t.description || t.descriptionRaw || 'Transação',
@@ -341,35 +342,57 @@ export async function buildPluggyProfile(clientId, clientSecret, forcedItemId = 
     const pfTotal = pfAccs.reduce((s, a) => s + balanceOf(a), 0);
     const pjTotal = pjAccs.reduce((s, a) => s + balanceOf(a), 0);
 
-    function topSaidas(accs) {
+    function resumoEntidade(accs, titular) {
       const ids = new Set(accs.map((a) => a.accountId));
-      const map = {};
-      allTx
-        .filter((t) => ids.has(t._accountId) && t.creditDebitType === 'DEBITO')
-        .forEach((t) => { map[t.type] = (map[t.type] ?? 0) + Number(t.transactionAmount.amount); });
-      return Object.entries(map)
-        .sort((a, b) => b[1] - a[1]).slice(0, 5)
-        .map(([tipo, valor]) => ({ tipo, valor }));
-    }
-
-    const entidades = {
-      PF: {
-        titular: pfName,
-        saldo_disponivel_total: pfTotal,
-        top_saidas_por_tipo: topSaidas(pfAccs),
-      },
-    };
-    if (pjName && pjAccs.length) {
-      entidades.PJ = {
-        titular: pjName,
-        saldo_disponivel_total: pjTotal,
-        top_saidas_por_tipo: topSaidas(pjAccs),
+      const txs = allTx.filter((t) => ids.has(t._accountId));
+      const porMes = {}, catDebito = {};
+      let entradas = 0, saidas = 0;
+      for (const t of txs) {
+        const mes = (t.transactionDateTime ?? '').slice(0, 7);
+        const v = Number(t.transactionAmount.amount);
+        porMes[mes] = porMes[mes] || { entradas: 0, saidas: 0 };
+        if (t.creditDebitType === 'CREDITO') { entradas += v; porMes[mes].entradas += v; }
+        else { saidas += v; porMes[mes].saidas += v; catDebito[t.type] = (catDebito[t.type] ?? 0) + v; }
+      }
+      const fluxo = Object.entries(porMes).sort().map(([mes, o]) => ({
+        mes, entradas: Number(o.entradas.toFixed(2)), saidas: Number(o.saidas.toFixed(2)),
+        liquido: Number((o.entradas - o.saidas).toFixed(2)),
+      }));
+      const saldo = accs.reduce((s, a) => s + balanceOf(a), 0);
+      return {
+        titular,
+        saldo_disponivel_total: Number(saldo.toFixed(2)),
+        entradas_12m: Number(entradas.toFixed(2)),
+        saidas_12m: Number(saidas.toFixed(2)),
+        fluxo_liquido_12m: Number((entradas - saidas).toFixed(2)),
+        fatura_cartao_atual: 0,
+        divida_total: 0,
+        top_saidas_por_tipo: Object.entries(catDebito)
+          .sort((a, b) => b[1] - a[1]).slice(0, 6)
+          .map(([tipo, valor]) => ({ tipo, valor: Number(valor.toFixed(2)) })),
+        fluxo_mensal: fluxo,
       };
     }
 
+    const pfEnt = resumoEntidade(pfAccs, pfName);
+    const entidades = { PF: pfEnt };
+    if (pjName && pjAccs.length) {
+      entidades.PJ = resumoEntidade(pjAccs, pjName);
+    }
+
     return {
-      consolidado: { saldo_disponivel_total: pfTotal + pjTotal },
+      gerado_em: new Date().toISOString(),
+      consolidado: {
+        saldo_disponivel_total: Number((pfTotal + pjTotal).toFixed(2)),
+        divida_total: 0,
+        patrimonio_liquido_aprox: Number((pfTotal + pjTotal).toFixed(2)),
+      },
       entidades,
+      cruzamentos: pjName && pjAccs.length ? {
+        pro_labore_pj_para_pf_12m: 0,
+        dependencia_pf_da_pj_pct: 0,
+        indice_liquidez_pj: Number((pjTotal / 1).toFixed(2)),
+      } : null,
     };
   }
 
