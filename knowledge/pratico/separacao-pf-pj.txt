@@ -1,0 +1,107 @@
+ASSUNTO: Separação financeira entre pessoa física e pessoa jurídica (PF/PJ) — boas práticas para o MEI
+FONTE: Boas práticas de gestão financeira; SEBRAE; Receita Federal
+
+---
+
+POR QUE SEPARAR PF E PJ
+
+A separação entre as finanças pessoais (PF) e as finanças do negócio (PJ) é o primeiro e mais importante passo na gestão financeira profissional do MEI. Sem essa separação, é impossível saber se o negócio é lucrativo, quanto o titular pode retirar com segurança, ou se as despesas do negócio estão controladas.
+
+Misturar PF e PJ gera: impossibilidade de calcular o lucro real; risco fiscal (Receita Federal pode questionar gastos pessoais lançados como despesa empresarial); dificuldade de acesso a crédito (bancos pedem demonstrativos do negócio); decisões baseadas em percepção, não em dados reais.
+
+---
+
+CONTA BANCÁRIA SEPARADA — A BASE DE TUDO
+
+Passo 1 fundamental: abrir uma conta bancária para o CNPJ separada da conta pessoal.
+Opções gratuitas ou de baixo custo para MEI:
+— Mercado Pago (conta PJ grátis)
+— Nubank PJ (gratuita)
+— Inter PJ (gratuita)
+— C6 Bank PJ (gratuita)
+— Bradesco MEI (conta com tarifas reduzidas)
+
+Todos os recebimentos do negócio devem entrar na conta PJ.
+Todas as despesas do negócio devem sair da conta PJ.
+A transferência mensal planejada da conta PJ para a conta PF = pró-labore/retirada do titular.
+
+---
+
+FLUXO FINANCEIRO IDEAL DO MEI
+
+CONTA PJ recebe:
+— Pagamentos de clientes (PIX, transferência, cartão de débito/crédito, boleto)
+— Rendimentos de investimentos do negócio (se houver)
+
+CONTA PJ paga:
+— Fornecedores e insumos do negócio
+— Aluguel do ponto comercial (se houver)
+— Energia, água, internet do negócio
+— DAS mensal (débito automático ou boleto)
+— Salário do funcionário (se houver)
+— Equipamentos e ferramentas do negócio
+
+TRANSFERÊNCIA MENSAL:
+— Uma vez por mês, o titular transfere da conta PJ para a conta PF o valor definido como retirada.
+— Esse valor deve ser pré-calculado (ver arquivo pro-labore.txt).
+— Nunca fazer múltiplas transferências aleatórias — isso dificulta o controle.
+
+CONTA PF paga:
+— Aluguel/financiamento da casa
+— Alimentação pessoal
+— Lazer e vestuário pessoal
+— Plano de saúde pessoal
+— Viagens
+— Qualquer gasto que não seja do negócio
+
+---
+
+COMO IDENTIFICAR GASTOS MISTURADOS (DIAGNÓSTICO)
+
+Se ao analisar o extrato da conta PJ aparecerem:
+— Supermercados e restaurantes não relacionados ao negócio
+— Compras em lojas de roupas e calçados
+— Serviços de streaming (Netflix, Spotify)
+— Farmácias e gastos com saúde pessoal
+— Transferências para familiares
+— Pagamento de contas pessoais (água da casa, condomínio, financiamento do carro pessoal)
+
+... então há mistura de PF e PJ que precisa ser corrigida.
+
+Se ao analisar a conta PF aparecerem:
+— Pagamentos de fornecedores do negócio
+— Compras de insumos e materiais
+— Depósitos diretos de clientes
+
+... também há mistura a corrigir.
+
+---
+
+RELATÓRIO MENSAL DE RECEITAS E DESPESAS (obrigação do MEI)
+
+O MEI é obrigado por lei a manter um relatório mensal de receitas brutas. Embora seja obrigação simples, poucos MEIs a cumprem formalmente. O relatório deve conter:
+— Data de cada recebimento
+— Valor recebido
+— Identificação do cliente ou forma de recebimento
+— Total mensal do faturamento
+
+Com a separação de contas, esse relatório pode ser extraído diretamente do extrato bancário da conta PJ, sem necessidade de planilha separada — desde que todos os recebimentos entrem pela conta PJ.
+
+---
+
+FERRAMENTAS GRATUITAS PARA CONTROLE FINANCEIRO DO MEI
+
+Planilha Google Sheets: crie uma planilha simples com colunas: Data | Descrição | Entrada | Saída | Saldo. Simples, gratuito, acessível pelo celular.
+App MEI da Receita Federal: gerencia DAS, consulta situação fiscal, emite DAS para pagamento.
+Aplicativos gratuitos de gestão para MEI: Granatum, Nibo (plano gratuito), ContaAzul Lite, MEI Fácil.
+Nota fiscal eletrônica: emita pelo Portal da Prefeitura (NFS-e) — gratuito para MEI.
+
+---
+
+DICAS PRÁTICAS PARA MANTER A SEPARAÇÃO
+
+Use o PIX do CNPJ para receber de clientes (chave CNPJ ou e-mail da empresa).
+Configure o DAS em débito automático na conta PJ para não esquecer.
+Defina uma data fixa para fazer a transferência da retirada (ex: todo dia 5 do mês).
+Nunca use o cartão da conta PJ para gastos pessoais — se necessário, use o cartão PF e reembolse a conta PJ com nota de despesa.
+Se usar carro ou celular pessoal para o negócio, registre a proporção de uso profissional e transfira esse valor como reembolso de despesa da conta PJ para a conta PF.

@@ -54,6 +54,70 @@ const anthropicTools = mcpTools.map(({ name, description, inputSchema }) => ({
   input_schema: inputSchema,
 }));
 
+// ── RAG — busca semântica na knowledge base MEI/EI ────────────
+const VOYAGE_API_KEY = process.env.VOYAGE_API_KEY;
+const QDRANT_URL     = (process.env.QDRANT_URL || '').trim();
+const QDRANT_API_KEY = (process.env.QDRANT_API_KEY || '').trim();
+const RAG_ENABLED    = !!(VOYAGE_API_KEY && QDRANT_URL && QDRANT_API_KEY);
+const RAG_COLLECTION = 'mei-kb';
+const RAG_TOP_K      = 5;
+
+if (RAG_ENABLED) {
+  anthropicTools.push({
+    name: 'mei_rag_search',
+    description: 'Busca na base de conhecimento MEI/EI: legislação, limites de faturamento, ' +
+      'DAS, DASN-SIMEI, desenquadramento, migração para ME, Simples Nacional, pró-labore, ' +
+      'separação PF/PJ e obrigações fiscais. Use sempre que o usuário perguntar sobre ' +
+      'regras do MEI, limites, teto de faturamento, impostos ou migração de regime.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        query: {
+          type: 'string',
+          description: 'Pergunta ou termos a buscar na base de conhecimento',
+        },
+      },
+      required: ['query'],
+    },
+  });
+}
+
+async function ragSearch(query) {
+  // 1. Embedding da query via Voyage AI
+  const embRes = await fetch('https://api.voyageai.com/v1/embeddings', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${VOYAGE_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ model: 'voyage-3-lite', input: [query], input_type: 'query' }),
+  });
+  if (!embRes.ok) throw new Error(`Voyage AI: ${await embRes.text()}`);
+  const embData = await embRes.json();
+  const vector = embData.data[0].embedding;
+
+  // 2. Busca no Qdrant
+  const srchRes = await fetch(`${QDRANT_URL}/collections/${RAG_COLLECTION}/points/search`, {
+    method: 'POST',
+    headers: {
+      'api-key': QDRANT_API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ vector, top: RAG_TOP_K, with_payload: true }),
+  });
+  if (!srchRes.ok) throw new Error(`Qdrant: ${await srchRes.text()}`);
+  const srchData = await srchRes.json();
+
+  // 3. Formata os chunks retornados
+  const results = (srchData.result ?? []).map((r) => ({
+    score: r.score,
+    source: r.payload.source,
+    text: r.payload.text,
+  }));
+
+  return JSON.stringify({ query, results });
+}
+
 // ── System prompt ─────────────────────────────────────────────
 const SYSTEM = [
   'Você é Fina, uma assistente financeira conversacional de uma plataforma white-label.',
@@ -89,6 +153,13 @@ const SYSTEM = [
   '(2) Emita NO INÍCIO da resposta, antes de qualquer texto: <!--FINA_INVEST:{"total":0,"items":[{"type":"CDB","label":"CDB Bradesco","value":0,"gross":0,"dueDate":"YYYY-MM-DD"},{"type":"LCI","label":"LCI","value":0,"taxFree":true,"dueDate":"YYYY-MM-DD"},{"type":"SELIC","label":"Tesouro Selic","value":0,"dueDate":"YYYY-MM-DD"},{"type":"FUND","label":"Nome do Fundo","value":0,"shares":0}],"suggestions":["follow-up 1","follow-up 2","follow-up 3"]}-->',
   '(3) Campos: type = um de CDB|LCI|LCA|SELIC|IPCA|PRFIX|FUND|STOCK|CRI|CRA|DEB. label = nome comercial limpo. value = valor líquido atual. gross = valor bruto antes de IR/IOF (omitir se igual a value ou não disponível). taxFree:true apenas para LCI/LCA/CRI/CRA. dueDate YYYY-MM-DD. shares para fundos quando disponível.',
   '(4) Calcule total como soma dos values. Após o bloco <!--FINA_INVEST:-->, escreva APENAS UMA frase curta de resumo. PROIBIDO: tabelas markdown, listas com hífens, separadores ---.',
+
+  'REGRA PARA PERGUNTAS SOBRE MEI, LIMITES, IMPOSTOS E MIGRAÇÃO:',
+  'Quando o usuário perguntar sobre: limite do MEI, teto de faturamento, DAS, DASN-SIMEI, desenquadramento, migração para ME, Simples Nacional, pró-labore, separação PF/PJ, obrigações fiscais, CNAE ou qualquer regra tributária do empreendedor individual:',
+  '(1) SEMPRE use a tool mei_rag_search para buscar a informação correta antes de responder.',
+  '(2) Baseie a resposta exclusivamente no que retornar da busca — não invente valores ou prazos.',
+  '(3) Cite a fonte quando relevante (ex: "Conforme LC 128/2008...").',
+  '(4) Se o contexto retornado não for suficiente, informe ao usuário que a informação não foi encontrada na base e sugira consultar um contador ou gov.br/mei.',
 ].join(' ');
 
 // ── Express ───────────────────────────────────────────────────
@@ -404,8 +475,12 @@ app.post('/api/chat', async (req, res) => {
 
         let resultText;
         try {
-          const mcpResult = await mcp.callTool({ name: block.name, arguments: block.input ?? {} });
-          resultText = mcpResult.content?.[0]?.text ?? '{}';
+          if (block.name === 'mei_rag_search') {
+            resultText = await ragSearch(block.input?.query ?? '');
+          } else {
+            const mcpResult = await mcp.callTool({ name: block.name, arguments: block.input ?? {} });
+            resultText = mcpResult.content?.[0]?.text ?? '{}';
+          }
         } catch (err) {
           resultText = JSON.stringify({ erro: err?.message ?? 'Falha na tool' });
         }
@@ -463,6 +538,7 @@ function toolDesc(name, input = {}) {
     of_get_fund:                  'Carregando dados do fundo…',
     analytics_cross_pf_pj:        'Consolidando posição PF + MEI…',
     analytics_spend_by_category:  'Analisando gastos por categoria…',
+    mei_rag_search:               'Consultando base de conhecimento MEI/EI…',
   };
   return MAP[name] ?? `Executando ${name}…`;
 }

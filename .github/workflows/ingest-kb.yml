@@ -1,0 +1,50 @@
+name: Indexar Knowledge Base MEI/EI
+
+on:
+  workflow_dispatch:
+    inputs:
+      force_recreate:
+        description: 'Recriar a coleção do zero (apaga dados existentes)?'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+jobs:
+  ingest:
+    name: Gerar embeddings e indexar no Qdrant
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Apagar coleção existente (se force_recreate=true)
+        if: ${{ github.event.inputs.force_recreate == 'true' }}
+        run: |
+          echo "Apagando coleção mei-kb..."
+          curl -s -o /dev/null -w "Status: %{http_code}\n" \
+            -X DELETE "${{ secrets.QDRANT_URL }}/collections/mei-kb" \
+            -H "api-key: ${{ secrets.QDRANT_API_KEY }}"
+
+      - name: Rodar ingest.js
+        working-directory: web-client
+        env:
+          VOYAGE_API_KEY: ${{ secrets.VOYAGE_API_KEY }}
+          QDRANT_URL: ${{ secrets.QDRANT_URL }}
+          QDRANT_API_KEY: ${{ secrets.QDRANT_API_KEY }}
+        run: node ingest.js
+
+      - name: Verificar coleção no Qdrant
+        run: |
+          echo "Verificando coleção indexada..."
+          curl -s "${{ secrets.QDRANT_URL }}/collections/mei-kb" \
+            -H "api-key: ${{ secrets.QDRANT_API_KEY }}" | \
+            python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Pontos indexados: {d[\"result\"][\"points_count\"]}')"

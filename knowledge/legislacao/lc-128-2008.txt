@@ -1,0 +1,56 @@
+FONTE: Lei Complementar nº 128, de 19 de dezembro de 2008
+ASSUNTO: Criação do Microempreendedor Individual (MEI)
+VIGÊNCIA: a partir de 01/07/2009
+ÚLTIMA ATUALIZAÇÃO RELEVANTE: LC 155/2016, LC 167/2019, LC 208/2024
+
+---
+
+DEFINIÇÃO DO MEI
+
+O Microempreendedor Individual (MEI) é o empresário individual que optou pelo enquadramento no Sistema de Recolhimento em Valores Fixos Mensais dos Tributos abrangidos pelo Simples Nacional (SIMEI). Foi criado pela LC 128/2008 como porta de entrada da formalização para trabalhadores autônomos e pequenos empreendedores brasileiros.
+
+Para se enquadrar como MEI, o empreendedor deve: exercer atividade permitida na lista de ocupações do MEI; ter faturamento bruto anual dentro do limite legal vigente; não participar como sócio, administrador ou titular de outra empresa; ter no máximo um empregado contratado com carteira assinada, que receba exclusivamente o salário mínimo nacional ou o piso salarial da categoria.
+
+---
+
+LIMITE DE FATURAMENTO
+
+O limite de faturamento bruto anual do MEI é definido pela legislação e atualizado periodicamente. O valor histórico consolidado foi de R$ 81.000,00 por ano (R$ 6.750,00 por mês), vigente de 2018 a 2024. A partir de 2025, a LC 208/2024 elevou o limite para R$ 130.500,00 por ano (R$ 10.875,00 por mês). Para MEI Caminhoneiro (transporte de cargas), o limite é diferenciado: R$ 251.600,00 por ano (até 2024) e R$ 409.800,00 por ano (a partir de 2025).
+
+IMPORTANTE: os limites são revisados periodicamente. Sempre verifique o valor vigente no Portal do Empreendedor (gov.br/mei) ou com a Receita Federal.
+
+---
+
+CRIAÇÃO DO CNPJ E FORMALIZAÇÃO
+
+O MEI possui CNPJ próprio, emite notas fiscais, pode abrir conta bancária jurídica e contratar com empresas e órgãos públicos. O registro é gratuito, realizado exclusivamente pelo Portal do Empreendedor (gov.br/mei), sem necessidade de contador obrigatório. O número de CNPJ é permanente mesmo que o MEI seja encerrado e reaberto.
+
+---
+
+EMPREGADO DO MEI
+
+O MEI pode contratar um único empregado CLT, que deve receber exclusivamente o salário mínimo nacional ou o piso da categoria profissional. O MEI empregador recolhe 3% de INSS patronal sobre a remuneração do funcionário (em vez dos 20% normais) mais os encargos do FGTS (8%) e os tributos devidos pelo trabalhador. Ter mais de um funcionário ou pagar salário acima do mínimo/piso descaracteriza o enquadramento MEI.
+
+---
+
+PREVIDÊNCIA SOCIAL DO MEI
+
+O MEI contribui para o INSS através do DAS com alíquota de 5% sobre o salário mínimo vigente (em vez dos 11% ou 20% do contribuinte individual normal). Essa contribuição garante: aposentadoria por idade, aposentadoria por invalidez, auxílio-doença, salário-maternidade e pensão por morte. Para aposentadoria por tempo de contribuição, o MEI precisa complementar a contribuição para 11% ou 20%.
+
+---
+
+TRIBUTAÇÃO FEDERAL
+
+Enquadrado no SIMEI, o MEI está isento de: Imposto de Renda Pessoa Jurídica (IRPJ), Contribuição Social sobre o Lucro Líquido (CSLL), Contribuição para o Financiamento da Seguridade Social (COFINS), Contribuição para o PIS/Pasep, e Imposto sobre Produtos Industrializados (IPI). O único tributo federal recolhido é a contribuição previdenciária (INSS) embutida no DAS.
+
+---
+
+OBRIGAÇÕES ACESSÓRIAS
+
+O MEI tem obrigações simplificadas: recolhimento mensal do DAS (até o dia 20 de cada mês); entrega anual da DASN-SIMEI (Declaração Anual do Simples Nacional — MEI), com prazo até 31 de maio de cada ano, referente ao faturamento do ano anterior; emissão de nota fiscal para pessoas jurídicas (para pessoa física, é facultativa); manutenção de relatório mensal de receitas brutas. O MEI está dispensado de escrituração contábil formal, de entrega de outras declarações (DCTF, EFD, etc.) e de registro em livros contábeis.
+
+---
+
+IMPEDIMENTOS E VEDAÇÕES
+
+Não pode ser MEI quem: é sócio ou titular de outra empresa; exerce atividade não permitida na lista oficial de ocupações MEI; possui mais de um estabelecimento; contrata mais de um funcionário; aufere receitas acima do limite anual; é servidor público federal em atividade (com exceções); exerce atividade de produção ou venda de bebidas alcoólicas, fumo, armas, veículos, ou outras restritas por lei; é microempreendedor individual rural vinculado a produtor rural pessoa física com opção pelo FUNRURAL.

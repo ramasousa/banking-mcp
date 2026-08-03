@@ -1,0 +1,144 @@
+ASSUNTO: Faixas e alíquotas do Simples Nacional — referência para migração MEI para ME
+FONTE: LC 123/2006, Anexos I a V; Receita Federal
+
+---
+
+COMO CALCULAR A ALÍQUOTA EFETIVA NO SIMPLES NACIONAL
+
+A alíquota efetiva depende do Anexo da atividade e do RBT12 (Receita Bruta Total dos últimos 12 meses).
+Fórmula: Alíquota Efetiva = (RBT12 × Alíquota Nominal − Parcela a Deduzir) / RBT12
+O PGDAS-D (gerador do DAS para ME) calcula isso automaticamente. O contador configura e acompanha mensalmente.
+
+---
+
+ANEXO I — COMÉRCIO (varejistas, atacadistas, revendedores em geral)
+
+Faixa 1: RBT12 até R$ 180.000,00
+— Alíquota nominal: 4,00% | Parcela a deduzir: R$ 0 | Alíquota efetiva: 4,00%
+
+Faixa 2: RBT12 de R$ 180.000,01 a R$ 360.000,00
+— Alíquota nominal: 7,30% | Parcela a deduzir: R$ 5.940,00
+
+Faixa 3: RBT12 de R$ 360.000,01 a R$ 720.000,00
+— Alíquota nominal: 9,50% | Parcela a deduzir: R$ 13.860,00
+
+Faixa 4: RBT12 de R$ 720.000,01 a R$ 1.800.000,00
+— Alíquota nominal: 10,70% | Parcela a deduzir: R$ 22.500,00
+
+Faixa 5: RBT12 de R$ 1.800.000,01 a R$ 3.600.000,00
+— Alíquota nominal: 14,30% | Parcela a deduzir: R$ 87.300,00
+
+Faixa 6: RBT12 de R$ 3.600.000,01 a R$ 4.800.000,00
+— Alíquota nominal: 19,00% | Parcela a deduzir: R$ 256.800,00
+
+---
+
+ANEXO II — INDÚSTRIA (fabricação, produção industrial)
+
+Faixa 1: RBT12 até R$ 180.000,00
+— Alíquota nominal: 4,50% | Parcela a deduzir: R$ 0
+
+Faixa 2: RBT12 de R$ 180.000,01 a R$ 360.000,00
+— Alíquota nominal: 7,80% | Parcela a deduzir: R$ 5.940,00
+
+Faixa 3: RBT12 de R$ 360.000,01 a R$ 720.000,00
+— Alíquota nominal: 10,00% | Parcela a deduzir: R$ 13.860,00
+
+Faixa 4: RBT12 de R$ 720.000,01 a R$ 1.800.000,00
+— Alíquota nominal: 11,20% | Parcela a deduzir: R$ 22.500,00
+
+Faixa 5: RBT12 de R$ 1.800.000,01 a R$ 3.600.000,00
+— Alíquota nominal: 14,70% | Parcela a deduzir: R$ 85.500,00
+
+Faixa 6: RBT12 de R$ 3.600.000,01 a R$ 4.800.000,00
+— Alíquota nominal: 30,00% | Parcela a deduzir: R$ 720.000,00
+
+---
+
+ANEXO III — SERVIÇOS EM GERAL (instalação, reparos, academias, agências de viagem, creches, etc.)
+
+Faixa 1: RBT12 até R$ 180.000,00
+— Alíquota nominal: 6,00% | Parcela a deduzir: R$ 0
+
+Faixa 2: RBT12 de R$ 180.000,01 a R$ 360.000,00
+— Alíquota nominal: 11,20% | Parcela a deduzir: R$ 9.360,00
+
+Faixa 3: RBT12 de R$ 360.000,01 a R$ 720.000,00
+— Alíquota nominal: 13,50% | Parcela a deduzir: R$ 17.640,00
+
+Faixa 4: RBT12 de R$ 720.000,01 a R$ 1.800.000,00
+— Alíquota nominal: 16,00% | Parcela a deduzir: R$ 35.640,00
+
+Faixa 5: RBT12 de R$ 1.800.000,01 a R$ 3.600.000,00
+— Alíquota nominal: 21,00% | Parcela a deduzir: R$ 125.640,00
+
+Faixa 6: RBT12 de R$ 3.600.000,01 a R$ 4.800.000,00
+— Alíquota nominal: 33,00% | Parcela a deduzir: R$ 648.000,00
+
+---
+
+ANEXO IV — SERVIÇOS COM TRIBUTAÇÃO PREVIDENCIÁRIA DIFERENCIADA
+(construção civil, limpeza, vigilância, serviços advocatícios, odontologia, etc.)
+ATENÇÃO: No Anexo IV, a CPP (contribuição patronal ao INSS) NÃO está incluída no DAS — deve ser recolhida separadamente à alíquota de 20% sobre a folha de salários.
+
+Faixa 1: RBT12 até R$ 180.000,00
+— Alíquota nominal: 4,50% | Parcela a deduzir: R$ 0
+
+Faixa 2: RBT12 de R$ 180.000,01 a R$ 360.000,00
+— Alíquota nominal: 9,00% | Parcela a deduzir: R$ 8.100,00
+
+Faixa 3: RBT12 de R$ 360.000,01 a R$ 720.000,00
+— Alíquota nominal: 10,20% | Parcela a deduzir: R$ 12.420,00
+
+Faixa 4: RBT12 de R$ 720.000,01 a R$ 1.800.000,00
+— Alíquota nominal: 14,00% | Parcela a deduzir: R$ 39.780,00
+
+Faixa 5: RBT12 de R$ 1.800.000,01 a R$ 3.600.000,00
+— Alíquota nominal: 22,00% | Parcela a deduzir: R$ 183.780,00
+
+Faixa 6: RBT12 de R$ 3.600.000,01 a R$ 4.800.000,00
+— Alíquota nominal: 33,00% | Parcela a deduzir: R$ 828.000,00
+
+---
+
+ANEXO V — SERVIÇOS INTELECTUAIS DE ALTA ESPECIALIZAÇÃO
+(tecnologia, auditoria, jornalismo, publicidade, engenharia, medicina em algumas modalidades)
+NOTA: Algumas atividades do Anexo V podem migrar para Anexo III com base no Fator R (relação folha/receita). O contador analisa caso a caso.
+
+Faixa 1: RBT12 até R$ 180.000,00
+— Alíquota nominal: 15,50% | Parcela a deduzir: R$ 0
+
+Faixa 2: RBT12 de R$ 180.000,01 a R$ 360.000,00
+— Alíquota nominal: 18,00% | Parcela a deduzir: R$ 4.500,00
+
+Faixa 3: RBT12 de R$ 360.000,01 a R$ 720.000,00
+— Alíquota nominal: 19,50% | Parcela a deduzir: R$ 9.900,00
+
+Faixa 4: RBT12 de R$ 720.000,01 a R$ 1.800.000,00
+— Alíquota nominal: 20,50% | Parcela a deduzir: R$ 17.100,00
+
+Faixa 5: RBT12 de R$ 1.800.000,01 a R$ 3.600.000,00
+— Alíquota nominal: 23,00% | Parcela a deduzir: R$ 62.100,00
+
+Faixa 6: RBT12 de R$ 3.600.000,01 a R$ 4.800.000,00
+— Alíquota nominal: 30,50% | Parcela a deduzir: R$ 540.000,00
+
+---
+
+EXEMPLO PRÁTICO DE CÁLCULO
+
+MEI que migrou para ME, atividade de serviços de tecnologia (Anexo III).
+Faturamento dos últimos 12 meses (RBT12): R$ 156.000.
+Faixa: 1 (até R$ 180.000).
+Alíquota nominal: 6%.
+Alíquota efetiva: (R$ 156.000 × 6% − R$ 0) / R$ 156.000 = 6%.
+DAS mensal: faturamento do mês × 6%. Se o mês faturou R$ 13.000: R$ 780 de DAS.
+Comparação: antes como MEI pagaria ~R$ 80/mês independente do faturamento.
+
+---
+
+FATOR R — QUANDO O ANEXO V PODE SER SUBSTITUÍDO PELO ANEXO III
+
+O Fator R é calculado como: Folha de Salários dos últimos 12 meses / RBT12.
+Se o Fator R for igual ou superior a 28%, a empresa do Anexo V pode recolher pelo Anexo III (alíquotas menores).
+O contador calcula o Fator R mensalmente e ajusta o enquadramento quando vantajoso.

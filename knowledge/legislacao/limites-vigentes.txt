@@ -1,0 +1,93 @@
+ASSUNTO: Limites de faturamento e valores de referência vigentes — MEI e Simples Nacional
+ATUALIZAÇÃO: Confira sempre gov.br/mei e Receita Federal para valores mais recentes
+
+---
+
+LIMITES DE FATURAMENTO BRUTO ANUAL
+
+MEI Geral (2018–2024): R$ 81.000,00/ano | R$ 6.750,00/mês
+MEI Geral (a partir de 2025 — LC 208/2024): R$ 130.500,00/ano | R$ 10.875,00/mês
+
+MEI Caminhoneiro (2018–2024): R$ 251.600,00/ano
+MEI Caminhoneiro (a partir de 2025): R$ 409.800,00/ano
+
+Microempresa (ME) no Simples Nacional: até R$ 360.000,00/ano
+Empresa de Pequeno Porte (EPP) no Simples Nacional: de R$ 360.000,01 até R$ 4.800.000,00/ano
+Limite para exportação de serviços (EPP): adicional de R$ 4.800.000,00 (total R$ 9.600.000,00)
+
+---
+
+REGRA DOS 20% — EXCESSO DE FATURAMENTO MEI
+
+Se o faturamento do MEI ultrapassar o limite anual em até 20%:
+— O MEI permanece enquadrado até 31 de dezembro do ano corrente.
+— Deve migrar obrigatoriamente para ME a partir do dia 1º de janeiro do ano seguinte.
+— Não há retroatividade; o DAS do ano em curso permanece válido.
+
+Exemplo com limite de R$ 81.000: faturou R$ 92.000 (excesso de R$ 11.000 = 13,6% acima do limite).
+— Permanece MEI até 31/12 do ano corrente.
+— Em janeiro do ano seguinte, passa a ser ME no Simples Nacional.
+
+Se o faturamento ultrapassar o limite em mais de 20%:
+— A exclusão do SIMEI é retroativa ao 1º dia do ano-calendário.
+— O empreendedor passa a dever os tributos como ME desde janeiro do ano corrente.
+— Pode gerar diferença de tributos a recolher com juros e multa.
+
+Exemplo com limite de R$ 81.000: faturou R$ 105.000 (excesso de R$ 24.000 = 29,6% acima do limite).
+— Desenquadramento retroativo a 01/01 do ano corrente.
+— Diferença de tributação de todo o ano deve ser regularizada.
+
+---
+
+SALÁRIO MÍNIMO E BASE DE CÁLCULO DO DAS
+
+O DAS do MEI é calculado com base no salário mínimo nacional vigente em cada competência. O salário mínimo é reajustado anualmente, geralmente em janeiro. Valores históricos de referência:
+2023: R$ 1.320,00
+2024: R$ 1.412,00
+2025: R$ 1.518,00
+2026: verificar portaria ministerial vigente
+
+INSS MEI (5% do salário mínimo):
+2024: 5% × R$ 1.412,00 = R$ 70,60
+2025: 5% × R$ 1.518,00 = R$ 75,90
+
+---
+
+COMPOSIÇÃO DO DAS MENSAL (valores aproximados para 2025)
+
+MEI Comércio e/ou Indústria: INSS R$ 75,90 + ICMS R$ 1,00 = R$ 76,90/mês
+MEI Serviços: INSS R$ 75,90 + ISS R$ 5,00 = R$ 80,90/mês
+MEI Comércio + Serviços: INSS R$ 75,90 + ICMS R$ 1,00 + ISS R$ 5,00 = R$ 81,90/mês
+MEI Caminhoneiro: INSS 12% × salário mínimo + ICMS R$ 1,00
+
+NOTA: os valores exatos de ISS e ICMS podem variar por município e estado. A emissão do DAS pelo Portal do Empreendedor sempre reflete o valor correto.
+
+---
+
+PRAZO DE PAGAMENTO DO DAS
+
+Vencimento: dia 20 de cada mês (competência do mês anterior).
+Se dia 20 cair em fim de semana ou feriado, vencimento é antecipado para o dia útil anterior.
+Multa por atraso: 0,33% ao dia, limitado a 20%, mais juros SELIC.
+Parcelamento de débitos: possível pelo portal PGMEI em até 60 vezes.
+
+---
+
+TETO DE FATURAMENTO MENSAL SEGURO (MEI)
+
+Para evitar risco de estouro do limite anual, o faturamento mensal deve ser monitorado:
+Com limite de R$ 81.000/ano: média mensal máxima = R$ 6.750,00
+Com limite de R$ 130.500/ano: média mensal máxima = R$ 10.875,00
+
+Atenção: o limite é sobre o FATURAMENTO BRUTO (valor total das notas fiscais e recebimentos do negócio), não sobre o lucro ou valor líquido recebido. Devoluções e cancelamentos podem ser deduzidos do faturamento, desde que devidamente comprovados.
+
+---
+
+ALERTAS DE MONITORAMENTO RECOMENDADOS
+
+60% do limite atingido: alerta informativo — o empreendedor está na metade da jornada anual
+75% do limite atingido: alerta de atenção — monitorar crescimento mensal
+85% do limite atingido: alerta amarelo — buscar orientação de um contador
+90% do limite atingido: alerta laranja — planejar migração com urgência
+95% do limite atingido: alerta vermelho — migração iminente necessária
+100%+ do limite atingido: alerta crítico — verificar percentual de excesso e agir conforme regra dos 20%
