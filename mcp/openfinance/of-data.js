@@ -503,15 +503,24 @@ export async function initPluggy() {
 
 /** Devolve o bundle de dados do perfil (ou o default se id inválido/ausente). */
 export function getProfile(id) {
-  if (_pluggyProfile) return _pluggyProfile;
+  if (id === 'pluggy') return _pluggyProfile || PROFILES[DEFAULT_PROFILE];
   return PROFILES[id] || PROFILES[DEFAULT_PROFILE];
 }
 
 /** Metadados dos perfis (para o seletor no WhatsApp). Id repetido → último vence. */
 export function listProfiles() {
-  if (_pluggyProfile) {
-    return [{ id: 'pluggy', primeiro: _pluggyProfile.PERSONAL_IDENTIFICATION?.civilName?.split(' ')[0] ?? 'Usuário', nome: _pluggyProfile.PERSONAL_IDENTIFICATION?.civilName ?? 'Usuário Pluggy', tipo: _pluggyProfile.hasPJ ? 'PF + PJ' : 'PF', empresa: _pluggyProfile.BUSINESS_IDENTIFICATION?.companyName ?? null }];
-  }
-  const byId = new Map(ALL_CFGS.map((c) => [c.id, { id: c.id, primeiro: c.primeiro, nome: c.nome, tipo: c.hasPJ ? 'PF + PJ' : 'PF', empresa: c.hasPJ ? c.empresa : null }]));
-  return [...byId.values()];
+  const mockProfiles = [...new Map(ALL_CFGS.map((c) => [c.id, {
+    id: c.id, primeiro: c.primeiro, nome: c.nome,
+    tipo: c.hasPJ ? 'PF + PJ' : 'PF', empresa: c.hasPJ ? c.empresa : null,
+  }])).values()];
+  if (!_pluggyProfile) return mockProfiles;
+  const pluggyEntry = {
+    id: 'pluggy',
+    primeiro: _pluggyProfile.PERSONAL_IDENTIFICATION?.civilName?.split(' ')[0] ?? 'Usuário',
+    nome: _pluggyProfile.PERSONAL_IDENTIFICATION?.civilName ?? 'Usuário Pluggy',
+    tipo: _pluggyProfile.hasPJ ? 'PF + PJ' : 'PF',
+    empresa: _pluggyProfile.BUSINESS_IDENTIFICATION?.companyName ?? null,
+    real: true,
+  };
+  return [pluggyEntry, ...mockProfiles];
 }
