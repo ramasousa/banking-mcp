@@ -2745,7 +2745,7 @@ function openPluggyConnect() {
 
       // Embed via iframe — avoids CDN dependency
       var iframe = document.createElement('iframe');
-      iframe.src = 'https://connect.pluggy.ai/?accessToken=' + encodeURIComponent(d.connectToken) + '&includeSandbox=true';
+      iframe.src = 'https://connect.pluggy.ai/?connectToken=' + encodeURIComponent(d.connectToken) + '&includeSandbox=true';
       iframe.style.cssText = 'width:100%;height:520px;border:none;border-radius:10px;display:block';
       iframe.allow = 'camera; microphone';
       if (rootEl) rootEl.appendChild(iframe);
