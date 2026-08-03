@@ -74,10 +74,22 @@ export async function buildPluggyProfile(clientId, clientSecret, forcedItemId = 
       }
     }
 
+    if (accounts.length) {
+      console.log('[Pluggy] tipos de conta encontrados:', accounts.map((a) => `${a.type}(${a.subtype ?? '-'})`).join(', '));
+    }
     for (const acc of accounts) {
-      if (acc.type === 'CHECKING')   checkingAccs.push({ ...acc, _itemId: item.id });
-      else if (acc.type === 'SAVINGS') savingsAccs.push({ ...acc, _itemId: item.id });
-      else if (acc.type === 'CREDIT')  creditAccs.push({  ...acc, _itemId: item.id });
+      const t = acc.type?.toUpperCase() ?? '';
+      const s = acc.subtype?.toUpperCase() ?? '';
+      if (t === 'CHECKING' || s === 'CHECKING_ACCOUNT' || t === 'BANK')
+        checkingAccs.push({ ...acc, _itemId: item.id });
+      else if (t === 'SAVINGS' || s === 'SAVINGS_ACCOUNT')
+        savingsAccs.push({ ...acc, _itemId: item.id });
+      else if (t === 'CREDIT')
+        creditAccs.push({ ...acc, _itemId: item.id });
+      else {
+        console.log('[Pluggy] tipo de conta não mapeado:', t, s, '— tratando como CHECKING');
+        checkingAccs.push({ ...acc, _itemId: item.id });
+      }
     }
   }
 
