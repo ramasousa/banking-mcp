@@ -19,7 +19,7 @@ const COLLECTION     = 'mei-kb';
 const VOYAGE_MODEL   = 'voyage-3-lite'; // 512 dims, 50M tokens/mês grátis
 const VECTOR_SIZE    = 512;
 const KB_DIR         = join(__dirname, '..', 'knowledge');
-const BATCH_SIZE     = 32; // max chunks por chamada Voyage
+const BATCH_SIZE     = 5;  // free tier Voyage: 3 RPM, 10K TPM → ~5 chunks/req com delay
 
 if (!VOYAGE_API_KEY || !QDRANT_URL || !QDRANT_API_KEY) {
   console.error('Erro: defina VOYAGE_API_KEY, QDRANT_URL e QDRANT_API_KEY.');
@@ -109,7 +109,13 @@ try {
 }
 
 // ── 3. Gera embeddings via Voyage AI em batches ───────────────────
-async function embedBatch(texts) {
+const RATE_LIMIT_DELAY = 21000; // 21s entre batches → respeita 3 RPM do free tier
+
+async function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
+async function embedBatch(texts, attempt = 1) {
   const res = await fetch('https://api.voyageai.com/v1/embeddings', {
     method: 'POST',
     headers: {
@@ -118,6 +124,12 @@ async function embedBatch(texts) {
     },
     body: JSON.stringify({ model: VOYAGE_MODEL, input: texts, input_type: 'document' }),
   });
+  if (res.status === 429 && attempt <= 3) {
+    const wait = RATE_LIMIT_DELAY * attempt;
+    console.log(`   Rate limit atingido, aguardando ${wait / 1000}s...`);
+    await sleep(wait);
+    return embedBatch(texts, attempt + 1);
+  }
   if (!res.ok) {
     const txt = await res.text();
     throw new Error(`Voyage AI → ${res.status}: ${txt}`);
@@ -126,10 +138,13 @@ async function embedBatch(texts) {
   return data.data.map((d) => d.embedding);
 }
 
-console.log('🧠 Gerando embeddings via Voyage AI...');
+const totalBatches = Math.ceil(documents.length / BATCH_SIZE);
+const estimatedMinutes = Math.ceil((totalBatches * RATE_LIMIT_DELAY) / 60000);
+console.log(`🧠 Gerando embeddings via Voyage AI (free tier — ~${estimatedMinutes} min)...`);
 const allEmbeddings = [];
 for (let i = 0; i < documents.length; i += BATCH_SIZE) {
   const batch = documents.slice(i, i + BATCH_SIZE);
+  if (i > 0) await sleep(RATE_LIMIT_DELAY); // aguarda entre batches
   const vectors = await embedBatch(batch.map((d) => d.text));
   allEmbeddings.push(...vectors);
   console.log(`   ${Math.min(i + BATCH_SIZE, documents.length)}/${documents.length} chunks processados`);
