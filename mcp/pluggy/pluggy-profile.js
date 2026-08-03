@@ -80,13 +80,13 @@ export async function buildPluggyProfile(clientId, clientSecret, forcedItemId = 
     for (const acc of accounts) {
       const t = acc.type?.toUpperCase() ?? '';
       const s = acc.subtype?.toUpperCase() ?? '';
-      if (t === 'CHECKING' || s === 'CHECKING_ACCOUNT' || t === 'BANK')
-        checkingAccs.push({ ...acc, _itemId: item.id });
-      else if (t === 'SAVINGS' || s === 'SAVINGS_ACCOUNT')
-        savingsAccs.push({ ...acc, _itemId: item.id });
-      else if (t === 'CREDIT')
+      if (t === 'CREDIT') {
         creditAccs.push({ ...acc, _itemId: item.id });
-      else {
+      } else if (t === 'SAVINGS' || s === 'SAVINGS_ACCOUNT') {
+        savingsAccs.push({ ...acc, _itemId: item.id });
+      } else if (t === 'CHECKING' || s === 'CHECKING_ACCOUNT' || (t === 'BANK' && s !== 'SAVINGS_ACCOUNT')) {
+        checkingAccs.push({ ...acc, _itemId: item.id });
+      } else {
         console.log('[Pluggy] tipo de conta não mapeado:', t, s, '— tratando como CHECKING');
         checkingAccs.push({ ...acc, _itemId: item.id });
       }
