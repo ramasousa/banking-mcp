@@ -516,6 +516,8 @@ export function getProfile(id) {
   return PROFILES[id] || PROFILES[DEFAULT_PROFILE];
 }
 
+export function isPluggyReady() { return !!_pluggyProfile; }
+
 /** Metadados dos perfis (para o seletor no WhatsApp). Id repetido → último vence. */
 export function listProfiles() {
   const mockProfiles = [...new Map(ALL_CFGS.map((c) => [c.id, {
