@@ -226,7 +226,7 @@ app.post('/api/switch-profile', (req, res) => {
 // GET /api/pluggy/connect-token
 // Retorna um connect token temporário para abrir o Pluggy Connect Widget.
 // ─────────────────────────────────────────────────────────────
-app.get('/api/pluggy/connect-token', async (_req, res) => {
+app.get('/api/pluggy/connect-token', async (req, res) => {
   const clientId     = process.env.PLUGGY_CLIENT_ID;
   const clientSecret = process.env.PLUGGY_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
@@ -235,7 +235,8 @@ app.get('/api/pluggy/connect-token', async (_req, res) => {
   try {
     const { PluggyClient } = await import('../mcp/pluggy/pluggy-client.js');
     const client = new PluggyClient(clientId, clientSecret);
-    const connectToken = await client.getConnectToken();
+    const redirectUrl = `${req.protocol}://${req.get('host')}/pluggy-callback`;
+    const connectToken = await client.getConnectToken(redirectUrl);
     res.json({ connectToken });
   } catch (err) {
     console.error('[pluggy/connect-token]', err.message);
@@ -260,6 +261,79 @@ app.post('/api/pluggy/connect', async (req, res) => {
     console.error('[pluggy/connect]', err.message);
     res.status(500).json({ error: err.message });
   }
+});
+
+// ─────────────────────────────────────────────────────────────
+// GET /pluggy-callback
+// Pluggy Connect Widget redireciona aqui após o usuário autorizar.
+// Serve uma página leve que notifica a aba principal via BroadcastChannel.
+// ─────────────────────────────────────────────────────────────
+app.get('/pluggy-callback', (_req, res) => {
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(`<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conectando conta…</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,sans-serif;background:#0f1117;color:#e2e8f0;display:flex;align-items:center;justify-content:center;min-height:100vh}
+  .box{text-align:center;padding:40px 32px;max-width:360px}
+  .spinner{width:44px;height:44px;border:3px solid #2d3748;border-top-color:#3D7FEE;border-radius:50%;animation:spin .9s linear infinite;margin:0 auto 24px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  p{font-size:15px;color:#a0aec0;line-height:1.6}
+  .ok{color:#68d391;font-size:22px;margin-bottom:16px}
+  .err{color:#fc8181}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="spinner" id="spinner"></div>
+  <p id="msg">Sincronizando sua conta…</p>
+</div>
+<script>
+(function () {
+  var params  = new URLSearchParams(location.search);
+  var itemId  = params.get('itemId');
+  var spinner = document.getElementById('spinner');
+  var msg     = document.getElementById('msg');
+
+  if (!itemId) {
+    spinner.style.display = 'none';
+    msg.innerHTML = '<span class="err">Erro: itemId não encontrado na URL.</span>';
+    return;
+  }
+
+  fetch('/api/pluggy/connect', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ itemId: itemId })
+  })
+  .then(function (r) { return r.json(); })
+  .then(function (data) {
+    if (data.ok) {
+      spinner.style.display = 'none';
+      msg.innerHTML = '<div class="ok">✓</div>Conta conectada!<br>Fechando esta janela…';
+      try {
+        var bc = new BroadcastChannel('pluggy-connect');
+        bc.postMessage({ type: 'pluggy-connected' });
+        bc.close();
+      } catch (_) {}
+      setTimeout(function () { window.close(); }, 1200);
+    } else {
+      spinner.style.display = 'none';
+      msg.innerHTML = '<span class="err">Erro ao sincronizar: ' + (data.error || 'tente novamente') + '</span>';
+    }
+  })
+  .catch(function (err) {
+    spinner.style.display = 'none';
+    msg.innerHTML = '<span class="err">Erro de rede: ' + err.message + '</span>';
+  });
+}());
+</script>
+</body>
+</html>`);
 });
 
 // ─────────────────────────────────────────────────────────────
