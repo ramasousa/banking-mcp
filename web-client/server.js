@@ -495,7 +495,7 @@ app.get('/api/dashboard', async (_req, res) => {
         from: fmtDate(thirtyAgo, { day: 'numeric', month: 'short' }),
         to: fmtDate(today, { day: 'numeric', month: 'short', year: 'numeric' }),
       },
-      accounts: { count: accounts.length },
+      accounts: { count: accounts.length + cardsList.length },
       categories,
       totalSpend,
       card,

@@ -165,7 +165,7 @@ export async function buildPluggyProfile(clientId, clientSecret, forcedItemId = 
       investmentType: 'CDB',
       name: inv.name ?? 'Investimento',
       updatedValue: fmtAmt(inv.balance ?? 0),
-      dueDate: inv.dueDate ?? null,
+      dueDate: inv.dueDate ? String(inv.dueDate).slice(0, 10) : null,
     }));
 
   const INVESTMENTS = {
@@ -341,6 +341,7 @@ export async function buildPluggyProfile(clientId, clientSecret, forcedItemId = 
     }
     const pfTotal = pfAccs.reduce((s, a) => s + balanceOf(a), 0);
     const pjTotal = pjAccs.reduce((s, a) => s + balanceOf(a), 0);
+    const investTotal = bankFixedItems.reduce((s, inv) => s + Number(inv.updatedValue?.amount ?? 0), 0);
 
     function resumoEntidade(accs, titular) {
       const ids = new Set(accs.map((a) => a.accountId));
@@ -359,9 +360,10 @@ export async function buildPluggyProfile(clientId, clientSecret, forcedItemId = 
         liquido: Number((o.entradas - o.saidas).toFixed(2)),
       }));
       const saldo = accs.reduce((s, a) => s + balanceOf(a), 0);
+      const saldoComInvest = saldo === 0 ? saldo + investTotal : saldo;
       return {
         titular,
-        saldo_disponivel_total: Number(saldo.toFixed(2)),
+        saldo_disponivel_total: Number(saldoComInvest.toFixed(2)),
         entradas_12m: Number(entradas.toFixed(2)),
         saidas_12m: Number(saidas.toFixed(2)),
         fluxo_liquido_12m: Number((entradas - saidas).toFixed(2)),
@@ -383,9 +385,9 @@ export async function buildPluggyProfile(clientId, clientSecret, forcedItemId = 
     return {
       gerado_em: new Date().toISOString(),
       consolidado: {
-        saldo_disponivel_total: Number((pfTotal + pjTotal).toFixed(2)),
+        saldo_disponivel_total: Number((pfTotal + pjTotal + investTotal).toFixed(2)),
         divida_total: 0,
-        patrimonio_liquido_aprox: Number((pfTotal + pjTotal).toFixed(2)),
+        patrimonio_liquido_aprox: Number((pfTotal + pjTotal + investTotal).toFixed(2)),
       },
       entidades,
       cruzamentos: pjName && pjAccs.length ? {
