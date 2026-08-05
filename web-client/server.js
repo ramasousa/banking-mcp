@@ -71,6 +71,19 @@ const RAG_ENABLED    = !!(VOYAGE_API_KEY && QDRANT_URL && QDRANT_API_KEY);
 const RAG_COLLECTION = 'mei-kb';
 const RAG_TOP_K      = 5;
 
+if (process.env.PLUGGY_CLIENT_ID) {
+  anthropicTools.push({
+    name: 'pluggy_initiate_consent',
+    description:
+      'Abre o widget Pluggy Connect para o usuário autorizar o acesso aos seus dados bancários ' +
+      'reais via Open Finance. Use quando o usuário pedir para conectar o banco, vincular conta, ' +
+      'ou quando os dados disponíveis são fictícios e o usuário quer dados reais. ' +
+      'Após chamar esta tool, informe o usuário que o widget foi aberto na tela e ele deve ' +
+      'seguir as instruções para concluir a autorização.',
+    input_schema: { type: 'object', properties: {}, required: [] },
+  });
+}
+
 if (RAG_ENABLED) {
   anthropicTools.push({
     name: 'mei_rag_search',
@@ -661,7 +674,22 @@ app.post('/api/chat', async (req, res) => {
 
         let resultText;
         try {
-          if (block.name === 'mei_rag_search') {
+          if (block.name === 'pluggy_initiate_consent') {
+            const pluggyId     = process.env.PLUGGY_CLIENT_ID;
+            const pluggySecret = process.env.PLUGGY_CLIENT_SECRET;
+            if (!pluggyId || !pluggySecret) {
+              resultText = JSON.stringify({ erro: 'Pluggy não configurado neste ambiente.' });
+            } else {
+              const { PluggyClient } = await import('../mcp/pluggy/pluggy-client.js');
+              const pluggyClient = new PluggyClient(pluggyId, pluggySecret);
+              const connectToken = await pluggyClient.getConnectToken();
+              send({ type: 'pluggy_connect', connectToken });
+              resultText = JSON.stringify({
+                ok: true,
+                message: 'Widget de consentimento aberto. Informe o usuário que deve seguir as instruções no widget para autorizar o acesso aos dados bancários.',
+              });
+            }
+          } else if (block.name === 'mei_rag_search') {
             resultText = await ragSearch(block.input?.query ?? '');
           } else {
             const mcpResult = await mcp.callTool({ name: block.name, arguments: block.input ?? {} });

@@ -1900,6 +1900,9 @@ function sendMsg() {
       chatHistory.push({ role: 'assistant', content: ev.text || '' });
       setSendBusy(false);
 
+    } else if (ev.type === 'pluggy_connect') {
+      openPluggyConnectFromChat(ev.connectToken);
+
     } else if (ev.type === 'error') {
       finalizeSteps();
       var w = document.createElement('div');
@@ -2779,6 +2782,69 @@ function openPluggyConnect() {
       overlay.classList.add('open');
       showPluggyError(err.message || 'Não foi possível inicializar o widget.');
     });
+}
+
+// Envia uma mensagem automática ao chat (usada após consent flow iniciado pelo Claude).
+function sendAutoMsg(text) {
+  if (chatBusy) return;
+  var inp = document.getElementById('chat-inp');
+  if (inp) inp.value = text;
+  sendMsg();
+}
+
+// Abre o widget Pluggy com um connectToken já obtido pelo servidor (fluxo via chat).
+function openPluggyConnectFromChat(connectToken) {
+  if (!window.PluggyConnectSDK || !window.PluggyConnectSDK.PluggyConnect) return;
+  var overlay  = document.getElementById('pluggy-modal-overlay');
+  var statusEl = document.getElementById('pluggy-modal-status');
+  var rootEl   = document.getElementById('pluggy-widget-root');
+
+  if (_pluggyWidget) { try { _pluggyWidget.destroy(); } catch(_) {} _pluggyWidget = null; }
+  if (rootEl) rootEl.innerHTML = '';
+  if (statusEl) statusEl.style.display = 'none';
+
+  _pluggyWidget = new window.PluggyConnectSDK.PluggyConnect({
+    connectToken: connectToken,
+    includeSandbox: true,
+    onSuccess: function(itemData) {
+      var itemId = (itemData && itemData.item && itemData.item.id) || (itemData && itemData.id);
+      if (!itemId) {
+        overlay.classList.add('open');
+        showPluggyError('Conexão realizada, mas itemId não retornado.');
+        return;
+      }
+      if (statusEl) { statusEl.style.display = ''; statusEl.textContent = 'Sincronizando dados…'; }
+      overlay.classList.add('open');
+      fetch('/api/pluggy/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ itemId: itemId }),
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(res) {
+        overlay.classList.remove('open');
+        if (res.ok) {
+          dashLoaded = false; dashData = null;
+          loadProfiles(); loadDashboard();
+          sendAutoMsg('Conta bancária conectada com sucesso! Pode me mostrar meu saldo e meus investimentos?');
+        } else {
+          overlay.classList.add('open');
+          showPluggyError(res.error || 'Erro ao sincronizar dados.');
+        }
+      })
+      .catch(function(err) { overlay.classList.add('open'); showPluggyError('Erro de rede: ' + err.message); });
+    },
+    onError: function(err) {
+      var msg = (err && err.message) || 'Erro no widget da Pluggy.';
+      overlay.classList.add('open');
+      showPluggyError(msg);
+    },
+    onClose: function() {
+      overlay.classList.remove('open');
+      if (rootEl) rootEl.innerHTML = '';
+    },
+  });
+  _pluggyWidget.init();
 }
 
 function showPluggyError(msg) {
