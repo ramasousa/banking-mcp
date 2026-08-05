@@ -4,8 +4,9 @@
   "description": "Fina — white-label conversational financial assistant. Express server that bridges the browser to the Banking MCP Server and the Claude API.",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
+    "build": "node_modules/.bin/esbuild node_modules/pluggy-connect-sdk/dist/main/pluggy-connect.js --bundle --global-name=PluggyConnectSDK --platform=browser --outfile=public/js/pluggy-connect-sdk.js --external:react --external:react-dom",
+    "start": "npm run build && node server.js",
+    "dev": "npm run build && node --watch server.js"
   },
   "engines": {
     "node": ">=18"
@@ -13,6 +14,10 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.65.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "pluggy-connect-sdk": "^2.14.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1"
   }
 }
