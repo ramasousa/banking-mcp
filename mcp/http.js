@@ -22,6 +22,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { createBankingServer } from './core.js';
 import { authRouter, requireAuth, PUBLIC_URL } from './auth.js';
 import { demoIdpRouter } from './demo-idp.js';
+import { initPluggy } from './openfinance/of-data.js';
 
 const PORT = process.env.PORT || 3000;
 const REQUIRE_AUTH = process.env.MCP_REQUIRE_AUTH !== 'false';
@@ -110,6 +111,10 @@ const methodNotAllowed = (_req, res) =>
   });
 app.get('/mcp', methodNotAllowed);
 app.delete('/mcp', methodNotAllowed);
+
+// Pré-carrega dados reais do Pluggy quando PLUGGY_CLIENT_ID está configurado.
+// Sem isso, as tools retornam dados mock mesmo com credenciais presentes.
+initPluggy().catch((err) => console.error('[Pluggy] falha na inicialização:', err.message));
 
 app.listen(PORT, () => {
   const demo = process.env.IDP_DEMO === 'true';

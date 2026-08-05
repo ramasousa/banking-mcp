@@ -247,10 +247,13 @@ const idProp = (d) => ({ type: 'string', description: d });
 const pageProps = { page: { type: 'integer', description: 'Página (1..). Padrão 1.' }, pageSize: { type: 'integer', description: 'Itens por página. Padrão 25.' } };
 
 export const tools = [
-  T('pluggy_initiate_consent', 'Conectar banco (Open Finance real)',
-    'Inicia a jornada de consentimento Pluggy para o usuário autorizar acesso aos dados bancários REAIS via Open Finance Brasil. ' +
-    'Retorna uma URL que o usuário deve abrir no navegador. Use quando o usuário pedir para conectar o banco, ' +
-    'vincular conta ou quando os dados disponíveis são fictícios e o usuário quer dados reais.',
+  T('pluggy_initiate_consent', 'Vincular conta bancária real (Pluggy / Open Finance)',
+    'Inicia a jornada de consentimento Pluggy Open Finance para o usuário autorizar acesso aos seus dados bancários REAIS. ' +
+    'Os dados disponíveis atualmente são de DEMONSTRAÇÃO (fictícios). Use esta tool quando o usuário quiser: ' +
+    'conectar sua conta real, ver dados reais, vincular banco via Open Finance, usar Pluggy, ' +
+    'ou quando mencionar que os dados não são os seus. ' +
+    'NÃO use as outras tools de dados bancários antes de chamar esta — os dados são mock até o consentimento ser concedido. ' +
+    'Retorna uma URL que o usuário deve abrir no navegador para autorizar.',
     obj(), { readOnlyHint: false, openWorldHint: true }),
 
   T('of_get_consent', 'Consentimento (Open Finance)', 'GET /consents/v3/consents/{consentId} — retorna o consentimento com status e permissions. Sem parâmetro usa o consentimento ativo do usuário.',
