@@ -57,12 +57,14 @@ export class PluggyClient {
     return res.json();
   }
 
-  async getConnectToken() {
+  async getConnectToken(redirectUrl) {
     const apiKey = await this.getApiKey();
+    const body = {};
+    if (redirectUrl) body.redirectUrl = redirectUrl;
     const res = await fetch(`${PLUGGY_BASE}/connect_token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-API-KEY': apiKey },
-      body: JSON.stringify({}),
+      body: JSON.stringify(body),
     });
     if (!res.ok) {
       const txt = await res.text();

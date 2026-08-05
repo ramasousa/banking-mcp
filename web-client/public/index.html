@@ -2690,36 +2690,15 @@ document.querySelectorAll('#scr-land a[href^="#"]').forEach(function(a) {
 
 <script>
 /* ════════════════════════════════════════════════════
-   PLUGGY CONNECT — consent journey (iframe + postMessage)
+   PLUGGY CONNECT — consent journey (popup + BroadcastChannel)
 ════════════════════════════════════════════════════ */
-var _pluggyMsgHandler = null;
+var _pluggyPopup = null;
+var _pluggyPopupChecker = null;
+var _pluggyBC = null;
 
-function _pluggyAfterSuccess(itemId) {
-  var overlay  = document.getElementById('pluggy-modal-overlay');
-  var statusEl = document.getElementById('pluggy-modal-status');
-  var rootEl   = document.getElementById('pluggy-widget-root');
-  if (statusEl) { statusEl.style.display = ''; statusEl.textContent = 'Sincronizando dados…'; }
-  if (rootEl) rootEl.innerHTML = '';
-
-  fetch('/api/pluggy/connect', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ itemId: itemId }),
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(res) {
-    if (res.ok) {
-      closePluggyModal();
-      dashLoaded = false;
-      dashData = null;
-      chatHistory = [];
-      loadProfiles();
-      loadDashboard();
-    } else {
-      showPluggyError(res.error || 'Erro ao sincronizar dados.');
-    }
-  })
-  .catch(function(err) { showPluggyError('Erro de rede: ' + err.message); });
+function _pluggyCleanup() {
+  if (_pluggyPopupChecker) { clearInterval(_pluggyPopupChecker); _pluggyPopupChecker = null; }
+  if (_pluggyBC) { try { _pluggyBC.close(); } catch(_) {} _pluggyBC = null; }
 }
 
 function openPluggyConnect() {
@@ -2728,10 +2707,9 @@ function openPluggyConnect() {
   var rootEl   = document.getElementById('pluggy-widget-root');
   if (!overlay) return;
 
-  // Reset
-  if (statusEl) { statusEl.style.display = ''; statusEl.textContent = 'Carregando widget…'; }
+  _pluggyCleanup();
+  if (statusEl) { statusEl.style.display = ''; statusEl.textContent = 'Gerando token de conexão…'; }
   if (rootEl) rootEl.innerHTML = '';
-  if (_pluggyMsgHandler) { window.removeEventListener('message', _pluggyMsgHandler); _pluggyMsgHandler = null; }
   overlay.classList.add('open');
 
   fetch('/api/pluggy/connect-token')
@@ -2741,41 +2719,49 @@ function openPluggyConnect() {
     })
     .then(function(d) {
       if (!d.connectToken) throw new Error('Token não retornado pelo servidor');
-      if (statusEl) statusEl.style.display = 'none';
 
-      // Embed via iframe — avoids CDN dependency
-      var iframe = document.createElement('iframe');
-      iframe.src = 'https://connect.pluggy.ai/?connectToken=' + encodeURIComponent(d.connectToken) + '&includeSandbox=true';
-      iframe.style.cssText = 'width:100%;height:520px;border:none;border-radius:10px;display:block';
-      iframe.allow = 'camera; microphone';
-      if (rootEl) rootEl.appendChild(iframe);
+      var w = 480, h = 700;
+      var left = Math.round((screen.width - w) / 2);
+      var top  = Math.round((screen.height - h) / 2);
+      _pluggyPopup = window.open(
+        'https://connect.pluggy.ai/?connectToken=' + encodeURIComponent(d.connectToken) + '&includeSandbox=true',
+        'pluggy-connect',
+        'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top + ',resizable=yes'
+      );
 
-      // Listen for events from the widget
-      _pluggyMsgHandler = function(ev) {
-        if (ev.origin !== 'https://connect.pluggy.ai') return;
-        var data   = ev.data || {};
-        // Pluggy emits { action, payload } or { type, payload }
-        var action = data.action || data.type || '';
-        var payload = data.payload || data;
+      if (!_pluggyPopup) {
+        showPluggyError('Popup bloqueado pelo navegador. Permita popups para este site e tente novamente.');
+        return;
+      }
 
-        if (action === 'pluggyConnect/pluggySuccess' || action === 'SUCCESS') {
-          window.removeEventListener('message', _pluggyMsgHandler); _pluggyMsgHandler = null;
-          var item   = payload.item || payload;
-          var itemId = item.id || item.itemId;
-          if (!itemId) { showPluggyError('Conexão realizada, mas itemId não retornado. Recarregue a página.'); return; }
-          _pluggyAfterSuccess(itemId);
+      if (statusEl) {
+        statusEl.style.display = '';
+        statusEl.innerHTML = '<strong>Uma janela foi aberta.</strong><br>Complete a conexão bancária nessa janela — esta tela atualizará automaticamente.';
+      }
 
-        } else if (action === 'pluggyConnect/pluggyCanceled' || action === 'CLOSE' || action === 'CANCELED') {
-          window.removeEventListener('message', _pluggyMsgHandler); _pluggyMsgHandler = null;
-          closePluggyModal();
+      // Listen for success via BroadcastChannel (fired by /pluggy-callback page)
+      try {
+        _pluggyBC = new BroadcastChannel('pluggy-connect');
+        _pluggyBC.onmessage = function(ev) {
+          if (ev.data && ev.data.type === 'pluggy-connected') {
+            _pluggyCleanup();
+            closePluggyModal();
+            dashLoaded = false;
+            dashData = null;
+            chatHistory = [];
+            loadProfiles();
+            loadDashboard();
+          }
+        };
+      } catch(_) { /* BroadcastChannel not supported — fallback: poll popup */ }
 
-        } else if (action === 'pluggyConnect/pluggyError' || action === 'ERROR') {
-          window.removeEventListener('message', _pluggyMsgHandler); _pluggyMsgHandler = null;
-          var msg = (payload && payload.message) || 'Erro no widget da Pluggy.';
-          showPluggyError(msg);
+      // Fallback: detect popup closed without connecting
+      _pluggyPopupChecker = setInterval(function() {
+        if (_pluggyPopup && _pluggyPopup.closed) {
+          _pluggyCleanup();
+          if (overlay.classList.contains('open')) closePluggyModal();
         }
-      };
-      window.addEventListener('message', _pluggyMsgHandler);
+      }, 600);
     })
     .catch(function(err) {
       showPluggyError(err.message || 'Não foi possível inicializar o widget.');
@@ -2791,9 +2777,11 @@ function showPluggyError(msg) {
 
 function closePluggyModal(ev) {
   if (ev && ev.target !== document.getElementById('pluggy-modal-overlay')) return;
+  _pluggyCleanup();
+  if (_pluggyPopup && !_pluggyPopup.closed) { try { _pluggyPopup.close(); } catch(_) {} }
+  _pluggyPopup = null;
   var overlay = document.getElementById('pluggy-modal-overlay');
   if (overlay) overlay.classList.remove('open');
-  if (_pluggyMsgHandler) { window.removeEventListener('message', _pluggyMsgHandler); _pluggyMsgHandler = null; }
   var rootEl = document.getElementById('pluggy-widget-root');
   if (rootEl) rootEl.innerHTML = '';
 }
