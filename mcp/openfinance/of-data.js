@@ -513,6 +513,8 @@ export async function refreshPluggy(newItemId) {
 /** Devolve o bundle de dados do perfil (ou o default se id inválido/ausente). */
 export function getProfile(id) {
   if (id === 'pluggy') return _pluggyProfile || PROFILES[DEFAULT_PROFILE];
+  // Quando nenhum perfil é especificado e já há dados reais carregados, usa o Pluggy.
+  if (!id && _pluggyProfile) return _pluggyProfile;
   return PROFILES[id] || PROFILES[DEFAULT_PROFILE];
 }
 
