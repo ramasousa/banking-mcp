@@ -14,16 +14,21 @@
 //        ──Claude API (tool_use loop)──▶ Anthropic
 //
 // Variáveis de ambiente:
-//   ANTHROPIC_API_KEY   obrigatória
-//   CLAUDE_MODEL        opcional (padrão claude-sonnet-4-6)
-//   PORT                opcional (padrão 3300)
-//   BANK_PROFILE        opcional — perfil mock: "default" | "mei" | "pj"
-//                       ver ../mcp/openfinance/of-data.js para perfis
+//   ANTHROPIC_API_KEY      obrigatória
+//   CLAUDE_MODEL           opcional (padrão claude-sonnet-4-6)
+//   PORT                   opcional (padrão 3300)
+//   BANK_PROFILE           opcional — perfil mock: "default" | "mei" | "pj"
+//                          ver ../mcp/openfinance/of-data.js para perfis
+//   PLUGGY_CLIENT_ID       opcional — habilita integração Pluggy Open Finance
+//   PLUGGY_CLIENT_SECRET   opcional — par do PLUGGY_CLIENT_ID
+//   PLUGGY_ITEM_ID         opcional — item pré-conectado (carregado na inicialização)
+//   PLUGGY_WEBHOOK_SECRET  opcional — verifica assinatura HMAC dos webhooks Pluggy
 // ─────────────────────────────────────────────────────────────
 
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -65,6 +70,19 @@ const QDRANT_API_KEY = (process.env.QDRANT_API_KEY || '').trim();
 const RAG_ENABLED    = !!(VOYAGE_API_KEY && QDRANT_URL && QDRANT_API_KEY);
 const RAG_COLLECTION = 'mei-kb';
 const RAG_TOP_K      = 5;
+
+if (process.env.PLUGGY_CLIENT_ID) {
+  anthropicTools.push({
+    name: 'pluggy_initiate_consent',
+    description:
+      'Abre o widget Pluggy Connect para o usuário autorizar o acesso aos seus dados bancários ' +
+      'reais via Open Finance. Use quando o usuário pedir para conectar o banco, vincular conta, ' +
+      'ou quando os dados disponíveis são fictícios e o usuário quer dados reais. ' +
+      'Após chamar esta tool, informe o usuário que o widget foi aberto na tela e ele deve ' +
+      'seguir as instruções para concluir a autorização.',
+    input_schema: { type: 'object', properties: {}, required: [] },
+  });
+}
 
 if (RAG_ENABLED) {
   anthropicTools.push({
@@ -174,6 +192,61 @@ function buildSystem() {
 
 // ── Express ───────────────────────────────────────────────────
 const app = express();
+
+// ─────────────────────────────────────────────────────────────
+// POST /api/pluggy/webhook
+// Recebe eventos Pluggy (item/created, item/updated,
+// transactions/created, transactions/updated, transactions/deleted).
+// Registre este endpoint no dashboard Pluggy → Configurações → Webhooks.
+//
+// Variável de ambiente opcional:
+//   PLUGGY_WEBHOOK_SECRET  — segredo definido no dashboard; ativa
+//                            verificação de assinatura HMAC-SHA256.
+// ─────────────────────────────────────────────────────────────
+const PLUGGY_REFRESH_EVENTS = new Set([
+  'item/created', 'item/updated', 'item/error',
+  'transactions/created', 'transactions/updated', 'transactions/deleted',
+]);
+
+app.post(
+  '/api/pluggy/webhook',
+  express.raw({ type: 'application/json', limit: '256kb' }),
+  async (req, res) => {
+    const secret = process.env.PLUGGY_WEBHOOK_SECRET;
+    if (secret) {
+      const sig = req.headers['pluggy-signature'] ?? '';
+      const expected = createHmac('sha256', secret).update(req.body).digest('hex');
+      try {
+        if (!timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) {
+          console.warn('[pluggy/webhook] assinatura inválida');
+          return res.status(401).json({ error: 'assinatura inválida' });
+        }
+      } catch {
+        return res.status(401).json({ error: 'assinatura inválida' });
+      }
+    }
+
+    let payload;
+    try {
+      payload = JSON.parse(req.body.toString('utf8'));
+    } catch {
+      return res.status(400).json({ error: 'body inválido' });
+    }
+
+    const { event, itemId } = payload ?? {};
+    console.log(`[pluggy/webhook] evento: ${event} | itemId: ${itemId}`);
+
+    // Responde imediatamente para Pluggy não marcar como falha.
+    res.json({ received: true });
+
+    if (itemId && PLUGGY_REFRESH_EVENTS.has(event)) {
+      refreshPluggy(itemId).catch((err) =>
+        console.error(`[pluggy/webhook] erro ao atualizar perfil:`, err.message),
+      );
+    }
+  },
+);
+
 app.use(express.json({ limit: '512kb' }));
 
 // Serve os arquivos estáticos do frontend.
@@ -241,6 +314,185 @@ app.get('/api/pluggy/connect-token', async (_req, res) => {
     console.error('[pluggy/connect-token]', err.message);
     res.status(500).json({ error: err.message });
   }
+});
+
+// ─────────────────────────────────────────────────────────────
+// GET /pluggy-consent
+// Página standalone aberta pelo usuário vindo do Claude.ai / Claude Desktop.
+// Carrega o SDK Pluggy, abre o widget automaticamente e sincroniza o perfil.
+// ─────────────────────────────────────────────────────────────
+app.get('/pluggy-consent', (_req, res) => {
+  const hasPluggy = !!(process.env.PLUGGY_CLIENT_ID && process.env.PLUGGY_CLIENT_SECRET);
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Conectar banco — Fina</title>
+<script src="/js/pluggy-connect-sdk.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f0f13;
+    color: #e8e8f0;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 2rem;
+  }
+  .logo { font-size: 2rem; font-weight: 800; letter-spacing: -0.04em; color: #fff; }
+  .logo span { color: #7c6af7; }
+  .card {
+    background: #1a1a24;
+    border: 1px solid #2a2a38;
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .status-icon { font-size: 2.5rem; }
+  h2 { font-size: 1.25rem; font-weight: 700; }
+  p { color: #8888a8; font-size: 0.9rem; line-height: 1.6; }
+  .btn {
+    margin-top: 0.5rem;
+    background: #7c6af7;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    transition: opacity .15s;
+  }
+  .btn:hover { opacity: .85; }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid #2a2a38;
+    border-top-color: #7c6af7;
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    margin: 0 auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="logo">fi<span>na</span></div>
+<div class="card" id="card">
+  <div class="spinner" id="spinner"></div>
+  <h2 id="title">Preparando widget…</h2>
+  <p id="desc">Aguarde enquanto carregamos o ambiente de consentimento.</p>
+</div>
+
+<script>
+${!hasPluggy ? `
+  document.getElementById('spinner').style.display = 'none';
+  document.getElementById('title').textContent = 'Integração não configurada';
+  document.getElementById('desc').textContent = 'As credenciais Pluggy não estão configuradas neste servidor.';
+` : `
+(function () {
+  var widget = null;
+
+  function setState(icon, title, desc, btnLabel, btnFn) {
+    var card = document.getElementById('card');
+    var sp   = document.getElementById('spinner');
+    if (sp) sp.style.display = 'none';
+    card.innerHTML =
+      '<div class="status-icon">' + icon + '</div>' +
+      '<h2>' + title + '</h2>' +
+      '<p>' + desc + '</p>' +
+      (btnLabel ? '<button class="btn" onclick="(' + btnFn.toString() + ')()">'+btnLabel+'</button>' : '');
+  }
+
+  function sync(itemId) {
+    setState('⏳', 'Sincronizando…', 'Estamos importando seus dados bancários.', null, null);
+    fetch('/api/pluggy/connect', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ itemId: itemId }),
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      if (res.ok) {
+        setState('✅', 'Conta conectada!',
+          'Seus dados bancários foram importados com sucesso. Volte ao Claude e pergunte sobre seu saldo, investimentos ou gastos.',
+          'Fechar esta aba', function() { window.close(); });
+      } else {
+        setState('⚠️', 'Erro ao sincronizar', res.error || 'Não foi possível importar os dados.',
+          'Tentar novamente', function() { location.reload(); });
+      }
+    })
+    .catch(function(err) {
+      setState('⚠️', 'Erro de rede', err.message,
+        'Tentar novamente', function() { location.reload(); });
+    });
+  }
+
+  function openWidget(connectToken) {
+    if (!window.PluggyConnectSDK || !window.PluggyConnectSDK.PluggyConnect) {
+      setState('⚠️', 'SDK não carregou', 'Recarregue a página e tente novamente.',
+        'Recarregar', function() { location.reload(); });
+      return;
+    }
+    document.getElementById('title').textContent = 'Autorizando acesso…';
+    document.getElementById('desc').textContent = 'Siga as instruções no widget para conectar sua conta.';
+
+    widget = new window.PluggyConnectSDK.PluggyConnect({
+      connectToken: connectToken,
+      includeSandbox: true,
+      onSuccess: function(itemData) {
+        var itemId = (itemData && itemData.item && itemData.item.id) || (itemData && itemData.id);
+        if (widget) { try { widget.destroy(); } catch(_) {} widget = null; }
+        if (!itemId) {
+          setState('⚠️', 'itemId ausente', 'Conexão realizada mas itemId não retornado. Feche e tente novamente.',
+            'Fechar', function() { window.close(); });
+          return;
+        }
+        sync(itemId);
+      },
+      onError: function(err) {
+        setState('⚠️', 'Erro no widget', (err && err.message) || 'Tente novamente.',
+          'Tentar novamente', function() { location.reload(); });
+      },
+      onClose: function() {
+        if (!document.getElementById('spinner') || document.getElementById('spinner').style.display === 'none') return;
+        setState('ℹ️', 'Widget fechado', 'Você fechou o widget antes de autorizar.',
+          'Tentar novamente', function() { location.reload(); });
+      },
+    });
+    widget.init();
+  }
+
+  fetch('/api/pluggy/connect-token')
+    .then(function(r) {
+      if (!r.ok) return r.json().then(function(e) { throw new Error(e.error || 'HTTP ' + r.status); });
+      return r.json();
+    })
+    .then(function(d) {
+      if (!d.connectToken) throw new Error('connectToken ausente');
+      openWidget(d.connectToken);
+    })
+    .catch(function(err) {
+      setState('⚠️', 'Não foi possível iniciar', err.message,
+        'Tentar novamente', function() { location.reload(); });
+    });
+}());
+`}
+</script>
+</body>
+</html>`);
 });
 
 // ─────────────────────────────────────────────────────────────
@@ -601,7 +853,22 @@ app.post('/api/chat', async (req, res) => {
 
         let resultText;
         try {
-          if (block.name === 'mei_rag_search') {
+          if (block.name === 'pluggy_initiate_consent') {
+            const pluggyId     = process.env.PLUGGY_CLIENT_ID;
+            const pluggySecret = process.env.PLUGGY_CLIENT_SECRET;
+            if (!pluggyId || !pluggySecret) {
+              resultText = JSON.stringify({ erro: 'Pluggy não configurado neste ambiente.' });
+            } else {
+              const { PluggyClient } = await import('../mcp/pluggy/pluggy-client.js');
+              const pluggyClient = new PluggyClient(pluggyId, pluggySecret);
+              const connectToken = await pluggyClient.getConnectToken();
+              send({ type: 'pluggy_connect', connectToken });
+              resultText = JSON.stringify({
+                ok: true,
+                message: 'Widget de consentimento aberto. Informe o usuário que deve seguir as instruções no widget para autorizar o acesso aos dados bancários.',
+              });
+            }
+          } else if (block.name === 'mei_rag_search') {
             resultText = await ragSearch(block.input?.query ?? '');
           } else {
             const mcpResult = await mcp.callTool({ name: block.name, arguments: block.input ?? {} });

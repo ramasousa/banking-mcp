@@ -35,9 +35,16 @@ services:
     envVars:
       - key: MCP_REQUIRE_AUTH
         value: "false"
+      - key: FINA_WEB_URL
+        value: "https://fina-web-client-aix6.onrender.com"
+      - key: PLUGGY_CLIENT_ID
+        sync: false
+      - key: PLUGGY_CLIENT_SECRET
+        sync: false
 
   # ── Fina Web Client (app conversacional completo) ──────────────────
-  # URL pública: https://fina-web-client.onrender.com
+  # URL pública: https://fina-web-client-aix6.onrender.com
+  # Webhook Pluggy: https://fina-web-client-aix6.onrender.com/api/pluggy/webhook
   # Serve: landing + dashboard + chat com streaming SSE real
   #
   # Antes de publicar, defina ANTHROPIC_API_KEY no painel do Render:
@@ -56,3 +63,9 @@ services:
         value: "claude-sonnet-4-6"
       - key: BANK_PROFILE
         value: "default"
+      - key: PLUGGY_CLIENT_ID
+        sync: false
+      - key: PLUGGY_CLIENT_SECRET
+        sync: false
+      - key: PLUGGY_WEBHOOK_SECRET
+        sync: false
