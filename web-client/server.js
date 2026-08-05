@@ -28,7 +28,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { createBankingServer } from '../mcp/core.js';
-import { initPluggy, listProfiles, refreshPluggy } from '../mcp/openfinance/of-data.js';
+import { initPluggy, listProfiles, refreshPluggy, isPluggyReady } from '../mcp/openfinance/of-data.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -123,7 +123,12 @@ async function ragSearch(query) {
 }
 
 // ── System prompt ─────────────────────────────────────────────
-const SYSTEM = [
+function buildSystem() {
+  const realData = PROFILE === 'pluggy' && isPluggyReady();
+  const dataCtx = realData
+    ? 'Você está acessando dados REAIS de Open Finance do usuário, sincronizados via Pluggy. Nunca diga que são dados de demonstração ou fictícios — são dados bancários reais.'
+    : 'Este ambiente usa dados fictícios de demonstração para fins de teste.';
+  return [
   'Você é Fina, uma assistente financeira conversacional de uma plataforma white-label.',
   'Ajude o cliente a entender suas finanças: saldos, extratos, faturas, investimentos, PIX e análises de gastos.',
   'Use SEMPRE as ferramentas disponíveis para obter dados reais — nunca invente valores.',
@@ -131,7 +136,7 @@ const SYSTEM = [
   'Ao apresentar valores monetários, use o formato R$ 0.000,00.',
   'Quando exibir listas de transações, agrupe por tipo ou período quando fizer sentido.',
   'Ofereça sempre um próximo passo útil após cada resposta.',
-  'Este ambiente usa dados fictícios de demonstração.',
+  dataCtx,
 
   'REGRA GERAL DE FORMATO: Em TODAS as respostas, sem exceção, é PROIBIDO usar markdown: sem **negrito**, sem _itálico_, sem ```código```, sem ## títulos, sem | tabelas |, sem hífens de lista, sem separadores ---. Escreva sempre em texto simples e direto.',
 
@@ -153,7 +158,7 @@ const SYSTEM = [
 
   'REGRA PARA CARTEIRA DE INVESTIMENTOS:',
   'Quando o usuário pedir lista de investimentos, carteira, portfólio, títulos, aplicações ou rendimentos:',
-  '(1) Consulte of_list_bank_fixed_incomes para renda fixa bancária. Use outros tools disponíveis para fundos ou renda variável se existirem.',
+  '(1) Consulte of_list_investments para listar toda a carteira de investimentos. A ferramenta retorna todos os tipos: renda fixa (CDB, LCI, LCA, Tesouro), fundos e renda variável.',
   '(2) Emita NO INÍCIO da resposta, antes de qualquer texto: <!--FINA_INVEST:{"total":0,"items":[{"type":"CDB","label":"CDB Bradesco","value":0,"gross":0,"dueDate":"YYYY-MM-DD"},{"type":"LCI","label":"LCI","value":0,"taxFree":true,"dueDate":"YYYY-MM-DD"},{"type":"SELIC","label":"Tesouro Selic","value":0,"dueDate":"YYYY-MM-DD"},{"type":"FUND","label":"Nome do Fundo","value":0,"shares":0}],"suggestions":["follow-up 1","follow-up 2","follow-up 3"]}-->',
   '(3) Campos: type = um de CDB|LCI|LCA|SELIC|IPCA|PRFIX|FUND|STOCK|CRI|CRA|DEB. label = nome comercial limpo. value = valor líquido atual. gross = valor bruto antes de IR/IOF (omitir se igual a value ou não disponível). taxFree:true apenas para LCI/LCA/CRI/CRA. dueDate YYYY-MM-DD. shares para fundos quando disponível.',
   '(4) Calcule total como soma dos values. Após o bloco <!--FINA_INVEST:-->, escreva APENAS UMA frase curta de resumo. PROIBIDO: tabelas markdown, listas com hífens, separadores ---.',
@@ -164,7 +169,8 @@ const SYSTEM = [
   '(2) Baseie a resposta exclusivamente no que retornar da busca — não invente valores ou prazos.',
   '(3) Cite a fonte quando relevante (ex: "Conforme LC 128/2008...").',
   '(4) Se o contexto retornado não for suficiente, informe ao usuário que a informação não foi encontrada na base e sugira consultar um contador ou gov.br/mei.',
-].join(' ');
+  ].join(' ');
+}
 
 // ── Express ───────────────────────────────────────────────────
 const app = express();
@@ -292,7 +298,7 @@ app.get('/api/dashboard', async (_req, res) => {
       mcpCall('of_get_personal_identifications'),
       mcpCall('of_list_accounts'),
       mcpCall('of_list_credit_cards'),
-      mcpCall('of_list_bank_fixed_incomes'),
+      mcpCall('of_list_investments'),
     ]);
 
     const accounts = Array.isArray(accountsEnv.data) ? accountsEnv.data : [];
@@ -486,7 +492,7 @@ app.post('/api/chat', async (req, res) => {
         model: MODEL,
         max_tokens: 4096,
         thinking: { type: 'adaptive' },
-        system: SYSTEM,
+        system: buildSystem(),
         tools: anthropicTools,
         messages,
       });
@@ -576,7 +582,7 @@ function toolDesc(name, input = {}) {
     of_get_business_identifications: 'Carregando dados do CNPJ…',
     of_get_business_financial_relations: 'Verificando relacionamento PJ…',
     of_get_business_qualifications: 'Consultando qualificação PJ…',
-    of_list_bank_fixed_incomes:   'Consultando renda fixa bancária…',
+    of_list_investments:          'Consultando carteira de investimentos…',
     of_get_bank_fixed_income:     'Carregando detalhes do título…',
     of_get_bank_fixed_income_transactions: 'Buscando movimentações do título…',
     of_list_treasure_titles:      'Consultando Tesouro Direto…',
@@ -604,7 +610,7 @@ function buildSummary(name, rawJson) {
         of_get_account_transactions: 'transação',
         of_get_credit_card_transactions: 'lançamento',
         of_list_resources: 'recurso',
-        of_list_bank_fixed_incomes: 'título de renda fixa',
+        of_list_investments: 'investimento',
         of_list_treasure_titles: 'título do Tesouro',
         of_list_funds: 'fundo',
       }[name] ?? 'item';
