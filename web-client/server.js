@@ -226,7 +226,7 @@ app.post('/api/switch-profile', (req, res) => {
 // GET /api/pluggy/connect-token
 // Retorna um connect token temporário para abrir o Pluggy Connect Widget.
 // ─────────────────────────────────────────────────────────────
-app.get('/api/pluggy/connect-token', async (req, res) => {
+app.get('/api/pluggy/connect-token', async (_req, res) => {
   const clientId     = process.env.PLUGGY_CLIENT_ID;
   const clientSecret = process.env.PLUGGY_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
@@ -235,8 +235,7 @@ app.get('/api/pluggy/connect-token', async (req, res) => {
   try {
     const { PluggyClient } = await import('../mcp/pluggy/pluggy-client.js');
     const client = new PluggyClient(clientId, clientSecret);
-    const redirectUrl = `${req.protocol}://${req.get('host')}/pluggy-callback`;
-    const connectToken = await client.getConnectToken(redirectUrl);
+    const connectToken = await client.getConnectToken();
     res.json({ connectToken });
   } catch (err) {
     console.error('[pluggy/connect-token]', err.message);
