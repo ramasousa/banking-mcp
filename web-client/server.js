@@ -14,16 +14,21 @@
 //        ──Claude API (tool_use loop)──▶ Anthropic
 //
 // Variáveis de ambiente:
-//   ANTHROPIC_API_KEY   obrigatória
-//   CLAUDE_MODEL        opcional (padrão claude-sonnet-4-6)
-//   PORT                opcional (padrão 3300)
-//   BANK_PROFILE        opcional — perfil mock: "default" | "mei" | "pj"
-//                       ver ../mcp/openfinance/of-data.js para perfis
+//   ANTHROPIC_API_KEY      obrigatória
+//   CLAUDE_MODEL           opcional (padrão claude-sonnet-4-6)
+//   PORT                   opcional (padrão 3300)
+//   BANK_PROFILE           opcional — perfil mock: "default" | "mei" | "pj"
+//                          ver ../mcp/openfinance/of-data.js para perfis
+//   PLUGGY_CLIENT_ID       opcional — habilita integração Pluggy Open Finance
+//   PLUGGY_CLIENT_SECRET   opcional — par do PLUGGY_CLIENT_ID
+//   PLUGGY_ITEM_ID         opcional — item pré-conectado (carregado na inicialização)
+//   PLUGGY_WEBHOOK_SECRET  opcional — verifica assinatura HMAC dos webhooks Pluggy
 // ─────────────────────────────────────────────────────────────
 
 import express from 'express';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import Anthropic from '@anthropic-ai/sdk';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -174,6 +179,61 @@ function buildSystem() {
 
 // ── Express ───────────────────────────────────────────────────
 const app = express();
+
+// ─────────────────────────────────────────────────────────────
+// POST /api/pluggy/webhook
+// Recebe eventos Pluggy (item/created, item/updated,
+// transactions/created, transactions/updated, transactions/deleted).
+// Registre este endpoint no dashboard Pluggy → Configurações → Webhooks.
+//
+// Variável de ambiente opcional:
+//   PLUGGY_WEBHOOK_SECRET  — segredo definido no dashboard; ativa
+//                            verificação de assinatura HMAC-SHA256.
+// ─────────────────────────────────────────────────────────────
+const PLUGGY_REFRESH_EVENTS = new Set([
+  'item/created', 'item/updated', 'item/error',
+  'transactions/created', 'transactions/updated', 'transactions/deleted',
+]);
+
+app.post(
+  '/api/pluggy/webhook',
+  express.raw({ type: 'application/json', limit: '256kb' }),
+  async (req, res) => {
+    const secret = process.env.PLUGGY_WEBHOOK_SECRET;
+    if (secret) {
+      const sig = req.headers['pluggy-signature'] ?? '';
+      const expected = createHmac('sha256', secret).update(req.body).digest('hex');
+      try {
+        if (!timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) {
+          console.warn('[pluggy/webhook] assinatura inválida');
+          return res.status(401).json({ error: 'assinatura inválida' });
+        }
+      } catch {
+        return res.status(401).json({ error: 'assinatura inválida' });
+      }
+    }
+
+    let payload;
+    try {
+      payload = JSON.parse(req.body.toString('utf8'));
+    } catch {
+      return res.status(400).json({ error: 'body inválido' });
+    }
+
+    const { event, itemId } = payload ?? {};
+    console.log(`[pluggy/webhook] evento: ${event} | itemId: ${itemId}`);
+
+    // Responde imediatamente para Pluggy não marcar como falha.
+    res.json({ received: true });
+
+    if (itemId && PLUGGY_REFRESH_EVENTS.has(event)) {
+      refreshPluggy(itemId).catch((err) =>
+        console.error(`[pluggy/webhook] erro ao atualizar perfil:`, err.message),
+      );
+    }
+  },
+);
+
 app.use(express.json({ limit: '512kb' }));
 
 // Serve os arquivos estáticos do frontend.
