@@ -27,6 +27,22 @@ function buildResources(D) {
 const findLoan = (D, id) => D.LOANS.find((c) => c.contractId === id) || D.FINANCINGS.find((c) => c.contractId === id);
 
 export const executores = {
+  // Pluggy Open Finance — consentimento real
+  pluggy_initiate_consent(i = {}, ctx) {
+    if (!process.env.PLUGGY_CLIENT_ID) {
+      return { data: { error: 'Pluggy não configurado neste ambiente. Defina PLUGGY_CLIENT_ID e PLUGGY_CLIENT_SECRET.' }, meta: 'config error' };
+    }
+    const baseUrl = (process.env.FINA_WEB_URL || 'https://fina-web-client-aix6.onrender.com').replace(/\/$/, '');
+    const consentUrl = `${baseUrl}/pluggy-consent`;
+    return {
+      data: {
+        consentUrl,
+        instrucoes: 'Apresente este link ao usuário para que ele autorize o acesso aos dados bancários reais via Open Finance Brasil. Após autorizar, os dados reais estarão disponíveis nas demais tools.',
+      },
+      meta: 'Pluggy Connect — URL de consentimento',
+    };
+  },
+
   // Consents / Resources
   of_get_consent(i = {}, ctx) {
     const D = getProfile(ctx?.profile);
@@ -231,6 +247,12 @@ const idProp = (d) => ({ type: 'string', description: d });
 const pageProps = { page: { type: 'integer', description: 'Página (1..). Padrão 1.' }, pageSize: { type: 'integer', description: 'Itens por página. Padrão 25.' } };
 
 export const tools = [
+  T('pluggy_initiate_consent', 'Conectar banco (Open Finance real)',
+    'Inicia a jornada de consentimento Pluggy para o usuário autorizar acesso aos dados bancários REAIS via Open Finance Brasil. ' +
+    'Retorna uma URL que o usuário deve abrir no navegador. Use quando o usuário pedir para conectar o banco, ' +
+    'vincular conta ou quando os dados disponíveis são fictícios e o usuário quer dados reais.',
+    obj(), { readOnlyHint: false, openWorldHint: true }),
+
   T('of_get_consent', 'Consentimento (Open Finance)', 'GET /consents/v3/consents/{consentId} — retorna o consentimento com status e permissions. Sem parâmetro usa o consentimento ativo do usuário.',
     obj({ consentId: idProp('URN do consentimento. Ex.: urn:bradesco:C1DD...') })),
   T('of_list_resources', 'Recursos disponíveis', 'GET /resources/v3/resources — lista os recursos (ACCOUNT, CREDIT_CARD_ACCOUNT, LOAN, FINANCING, investimentos) e seu status.',

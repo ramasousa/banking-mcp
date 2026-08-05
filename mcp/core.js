@@ -60,7 +60,7 @@ export function createBankingServer(getContext = () => ({})) {
     // No mock é ignorado; em produção o executor usaria ctx.accessToken
     // como Bearer para chamar o Axway/Core Bancário.
     const ctx = getContext(extra);
-    const out = fn(args || {}, ctx);
+    const out = await Promise.resolve(fn(args || {}, ctx));
 
     return {
       content: [{ type: 'text', text: JSON.stringify(out.data) }],
