@@ -22,6 +22,9 @@ import { tools, executores } from './openfinance/catalog.js';
 
 export const SERVER_INFO = { name: 'bradesco-openfinance-mcp', version: '1.0.0' };
 
+const log = (level, event, data = {}) =>
+  console.log(JSON.stringify({ ts: new Date().toISOString(), level, event, ...data }));
+
 /**
  * Cria uma instância do MCP Server já com as tools registradas.
  *
@@ -43,13 +46,19 @@ export function createBankingServer(getContext = () => ({})) {
   const server = new Server(SERVER_INFO, { capabilities: { tools: {} } });
 
   // tools/list — expõe as tools já no formato MCP (inputSchema).
-  server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: MCP_TOOLS }));
+  server.setRequestHandler(ListToolsRequestSchema, async () => {
+    log('info', 'tools/list', { channel: 'claude', toolCount: MCP_TOOLS.length });
+    return { tools: MCP_TOOLS };
+  });
 
   // tools/call — resolve o executor e devolve o resultado como texto JSON.
   server.setRequestHandler(CallToolRequestSchema, async (req, extra) => {
     const { name, arguments: args } = req.params;
     const fn = executores[name];
+    const t0 = Date.now();
+
     if (!fn) {
+      log('warn', 'tool/unknown', { channel: 'claude', tool: name });
       return {
         isError: true,
         content: [{ type: 'text', text: `Tool desconhecida: ${name}` }],
@@ -60,13 +69,18 @@ export function createBankingServer(getContext = () => ({})) {
     // No mock é ignorado; em produção o executor usaria ctx.accessToken
     // como Bearer para chamar o Axway/Core Bancário.
     const ctx = getContext(extra);
-    const out = await Promise.resolve(fn(args || {}, ctx));
-
-    return {
-      content: [{ type: 'text', text: JSON.stringify(out.data) }],
-      structuredContent: out.data,
-      _meta: { source: out.meta },
-    };
+    try {
+      const out = await Promise.resolve(fn(args || {}, ctx));
+      log('info', 'tool/call', { channel: 'claude', tool: name, durationMs: Date.now() - t0, userId: ctx.sub ?? null });
+      return {
+        content: [{ type: 'text', text: JSON.stringify(out.data) }],
+        structuredContent: out.data,
+        _meta: { source: out.meta },
+      };
+    } catch (err) {
+      log('error', 'tool/error', { channel: 'claude', tool: name, durationMs: Date.now() - t0, error: err?.message });
+      throw err;
+    }
   });
 
   return server;

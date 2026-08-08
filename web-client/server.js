@@ -42,6 +42,9 @@ const MODEL  = process.env.CLAUDE_MODEL || 'claude-sonnet-4-6';
 let PROFILE = process.env.BANK_PROFILE || (process.env.PLUGGY_CLIENT_ID ? 'pluggy' : 'raul');
 const hasKey = !!process.env.ANTHROPIC_API_KEY;
 
+const log = (level, event, data = {}) =>
+  console.log(JSON.stringify({ ts: new Date().toISOString(), level, event, ...data }));
+
 // ── Conecta o MCP Server em processo via InMemoryTransport ────
 // Criamos UM par de transports por servidor — o MCP Server é stateless,
 // então a mesma instância atende todos os requests.
@@ -234,14 +237,15 @@ app.post(
     }
 
     const { event, itemId } = payload ?? {};
-    console.log(`[pluggy/webhook] evento: ${event} | itemId: ${itemId}`);
+    const willRefresh = !!(itemId && PLUGGY_REFRESH_EVENTS.has(event));
+    log('info', 'webhook/pluggy', { event, itemId, willRefresh });
 
     // Responde imediatamente para Pluggy não marcar como falha.
     res.json({ received: true });
 
-    if (itemId && PLUGGY_REFRESH_EVENTS.has(event)) {
+    if (willRefresh) {
       refreshPluggy(itemId).catch((err) =>
-        console.error(`[pluggy/webhook] erro ao atualizar perfil:`, err.message),
+        log('error', 'webhook/pluggy_refresh_error', { itemId, error: err.message }),
       );
     }
   },
@@ -507,9 +511,10 @@ app.post('/api/pluggy/connect', async (req, res) => {
   try {
     await refreshPluggy(itemId);
     PROFILE = 'pluggy';
+    log('info', 'consent/completed', { channel: req.headers['x-fina-channel'] ?? 'fina-web', itemId });
     res.json({ ok: true, profile: 'pluggy' });
   } catch (err) {
-    console.error('[pluggy/connect]', err.message);
+    log('error', 'consent/error', { itemId, error: err.message });
     res.status(500).json({ error: err.message });
   }
 });
@@ -804,11 +809,18 @@ app.post('/api/chat', async (req, res) => {
     return res.end();
   }
 
+  const channel = req.headers['x-fina-channel'] ?? 'fina-web';
+  const t0Chat = Date.now();
+  const lastUserMsg = [...incoming].reverse().find((m) => m.role === 'user')?.content ?? '';
+  const msgPreview = String(lastUserMsg).slice(0, 120);
+  log('info', 'chat/start', { channel, profile: PROFILE, msgPreview });
+
   const client = new Anthropic();
 
   // Copia as mensagens para o array mutável do loop.
   const messages = incoming.map((m) => ({ role: m.role, content: m.content }));
   let fullText = '';
+  const toolsUsed = [];
 
   try {
     // Loop agêntico: até 8 iterações (proteção contra loops infinitos).
@@ -833,6 +845,7 @@ app.post('/api/chat', async (req, res) => {
       if (response.stop_reason !== 'tool_use') {
         const textBlock = response.content.find((b) => b.type === 'text');
         fullText = textBlock?.text ?? '';
+        log('info', 'chat/done', { channel, profile: PROFILE, totalDurationMs: Date.now() - t0Chat, toolsUsed, iterations: i + 1 });
         // Simula streaming char a char para UX mais suave.
         const CHUNK = 18;
         for (let j = 0; j < fullText.length; j += CHUNK) {
@@ -850,19 +863,24 @@ app.post('/api/chat', async (req, res) => {
         if (block.type !== 'tool_use') continue;
 
         send({ type: 'tool_start', name: block.name, desc: toolDesc(block.name, block.input) });
+        toolsUsed.push(block.name);
+        const tTool = Date.now();
 
         let resultText;
+        let toolOk = true;
         try {
           if (block.name === 'pluggy_initiate_consent') {
             const pluggyId     = process.env.PLUGGY_CLIENT_ID;
             const pluggySecret = process.env.PLUGGY_CLIENT_SECRET;
             if (!pluggyId || !pluggySecret) {
               resultText = JSON.stringify({ erro: 'Pluggy não configurado neste ambiente.' });
+              toolOk = false;
             } else {
               const { PluggyClient } = await import('../mcp/pluggy/pluggy-client.js');
               const pluggyClient = new PluggyClient(pluggyId, pluggySecret);
               const connectToken = await pluggyClient.getConnectToken();
               send({ type: 'pluggy_connect', connectToken });
+              log('info', 'consent/initiated', { channel, trigger: 'chat' });
               resultText = JSON.stringify({
                 ok: true,
                 message: 'Widget de consentimento aberto. Informe o usuário que deve seguir as instruções no widget para autorizar o acesso aos dados bancários.',
@@ -875,8 +893,11 @@ app.post('/api/chat', async (req, res) => {
             resultText = mcpResult.content?.[0]?.text ?? '{}';
           }
         } catch (err) {
+          toolOk = false;
           resultText = JSON.stringify({ erro: err?.message ?? 'Falha na tool' });
         }
+
+        log('info', 'chat/tool_call', { channel, tool: block.name, durationMs: Date.now() - tTool, ok: toolOk });
 
         // Gera um resumo legível do resultado para o SSE (não enviamos o JSON bruto).
         const summary = buildSummary(block.name, resultText);
@@ -892,7 +913,7 @@ app.post('/api/chat', async (req, res) => {
       messages.push({ role: 'user', content: toolResults });
     }
   } catch (err) {
-    console.error('[fina] Erro no loop agêntico:', err?.message || err);
+    log('error', 'chat/error', { channel, profile: PROFILE, totalDurationMs: Date.now() - t0Chat, toolsUsed, error: err?.message });
     send({ type: 'error', message: err?.message ?? 'Erro interno do servidor.' });
   }
 
