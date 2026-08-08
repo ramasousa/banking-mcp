@@ -19,11 +19,9 @@ import {
   CallToolRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 import { tools, executores } from './openfinance/catalog.js';
+import { log } from './lib/logger.js';
 
 export const SERVER_INFO = { name: 'bradesco-openfinance-mcp', version: '1.0.0' };
-
-const log = (level, event, data = {}) =>
-  console.log(JSON.stringify({ ts: new Date().toISOString(), level, event, ...data }));
 
 /**
  * Cria uma instância do MCP Server já com as tools registradas.

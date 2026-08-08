@@ -34,6 +34,7 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { createBankingServer } from '../mcp/core.js';
 import { initPluggy, listProfiles, refreshPluggy, isPluggyReady } from '../mcp/openfinance/of-data.js';
+import { log } from '../mcp/lib/logger.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -41,9 +42,6 @@ const PORT   = process.env.PORT || 3300;
 const MODEL  = process.env.CLAUDE_MODEL || 'claude-sonnet-4-6';
 let PROFILE = process.env.BANK_PROFILE || (process.env.PLUGGY_CLIENT_ID ? 'pluggy' : 'raul');
 const hasKey = !!process.env.ANTHROPIC_API_KEY;
-
-const log = (level, event, data = {}) =>
-  console.log(JSON.stringify({ ts: new Date().toISOString(), level, event, ...data }));
 
 // ── Conecta o MCP Server em processo via InMemoryTransport ────
 // Criamos UM par de transports por servidor — o MCP Server é stateless,

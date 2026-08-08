@@ -41,6 +41,10 @@ services:
         sync: false
       - key: PLUGGY_CLIENT_SECRET
         sync: false
+      - key: AXIOM_TOKEN
+        sync: false
+      - key: AXIOM_DATASET
+        value: "banking-mcp"
 
   # ── Fina Web Client (app conversacional completo) ──────────────────
   # URL pública: https://fina-web-client-aix6.onrender.com
@@ -69,3 +73,7 @@ services:
         sync: false
       - key: PLUGGY_WEBHOOK_SECRET
         sync: false
+      - key: AXIOM_TOKEN
+        sync: false
+      - key: AXIOM_DATASET
+        value: "banking-mcp"
